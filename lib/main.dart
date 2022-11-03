@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:project_cut/controller/cycle_configuration_controller.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/theme.dart';
+import 'package:project_cut/view/cycle_configuration.dart';
 import 'package:project_cut/widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/biometric.dart';
 
@@ -15,11 +19,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      ),
     );
   }
 }
@@ -34,22 +41,32 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int? value;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounter();
+  }
+
+  //Loading counter value on start
+  Future<void> _loadCounter() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      value = (prefs.getInt('counter'));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
-
-    // if (isIOS) {
-    //   return const CupertinoPageScaffold(
-    //     child: CustomScrollView(
-    //       physics: ScrollPhysics(),
-    //       slivers: <Widget>[
-    //         CupertinoSliverNavigationBar(
-    //           largeTitle: Text('Flutter iOS App'),
-    //         )
-    //       ],
-    //     ),
-    //   );
-    // }
+    if (value == null) {
+      return ChangeNotifierProvider(
+        create: (context) => CycleConfigurationController(),
+        child: const CycleConfiguration(),
+      );
+    } else {
+      print('nothing there :(');
+    }
 
     return Scaffold(
       body: Center(
@@ -211,12 +228,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
-  var test = const Biometric(
-    id: 1,
-    currentWeight: 75.8,
-    bodyFat: 10,
-    dateTime: 'time',
-    weekId: 11,
-  );
 }
