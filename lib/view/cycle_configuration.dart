@@ -17,6 +17,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
   double earliestTime = 8;
   double latestTime = 18;
   double timeFrame = 0;
+  List<String> sexes = ['MALE', 'FEMALE', 'OTHER'];
 
   // Text Field Titles
   static const String heightTitle = 'HEIGHT';
@@ -25,79 +26,102 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
   static const String goalWeightTitle = 'GOAL WEIGHT';
   static const String startingBodyfatTitle = 'STARTING BODYFAT %';
   static const String goalBodyfatTitle = 'GOAL BODYFAT %';
+  static const String timeFrameTitle = 'TIMEFRAME';
+
+  String height = '';
+  String age = '';
+  String startingWeight = '';
+  String goalWeight = '';
+  String startingBodyfat = '';
+  String goalBodyfat = '';
 
   SharedPreferences? sharedPreferences;
 
   @override
   void initState() {
     super.initState();
-    getSharedPreferences();
+    _getSharedPreferences();
   }
 
-  Future<void> getSharedPreferences() async {
+  bool checkEnteredValues() {
+    if (height == '' ||
+        age == '' ||
+        startingWeight == '' ||
+        goalWeight == '' ||
+        startingBodyfat == '' ||
+        goalBodyfat == '' ||
+        timeFrame == 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<void> _getSharedPreferences() async {
     sharedPreferences = await SharedPreferences.getInstance();
   }
 
-  Future<void> updateSharedPreferences(String newValue, String field) async {
+  Future<void> _updateSharedPreferences(String newValue, String field) async {
     String preference;
+
     switch (field) {
       case ageTitle:
         preference = 'age';
+        age = newValue;
         break;
       case startingWeightTitle:
         preference = 'startingWeight';
+        startingWeight = newValue;
         break;
       case goalWeightTitle:
         preference = 'goalWeight';
+        goalWeight = newValue;
         break;
       case startingBodyfatTitle:
         preference = 'startingBodyfat';
+        startingBodyfat = newValue;
         break;
       case goalBodyfatTitle:
         preference = 'goalBodyfat';
+        goalBodyfat = newValue;
         break;
       default:
         preference = 'height';
+        height = newValue;
     }
 
     await sharedPreferences!.setDouble(preference, double.parse(newValue));
   }
 
-  Future<void> updateGauge(String value) async {
-    setState(() {
-      timeFrame = double.parse(value);
-    });
-  }
-
   Widget textInputWidget(BuildContext context, String hint, String unit,
-      CycleConfigurationController config) {
+      CycleConfigurationController? config) {
     Color onPrimary = Theme.of(context).colorScheme.onPrimary;
     String? value;
     bool canEdit = true;
 
-    if (hint == 'TIMEFRAME') {
-      value = timeFrame.toInt().toString();
-      canEdit = false;
-    }
-
     switch (hint) {
       case ageTitle:
-        value = config.getAge;
+        value = age;
         break;
       case startingWeightTitle:
-        value = config.startingWeight;
+        value = startingWeight;
         break;
       case goalWeightTitle:
-        value = config.goalWeight;
+        value = goalWeight;
         break;
       case startingBodyfatTitle:
-        value = config.startingBodyfat;
+        value = startingBodyfat;
         break;
       case goalBodyfatTitle:
-        value = config.getGoalBodyfat;
+        value = goalBodyfat;
         break;
       default:
-        value = config.getHeight;
+        value = height;
+    }
+
+    if (hint == 'TIMEFRAME') {
+      value = config!.getTimeFrame.toInt().toString();
+      canEdit = false;
     }
 
     return SizedBox(
@@ -121,7 +145,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
           helperText: hint,
         ),
         onChanged: (value) {
-          updateSharedPreferences(value, hint);
+          _updateSharedPreferences(value, hint);
         },
       ),
     );
@@ -134,7 +158,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     );
   }
 
-  Widget gaugeWidget() {
+  Widget gaugeWidget(CycleConfigurationController config) {
     return SizedBox(
       width: MediaQuery.of(context).size.width / 2 - 32,
       height: 200,
@@ -175,11 +199,12 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
             pointers: <GaugePointer>[
               NeedlePointer(
                 enableDragging: true,
-                value: timeFrame,
-                onValueChanged: (double newValue) {
-                  setState(() {
-                    timeFrame = newValue.roundToDouble();
-                  });
+                value: config.getTimeFrame,
+                onValueChanged: (double newValue) async {
+                  config.setTimeFrame(newValue);
+                  await sharedPreferences!
+                      .setDouble('timeFrame', newValue.roundToDouble());
+                  timeFrame = newValue;
                 },
                 needleLength: 0.5,
                 needleColor: Theme.of(context).colorScheme.onPrimary,
@@ -196,124 +221,135 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Consumer<CycleConfigurationController>(
-            builder: (context, config, child) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: 100,
-              ),
-              ToggleButtons(
-                isSelected: isSelected,
-                selectedColor: Theme.of(context).colorScheme.primary,
-                color: Theme.of(context).colorScheme.onPrimary,
-                fillColor: Theme.of(context).colorScheme.onPrimary,
-                textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                renderBorder: true,
-                borderColor: Theme.of(context).colorScheme.onPrimary,
-                borderWidth: 0.5,
-                borderRadius: BorderRadius.circular(10),
-                children: [
-                  toggleButtonWidget('MALE'),
-                  toggleButtonWidget('FEMALE'),
-                  toggleButtonWidget('OTHER'),
-                ],
-                onPressed: (int newIndex) {
-                  isSelected = [false, false];
-                  isSelected.insert(newIndex, true);
-                  setState(
-                    () {
-                      isSelected;
-                    },
-                  );
-                },
-              ),
-              const SizedBox(
-                height: 32,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  textInputWidget(context, heightTitle, 'cm', config),
-                  const SizedBox(
-                    width: 32,
-                  ),
-                  textInputWidget(context, ageTitle, 'yrs', config),
-                ],
-              ),
-              const SizedBox(
-                height: 32,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  textInputWidget(context, startingWeightTitle, 'kg', config),
-                  const Icon(
-                    Icons.arrow_forward,
-                    size: 32,
-                  ),
-                  textInputWidget(context, goalWeightTitle, 'kg', config),
-                ],
-              ),
-              const SizedBox(
-                height: 32,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  textInputWidget(context, startingBodyfatTitle, '%', config),
-                  const Icon(
-                    Icons.arrow_forward,
-                    size: 32,
-                  ),
-                  textInputWidget(context, goalBodyfatTitle, '%', config),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    color: Theme.of(context).colorScheme.onSecondary,
-                  ),
-                  CupertinoButton(
-                    child: Text(
-                      'How to calculate Body Fat %',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSecondary,
-                          fontSize: 16),
-                    ),
-                    onPressed: () => print('instructions'),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  textInputWidget(context, 'TIMEFRAME', 'weeks', config),
-                  const SizedBox(
-                    width: 32,
-                  ),
-                  gaugeWidget(),
-                ],
-              ),
-              CupertinoButton(
-                child: Text(
-                  'Shared Preferences',
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSecondary,
-                      fontSize: 16),
+    return ChangeNotifierProvider(
+      create: (context) => CycleConfigurationController(),
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  height: 100,
                 ),
-                onPressed: () =>
-                    print(sharedPreferences!.getDouble('age') ?? 0),
-              ),
-            ],
-          );
-        }),
+                Consumer<CycleConfigurationController>(
+                  builder: (context, config, child) {
+                    return ToggleButtons(
+                      isSelected: isSelected,
+                      selectedColor: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fillColor: Theme.of(context).colorScheme.onPrimary,
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      renderBorder: true,
+                      borderColor: Theme.of(context).colorScheme.onPrimary,
+                      borderWidth: 0.5,
+                      borderRadius: BorderRadius.circular(10),
+                      children: [
+                        toggleButtonWidget(sexes[0]),
+                        toggleButtonWidget(sexes[1]),
+                        toggleButtonWidget(sexes[2]),
+                      ],
+                      onPressed: (int newIndex) async {
+                        isSelected = [false, false];
+                        isSelected.insert(newIndex, true);
+                        config.setSex(sexes[newIndex]);
+                        await sharedPreferences!
+                            .setString('sex', sexes[newIndex]);
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(
+                  height: 32,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    textInputWidget(context, heightTitle, 'cm', null),
+                    const SizedBox(
+                      width: 32,
+                    ),
+                    textInputWidget(context, ageTitle, 'yrs', null),
+                  ],
+                ),
+                const SizedBox(
+                  height: 32,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    textInputWidget(context, startingWeightTitle, 'kg', null),
+                    const Icon(
+                      Icons.arrow_forward,
+                      size: 32,
+                    ),
+                    textInputWidget(context, goalWeightTitle, 'kg', null),
+                  ],
+                ),
+                const SizedBox(
+                  height: 32,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    textInputWidget(context, startingBodyfatTitle, '%', null),
+                    const Icon(
+                      Icons.arrow_forward,
+                      size: 32,
+                    ),
+                    textInputWidget(context, goalBodyfatTitle, '%', null),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: Theme.of(context).colorScheme.onSecondary,
+                    ),
+                    CupertinoButton(
+                      child: Text(
+                        'How to calculate Body Fat %',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSecondary,
+                            fontSize: 16),
+                      ),
+                      onPressed: () => print('instructions'),
+                    ),
+                  ],
+                ),
+                Consumer<CycleConfigurationController>(
+                    builder: (context, config, child) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      textInputWidget(context, timeFrameTitle, 'weeks', config),
+                      const SizedBox(
+                        width: 32,
+                      ),
+                      gaugeWidget(config),
+                    ],
+                  );
+                }),
+                CupertinoButton(
+                  color: Theme.of(context).colorScheme.secondary,
+                  child: Text(
+                    'Start Cut',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                        fontSize: 16),
+                  ),
+                  onPressed: () {
+                    checkEnteredValues()
+                        ? Navigator.pop(context, double.parse(age))
+                        : print('not all values filled out');
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
