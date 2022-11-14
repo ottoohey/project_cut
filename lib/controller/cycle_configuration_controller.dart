@@ -41,7 +41,7 @@ class CycleConfigurationController with ChangeNotifier {
         dateTime: dateTime,
         day: day,
         weekId: 0);
-    BiometricsDatabase.biometricsDatabase.insertBiometric(biometric);
+    AppDatabase.db.insertBiometric(biometric);
 
     Week week = const Week(
         id: 0,
@@ -50,6 +50,6 @@ class CycleConfigurationController with ChangeNotifier {
         weightLoss: 0,
         weightGoal: 0,
         bodyFatGoal: 0);
-    BiometricsDatabase.biometricsDatabase.insertWeek(week);
+    AppDatabase.db.insertWeek(week);
   }
 }

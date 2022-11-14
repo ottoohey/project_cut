@@ -6,8 +6,7 @@ class BiometricsHistoryController with ChangeNotifier {
   List<Biometric> biometrics = [];
 
   Future<List<Biometric>> get getBiometrics async {
-    biometrics =
-        await BiometricsDatabase.biometricsDatabase.getBiometricsForWeek(0);
+    biometrics = await AppDatabase.db.getBiometricsForWeek(0);
     return biometrics;
   }
 

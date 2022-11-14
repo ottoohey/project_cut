@@ -7,24 +7,23 @@ import 'package:sqflite/sqflite.dart';
 // TODO: create insert/update/delete/read functions for biometric table
 // TODO: create insert/update/delete/read functions for weeks table
 
-class BiometricsDatabase {
-  static final BiometricsDatabase biometricsDatabase =
-      BiometricsDatabase._init();
+class AppDatabase {
+  static final AppDatabase db = AppDatabase._init();
 
   static Database? _database;
 
-  BiometricsDatabase._init();
+  AppDatabase._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
 
-    _database = await _initDB('biometrics_database.db');
+    _database = await _initDB('app_database.db');
     return _database!;
   }
 
   Future<Database> _initDB(String filePath) async {
     return openDatabase(
-      join(await getDatabasesPath(), 'biometrics_database.db'),
+      join(await getDatabasesPath(), 'app_database.db'),
       onCreate: ((db, version) => createTables(db)),
       version: 1,
     );

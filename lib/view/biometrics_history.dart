@@ -27,7 +27,7 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
         day: oldValue.day,
         weekId: oldValue.weekId);
 
-    await BiometricsDatabase.biometricsDatabase.updateBiometric(biometric);
+    await AppDatabase.db.updateBiometric(biometric);
 
     setState(() {});
   }
@@ -45,7 +45,7 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
               MaterialButton(
                 child: const Text('add'),
                 onPressed: () {
-                  BiometricsDatabase.biometricsDatabase.insertBiometric(
+                  AppDatabase.db.insertBiometric(
                     const Biometric(
                         id: 4,
                         currentWeight: 72.5,

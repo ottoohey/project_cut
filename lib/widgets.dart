@@ -169,8 +169,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
   }
 
   Future<void> getBiometricsData() async {
-    biometrics =
-        await BiometricsDatabase.biometricsDatabase.getBiometricsForWeek(0);
+    biometrics = await AppDatabase.db.getBiometricsForWeek(0);
 
     setState(() {});
   }

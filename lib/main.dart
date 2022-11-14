@@ -201,9 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: [
                             MaterialButton(
                               child: const Text('add'),
-                              onPressed: () => BiometricsDatabase
-                                  .biometricsDatabase
-                                  .insertBiometric(
+                              onPressed: () => AppDatabase.db.insertBiometric(
                                 const Biometric(
                                     id: 6,
                                     currentWeight: 74.5,
@@ -215,8 +213,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             MaterialButton(
                               child: const Text('delete'),
-                              // onPressed: () => BiometricsDatabase
-                              //     .biometricsDatabase
+                              // onPressed: () => AppDatabase
+                              //     .db
                               //     .deleteAllBiometrics(),
                               onPressed: () async {
                                 final prefs =
@@ -235,15 +233,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
-              // print(
-              //   await BiometricsDatabase.biometricsDatabase
-              //       .getBiometricsForWeek(0),
-              // );
-              print(((int.parse(DateFormat('D').format(DateTime.now())) -
-                          DateTime.now().weekday +
-                          10) /
-                      7)
-                  .floor());
+              print(
+                await AppDatabase.db.getBiometricsForWeek(0),
+              );
             },
             tooltip: 'Increment',
             child: const Icon(Icons.add),
