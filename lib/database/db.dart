@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:project_cut/model/biometric.dart';
+import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -36,6 +37,10 @@ class AppDatabase {
 
     db.execute(
       'CREATE TABLE weeks(id INTEGER PRIMARY KEY, week INTEGER, calorieDeficit INTEGER, weightLoss REAL, weightGoal REAL, bodyFatGoal REAL)',
+    );
+
+    db.execute(
+      'CREATE TABLE cycles(id INTEGER PRIMARY KEY, startWeight REAL, goalWeight REAL, startBodyFat INTEGER, goalBodyFat INTEGER, startDateTime TEXT, endDateTime TEXT)',
     );
   }
 
@@ -155,6 +160,55 @@ class AppDatabase {
         weightLoss: maps[i]['weightLoss'],
         weightGoal: maps[i]['weightGoal'],
         bodyFatGoal: maps[i]['bodyFatGoal'],
+      );
+    });
+  }
+
+  Future<void> insertCycle(Cycle cycle) async {
+    final db = await database;
+
+    await db.insert(
+      'cycles',
+      cycle.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateCycle(Cycle cycle) async {
+    final db = await database;
+
+    await db.update(
+      'cycles',
+      cycle.toMap(),
+      where: 'id = ?',
+      whereArgs: [cycle.id],
+    );
+  }
+
+  Future<void> deleteCycle(int id) async {
+    final db = await database;
+
+    await db.delete(
+      'cycles',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<List<Cycle>> getCycles() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query('cycles');
+
+    return List.generate(maps.length, (i) {
+      return Cycle(
+        id: maps[i]['id'],
+        startWeight: maps[i]['startWeight'],
+        goalWeight: maps[i]['goalWeight'],
+        startBodyFat: maps[i]['startBodyFat'],
+        goalBodyFat: maps[i]['goalBodyFat'],
+        startDateTime: maps[i]['startDateTime'],
+        endDateTime: maps[i]['endDateTime'],
       );
     });
   }

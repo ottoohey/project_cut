@@ -15,8 +15,6 @@ class Week {
     required this.bodyFatGoal,
   });
 
-  // Convert a Week into a Map. The keys must correspond to the names of the
-  // columns in the db.
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -28,8 +26,6 @@ class Week {
     };
   }
 
-  // Implement toString to make it easier to see information about
-  // each biometric reading when using the print statement.
   @override
   String toString() {
     return 'Week{id: $id, week: $week, calorieDeficit: $calorieDeficit, weightLoss: $weightLoss, weightGoal: $weightGoal, bodyFatGoal: $bodyFatGoal}';
