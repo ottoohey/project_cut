@@ -32,7 +32,7 @@ class BiometricsDatabase {
 
   void createTables(Database db) {
     db.execute(
-      'CREATE TABLE biometrics(id INTEGER PRIMARY KEY, currentWeight REAL, bodyFat INTEGER, dateTime TEXT, weekId INTEGER)',
+      'CREATE TABLE biometrics(id INTEGER PRIMARY KEY, currentWeight REAL, bodyFat INTEGER, dateTime TEXT, day INTEGER, weekId INTEGER)',
     );
 
     db.execute(
@@ -71,6 +71,12 @@ class BiometricsDatabase {
     );
   }
 
+  Future<void> deleteAllBiometrics() async {
+    final db = await database;
+
+    await db.delete('biometrics');
+  }
+
   Future<List<Biometric>> getBiometrics() async {
     final db = await database;
 
@@ -82,6 +88,25 @@ class BiometricsDatabase {
         currentWeight: maps[i]['currentWeight'],
         bodyFat: maps[i]['bodyFat'],
         dateTime: maps[i]['dateTime'],
+        day: maps[i]['day'],
+        weekId: maps[i]['weekId'],
+      );
+    });
+  }
+
+  Future<List<Biometric>> getBiometricsForWeek(int week) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps =
+        await db.rawQuery('SELECT * FROM biometrics WHERE weekId = $week');
+
+    return List.generate(maps.length, (i) {
+      return Biometric(
+        id: maps[i]['id'],
+        currentWeight: maps[i]['currentWeight'],
+        bodyFat: maps[i]['bodyFat'],
+        dateTime: maps[i]['dateTime'],
+        day: maps[i]['day'],
         weekId: maps[i]['weekId'],
       );
     });

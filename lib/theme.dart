@@ -49,6 +49,14 @@ class AppTheme {
       valueIndicatorColor: primaryLight.withOpacity(0.3),
       showValueIndicator: ShowValueIndicator.never,
     ),
+    textTheme: const TextTheme(
+      headline4: TextStyle(
+        color: lightBgLight,
+      ),
+      subtitle1: TextStyle(
+        color: lightBgLight,
+      ),
+    ),
   );
 
   static final ThemeData darkTheme = ThemeData(
@@ -81,6 +89,12 @@ class AppTheme {
       // tickMarkShape: RoundSliderTickMarkShape(tickMarkRadius: 20),
       valueIndicatorColor: primaryLight.withOpacity(0.3),
       showValueIndicator: ShowValueIndicator.never,
+    ),
+    textTheme: const TextTheme(
+      displayLarge: TextStyle(
+        color: lightBgLight,
+        fontSize: 24,
+      ),
     ),
   );
 }

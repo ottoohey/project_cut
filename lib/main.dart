@@ -1,8 +1,14 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:project_cut/controller/biometrics_history_controller.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/theme.dart';
+import 'package:project_cut/view/biometrics_history.dart';
 import 'package:project_cut/view/cycle_configuration.dart';
 import 'package:project_cut/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/biometric.dart';
@@ -59,26 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     bool needSetup = false;
     if (value == null) {
-      // WidgetsBinding.instance.addPostFrameCallback(
-      //   ((timeStamp) {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(
-      //         builder: (context) => CycleConfiguration(),
-      //       ),
-      //     );
-      //   }),
-      // );
-
-      // return ChangeNotifierProvider(
-      //   create: (context) => CycleConfigurationController(),
-      //   child: const CycleConfiguration(),
-      // );
       needSetup = true;
-
-      // return const CycleConfiguration();
-    } else {
-      print('nothing there :(');
     }
 
     return Stack(
@@ -100,21 +87,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       amount: 'kg',
                     ),
                     const SizedBox(
-                      height: 32,
+                      height: 16,
                     ),
-                    Container(
-                      color: Theme.of(context).colorScheme.onSecondary,
-                      height: 150,
-                      width: MediaQuery.of(context).size.width,
-                      child: const Center(
-                        child: Text(
-                          'GRAPH',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                    ChangeNotifierProvider(
+                      create: (context) => BiometricsHistoryController(),
+                      child: WeightLineGraph(),
                     ),
+                    const WeeksRemainingIndicator(),
                     const SizedBox(
-                      height: 32,
+                      height: 24,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -143,11 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ],
                     ),
                     const SizedBox(
-                      height: 24,
-                    ),
-                    const WeeksRemainingIndicator(),
-                    const SizedBox(
-                      height: 32,
+                      height: 16,
                     ),
                     Column(
                       children: [
@@ -186,10 +163,21 @@ class _MyHomePageState extends State<MyHomePage> {
                             SizedBox(
                               width: MediaQuery.of(context).size.width / 2 - 24,
                               height: 100,
-                              child: const NeumorphicCard(
-                                title: 'SETTINGS',
-                                value: '',
-                                amount: '',
+                              child: GestureDetector(
+                                onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ChangeNotifierProvider(
+                                              create: (context) =>
+                                                  BiometricsHistoryController(),
+                                              child: const BiometricsHistory(),
+                                            ))),
+                                child: const NeumorphicCard(
+                                  title: 'SETTINGS',
+                                  value: 'settings_icon',
+                                  amount: '',
+                                ),
                               ),
                             ),
                             const SizedBox(
@@ -200,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               height: 100,
                               child: const NeumorphicCard(
                                 title: 'PROGRESS PIC',
-                                value: '',
+                                value: 'progress_pic_icon',
                                 amount: '',
                               ),
                             ),
@@ -215,20 +203,27 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: const Text('add'),
                               onPressed: () => BiometricsDatabase
                                   .biometricsDatabase
-                                  .insertBiometric(const Biometric(
-                                      id: 2,
-                                      currentWeight: 74,
-                                      bodyFat: 29,
-                                      dateTime: 'hello',
-                                      weekId: 132)),
+                                  .insertBiometric(
+                                const Biometric(
+                                    id: 6,
+                                    currentWeight: 74.5,
+                                    bodyFat: 9,
+                                    dateTime: '2022-12-11 00:00:00',
+                                    day: 6,
+                                    weekId: 0),
+                              ),
                             ),
                             MaterialButton(
-                                child: const Text('delete'),
-                                onPressed: () async {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  prefs.remove('age');
-                                }),
+                              child: const Text('delete'),
+                              // onPressed: () => BiometricsDatabase
+                              //     .biometricsDatabase
+                              //     .deleteAllBiometrics(),
+                              onPressed: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                prefs.clear();
+                              },
+                            ),
                           ],
                         )
                       ],
@@ -240,38 +235,66 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
-              print(
-                await BiometricsDatabase.biometricsDatabase.getBiometrics(),
-              );
+              // print(
+              //   await BiometricsDatabase.biometricsDatabase
+              //       .getBiometricsForWeek(0),
+              // );
+              print(((int.parse(DateFormat('D').format(DateTime.now())) -
+                          DateTime.now().weekday +
+                          10) /
+                      7)
+                  .floor());
             },
             tooltip: 'Increment',
             child: const Icon(Icons.add),
           ),
         ),
         needSetup
-            ? Padding(
-                padding: EdgeInsets.all(32),
-                child: Container(
-                  color: Colors.amber,
-                  child: Column(
-                    children: [
-                      Text('Need to set up cycle'),
-                      MaterialButton(
-                        child: Text('button'),
-                        onPressed: () async {
-                          value = await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => CycleConfiguration(),
-                            ),
-                          );
-                          setState(() {});
-                        },
-                      )
-                    ],
+            ? Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                color: Colors.white54,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                  child: Center(
+                    child: Container(
+                      height: 300,
+                      width: MediaQuery.of(context).size.width - 32,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Theme.of(context).colorScheme.onPrimary),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Welcome to Project Cut :)',
+                            style: Theme.of(context).textTheme.headline4,
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            'We just need to get a few bits of information to set everything up. All data is stored on your phone, so only you have access to it!',
+                            style: Theme.of(context).textTheme.subtitle1,
+                            textAlign: TextAlign.center,
+                          ),
+                          MaterialButton(
+                            child: const Text('Get Started'),
+                            onPressed: () async {
+                              value = await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const CycleConfiguration(),
+                                ),
+                              );
+                              setState(() {});
+                            },
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               )
-            : SizedBox(),
+            : const SizedBox(),
       ],
     );
   }

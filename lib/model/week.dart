@@ -16,7 +16,7 @@ class Week {
   });
 
   // Convert a Week into a Map. The keys must correspond to the names of the
-  // columns in the database.
+  // columns in the db.
   Map<String, dynamic> toMap() {
     return {
       'id': id,

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:project_cut/controller/biometrics_history_controller.dart';
+import 'package:project_cut/database/db.dart';
+import 'package:project_cut/model/biometric.dart';
+import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class NeumorphicCard extends StatelessWidget {
   const NeumorphicCard(
@@ -14,6 +19,22 @@ class NeumorphicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Icon icon;
+    switch (value) {
+      case 'settings_icon':
+        icon = Icon(
+          Icons.settings,
+          size: 40,
+          color: Theme.of(context).colorScheme.onPrimary,
+        );
+        break;
+      default:
+        icon = Icon(
+          Icons.camera_alt,
+          size: 40,
+          color: Theme.of(context).colorScheme.onPrimary,
+        );
+    }
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -49,76 +70,39 @@ class NeumorphicCard extends StatelessWidget {
                 ),
               ),
             ),
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: value,
-                    style: TextStyle(
-                      fontSize: 40,
-                      color: Theme.of(context).primaryColor,
+            value == 'settings_icon' || value == 'progress_pic_icon'
+                ? Padding(
+                    padding: EdgeInsets.all(4),
+                    child: icon,
+                  )
+                : Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: value,
+                          style: TextStyle(
+                            fontSize: 40,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        TextSpan(
+                          text: amount,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ],
                     ),
+                    textHeightBehavior: const TextHeightBehavior(
+                        applyHeightToFirstAscent: false),
+                    textAlign: TextAlign.center,
+                    softWrap: false,
                   ),
-                  TextSpan(
-                    text: amount,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-              textHeightBehavior:
-                  const TextHeightBehavior(applyHeightToFirstAscent: false),
-              textAlign: TextAlign.center,
-              softWrap: false,
-            ),
           ],
         ),
       ),
     );
-    // child: Center(
-    //   child: Column(
-    //     mainAxisAlignment: MainAxisAlignment.center,
-    //     children: [
-    //       FittedBox(
-    //         fit: BoxFit.contain,
-    //         child: Text(
-    //           title,
-    //           style: TextStyle(
-    //             color: Theme.of(context).primaryColor,
-    //             fontSize: 16,
-    //           ),
-    //         ),
-    //       ),
-    //       Row(
-    //         children: [
-    //           FittedBox(
-    //             fit: BoxFit.fitWidth,
-    //             child: Text(
-    //               value,
-    //               style: TextStyle(
-    //                 color: Theme.of(context).primaryColor,
-    //                 fontSize: 50,
-    //               ),
-    //             ),
-    //           ),
-    //           FittedBox(
-    //             fit: BoxFit.fitWidth,
-    //             child: Text(
-    //               amount,
-    //               style: TextStyle(
-    //                 color: Theme.of(context).primaryColor,
-    //                 fontSize: 20,
-    //               ),
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //     ],
-    //   ),
-    // ),
-    // );
   }
 }
 
@@ -164,6 +148,62 @@ class _WeeksRemainingIndicatorState extends State<WeeksRemainingIndicator> {
           style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
         )
       ],
+    );
+  }
+}
+
+class WeightLineGraph extends StatefulWidget {
+  WeightLineGraph({Key? key}) : super(key: key);
+
+  @override
+  State<WeightLineGraph> createState() => WeightLineGraphState();
+}
+
+class WeightLineGraphState extends State<WeightLineGraph> {
+  List<Biometric> biometrics = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getBiometricsData();
+  }
+
+  Future<void> getBiometricsData() async {
+    biometrics =
+        await BiometricsDatabase.biometricsDatabase.getBiometricsForWeek(0);
+
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<BiometricsHistoryController>(
+      builder: (context, controller, child) {
+        return FutureBuilder(
+          future: controller.getBiometrics,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return CircularProgressIndicator();
+            } else {
+              return Container(
+                height: 200,
+                child: SfCartesianChart(
+                  primaryXAxis: NumericAxis(),
+                  series: <ChartSeries>[
+                    // Renders line chart
+                    LineSeries<Biometric, int>(
+                      dataSource: biometrics,
+                      xValueMapper: (Biometric biometric, _) => biometric.day,
+                      yValueMapper: (Biometric biometric, _) =>
+                          biometric.currentWeight,
+                    )
+                  ],
+                ),
+              );
+            }
+          },
+        );
+      },
     );
   }
 }
