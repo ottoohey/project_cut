@@ -31,19 +31,21 @@ class AppDatabase {
   }
 
   void createTables(Database db) {
-    db.execute(
-      'CREATE TABLE biometrics(id INTEGER PRIMARY KEY, currentWeight REAL, bodyFat INTEGER, dateTime TEXT, day INTEGER, weekId INTEGER)',
-    );
-
-    db.execute(
-      'CREATE TABLE weeks(id INTEGER PRIMARY KEY, week INTEGER, calorieDeficit INTEGER, weightLoss REAL, weightGoal REAL, bodyFatGoal REAL)',
-    );
-
+    // CYCLES TABLE
     db.execute(
       'CREATE TABLE cycles(id INTEGER PRIMARY KEY, startWeight REAL, goalWeight REAL, startBodyFat INTEGER, goalBodyFat INTEGER, startDateTime TEXT, endDateTime TEXT)',
     );
+    // WEEKS TABLE
+    db.execute(
+      'CREATE TABLE weeks(id INTEGER PRIMARY KEY, cycleId INTEGER, week INTEGER, calorieDeficit INTEGER, weightLoss REAL, weightGoal REAL, bodyFatGoal REAL)',
+    );
+    // BIOMETRICS TABLE
+    db.execute(
+      'CREATE TABLE biometrics(id INTEGER PRIMARY KEY, weekId INTEGER, cycleId INTEGER, currentWeight REAL, bodyFat INTEGER, dateTime TEXT, day INTEGER)',
+    );
   }
 
+  // BIOMETRIC FUNCTIONS
   Future<void> insertBiometric(Biometric biometric) async {
     final db = await database;
 
@@ -89,11 +91,12 @@ class AppDatabase {
     return List.generate(maps.length, (i) {
       return Biometric(
         id: maps[i]['id'],
+        weekId: maps[i]['weekId'],
+        cycleId: maps[i]['cycleId'],
         currentWeight: maps[i]['currentWeight'],
         bodyFat: maps[i]['bodyFat'],
         dateTime: maps[i]['dateTime'],
         day: maps[i]['day'],
-        weekId: maps[i]['weekId'],
       );
     });
   }
@@ -107,15 +110,17 @@ class AppDatabase {
     return List.generate(maps.length, (i) {
       return Biometric(
         id: maps[i]['id'],
+        weekId: maps[i]['weekId'],
+        cycleId: maps[i]['cycleId'],
         currentWeight: maps[i]['currentWeight'],
         bodyFat: maps[i]['bodyFat'],
         dateTime: maps[i]['dateTime'],
         day: maps[i]['day'],
-        weekId: maps[i]['weekId'],
       );
     });
   }
 
+  // WEEK FUNCTIONS
   Future<void> insertWeek(Week week) async {
     final db = await database;
 
@@ -147,14 +152,11 @@ class AppDatabase {
     );
   }
 
-  Future<List<Week>> getWeeks() async {
-    final db = await database;
-
-    final List<Map<String, dynamic>> maps = await db.query('weeks');
-
+  List<Week> generateWeekList(List<Map<String, dynamic>> maps) {
     return List.generate(maps.length, (i) {
       return Week(
         id: maps[i]['id'],
+        cycleId: maps[i]['cycleId'],
         week: maps[i]['week'],
         calorieDeficit: maps[i]['calorieDeficit'],
         weightLoss: maps[i]['weightLoss'],
@@ -164,6 +166,27 @@ class AppDatabase {
     });
   }
 
+  Future<List<Week>> getWeeks() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query('weeks');
+
+    return generateWeekList(maps);
+  }
+
+  Future<List<Week>> getWeekListFromCycleId(int cycleId) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'weeks',
+      where: 'cycleId = ?',
+      whereArgs: [cycleId],
+    );
+
+    return generateWeekList(maps);
+  }
+
+  // CYCLE FUNCTIONS
   Future<void> insertCycle(Cycle cycle) async {
     final db = await database;
 
@@ -195,11 +218,7 @@ class AppDatabase {
     );
   }
 
-  Future<List<Cycle>> getCycles() async {
-    final db = await database;
-
-    final List<Map<String, dynamic>> maps = await db.query('cycles');
-
+  List<Cycle> generateCycleList(List<Map<String, dynamic>> maps) {
     return List.generate(maps.length, (i) {
       return Cycle(
         id: maps[i]['id'],
@@ -211,5 +230,33 @@ class AppDatabase {
         endDateTime: maps[i]['endDateTime'],
       );
     });
+  }
+
+  Future<List<Cycle>> getCycles() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query('cycles');
+
+    return generateCycleList(maps);
+  }
+
+  Future<List<Cycle>> getCurrentCycle() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'cycles',
+      limit: 1,
+      orderBy: 'id DESC',
+    );
+
+    return generateCycleList(maps);
+  }
+
+  Future<void> deleteAll() async {
+    final db = await database;
+
+    await db.delete('biometrics');
+    await db.delete('weeks');
+    await db.delete('cycles');
   }
 }

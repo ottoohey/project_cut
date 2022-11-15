@@ -1,18 +1,13 @@
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
+import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CycleConfigurationController with ChangeNotifier {
   String sex = 'MALE';
   double timeFrame = 0.0;
-  int startDay = DateTime.now().weekday;
-  int startWeek = ((int.parse(DateFormat('D').format(DateTime.now())) -
-              DateTime.now().weekday +
-              10) /
-          7)
-      .floor();
 
   String get getSex {
     return sex;
@@ -32,24 +27,38 @@ class CycleConfigurationController with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> startCut(
-      double currentWeight, int bodyFat, String dateTime, int day) async {
-    Biometric biometric = Biometric(
-        id: 0,
-        currentWeight: currentWeight,
-        bodyFat: bodyFat,
-        dateTime: dateTime,
-        day: day,
-        weekId: 0);
-    AppDatabase.db.insertBiometric(biometric);
+  Future<void> startCut(Cycle cycle) async {
+    await AppDatabase.db.insertCycle(cycle);
 
-    Week week = const Week(
-        id: 0,
-        week: 0,
-        calorieDeficit: 0,
-        weightLoss: 0,
-        weightGoal: 0,
-        bodyFatGoal: 0);
-    AppDatabase.db.insertWeek(week);
+    List<Cycle> newCycle = await AppDatabase.db.getCycles();
+    print(newCycle);
+    int cycleId = newCycle[0].id!;
+
+    Week week = Week(
+      cycleId: cycleId,
+      week: 0,
+      calorieDeficit: 0,
+      weightLoss: 0,
+      weightGoal: 0,
+      bodyFatGoal: 0,
+    );
+
+    await AppDatabase.db.insertWeek(week);
+
+    List<Week> newWeek = await AppDatabase.db.getWeekListFromCycleId(cycleId);
+    int weekId = newWeek[0].id!;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final DateTime dateTime = DateTime.now();
+
+    Biometric biometric = Biometric(
+      weekId: weekId,
+      cycleId: cycleId,
+      currentWeight: prefs.getDouble('startingWeight')!,
+      bodyFat: prefs.getInt('startingBodyfat')!,
+      dateTime: dateTime.toLocal().toString(),
+      day: dateTime.weekday,
+    );
+
+    await AppDatabase.db.insertBiometric(biometric);
   }
 }

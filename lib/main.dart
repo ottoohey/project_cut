@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project_cut/controller/biometrics_history_controller.dart';
 import 'package:project_cut/database/db.dart';
+import 'package:project_cut/model/cycle.dart';
+import 'package:project_cut/model/week.dart';
 import 'package:project_cut/theme.dart';
 import 'package:project_cut/view/biometrics_history.dart';
 import 'package:project_cut/view/cycle_configuration.dart';
@@ -45,7 +47,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double? value;
+  int? value;
 
   @override
   void initState() {
@@ -57,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _loadCounter() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      value = (prefs.getDouble('age'));
+      value = (prefs.getInt('age'));
     });
   }
 
@@ -201,15 +203,18 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: [
                             MaterialButton(
                               child: const Text('add'),
-                              onPressed: () => AppDatabase.db.insertBiometric(
-                                const Biometric(
-                                    id: 6,
-                                    currentWeight: 74.5,
-                                    bodyFat: 9,
-                                    dateTime: '2022-12-11 00:00:00',
-                                    day: 6,
-                                    weekId: 0),
-                              ),
+                              onPressed: () async {
+                                var biometric = Biometric(
+                                  weekId: 1,
+                                  cycleId: 1,
+                                  currentWeight: 8.5,
+                                  bodyFat: 8,
+                                  dateTime: DateTime.now().toLocal().toString(),
+                                  day: 4,
+                                );
+                                AppDatabase.db.insertBiometric(biometric);
+                                setState(() {});
+                              },
                             ),
                             MaterialButton(
                               child: const Text('delete'),
@@ -220,6 +225,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 final prefs =
                                     await SharedPreferences.getInstance();
                                 prefs.clear();
+                                AppDatabase.db.deleteAll();
+                                setState(() {});
                               },
                             ),
                           ],
@@ -233,9 +240,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
-              print(
-                await AppDatabase.db.getBiometricsForWeek(0),
-              );
+              List<Cycle> cycle = await AppDatabase.db.getCurrentCycle();
+              List<Week> week = await AppDatabase.db.getWeeks();
+              List<Biometric> biometric = await AppDatabase.db.getBiometrics();
+              print(cycle);
+              print(week);
+              print(biometric);
             },
             tooltip: 'Increment',
             child: const Icon(Icons.add),
@@ -278,6 +288,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                               );
                               setState(() {});
+                            },
+                          ),
+                          MaterialButton(
+                            child: const Text('tester button'),
+                            onPressed: () {
+                              print(
+                                DateTime.now().add(const Duration(days: 50)),
+                              );
                             },
                           )
                         ],

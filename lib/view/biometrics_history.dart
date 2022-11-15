@@ -20,12 +20,14 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
 
   Future<void> modifyBiometric(Biometric oldValue) async {
     Biometric biometric = Biometric(
-        id: oldValue.id,
-        currentWeight: 76.3,
-        bodyFat: oldValue.bodyFat,
-        dateTime: oldValue.dateTime,
-        day: oldValue.day,
-        weekId: oldValue.weekId);
+      id: oldValue.id,
+      weekId: oldValue.weekId,
+      cycleId: oldValue.cycleId,
+      currentWeight: 76.3,
+      bodyFat: oldValue.bodyFat,
+      dateTime: oldValue.dateTime,
+      day: oldValue.day,
+    );
 
     await AppDatabase.db.updateBiometric(biometric);
 
@@ -43,18 +45,9 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
                 height: 150,
               ),
               MaterialButton(
-                child: const Text('add'),
+                child: const Text('Clear database'),
                 onPressed: () {
-                  AppDatabase.db.insertBiometric(
-                    const Biometric(
-                        id: 4,
-                        currentWeight: 72.5,
-                        bodyFat: 9,
-                        dateTime: '2022-03-11 00:00:00',
-                        day: 2,
-                        weekId: 0),
-                  );
-                  controller.setBiometrics();
+                  AppDatabase.db.deleteAll();
                 },
               ),
               SizedBox(

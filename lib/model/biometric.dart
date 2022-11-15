@@ -1,18 +1,20 @@
 class Biometric {
-  final int id;
+  final int? id;
+  final int weekId;
+  final int cycleId;
   final double currentWeight;
   final int bodyFat;
   final String dateTime;
   final int day;
-  final int weekId;
 
   const Biometric({
-    required this.id,
+    this.id,
+    required this.weekId,
+    required this.cycleId,
     required this.currentWeight,
     required this.bodyFat,
     required this.dateTime,
     required this.day,
-    required this.weekId,
   });
 
   // Convert a Biometric into a Map. The keys must correspond to the names of the
@@ -20,11 +22,12 @@ class Biometric {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'weekId': weekId,
+      'cycleId': cycleId,
       'currentWeight': currentWeight,
       'bodyFat': bodyFat,
       'dateTime': dateTime,
       'day': day,
-      'weekId': weekId,
     };
   }
 
@@ -32,6 +35,6 @@ class Biometric {
   // each biometric reading when using the print statement.
   @override
   String toString() {
-    return 'Biometric{id: $id, currentWeight: $currentWeight, bodyFat: $bodyFat, dateTime: $dateTime, day: $day, weekId: $weekId}';
+    return 'Biometric{id: $id, weekId: $weekId, cycleId: $cycleId, currentWeight: $currentWeight, bodyFat: $bodyFat, dateTime: $dateTime, day: $day}';
   }
 }

@@ -1,5 +1,6 @@
 class Week {
-  final int id;
+  final int? id;
+  final int cycleId;
   final int week;
   final int calorieDeficit;
   final double weightLoss;
@@ -7,7 +8,8 @@ class Week {
   final double bodyFatGoal;
 
   const Week({
-    required this.id,
+    this.id,
+    required this.cycleId,
     required this.week,
     required this.calorieDeficit,
     required this.weightLoss,
@@ -18,6 +20,7 @@ class Week {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'cycleId': cycleId,
       'week': week,
       'calorieDeficit': calorieDeficit,
       'weightLoss': weightLoss,
@@ -28,6 +31,6 @@ class Week {
 
   @override
   String toString() {
-    return 'Week{id: $id, week: $week, calorieDeficit: $calorieDeficit, weightLoss: $weightLoss, weightGoal: $weightGoal, bodyFatGoal: $bodyFatGoal}';
+    return 'Week{id: $id, cycleId: $cycleId, week: $week, calorieDeficit: $calorieDeficit, weightLoss: $weightLoss, weightGoal: $weightGoal, bodyFatGoal: $bodyFatGoal}';
   }
 }

@@ -169,9 +169,37 @@ class WeightLineGraphState extends State<WeightLineGraph> {
   }
 
   Future<void> getBiometricsData() async {
-    biometrics = await AppDatabase.db.getBiometricsForWeek(0);
+    biometrics = await AppDatabase.db.getBiometricsForWeek(1);
 
     setState(() {});
+  }
+
+  String getWeekday(int day) {
+    String weekday;
+    switch (day) {
+      case 1:
+        weekday = 'MON';
+        break;
+      case 2:
+        weekday = 'TUE';
+        break;
+      case 3:
+        weekday = 'WED';
+        break;
+      case 4:
+        weekday = 'THU';
+        break;
+      case 5:
+        weekday = 'FRI';
+        break;
+      case 6:
+        weekday = 'SAT';
+        break;
+      default:
+        weekday = 'SUN';
+    }
+
+    return weekday;
   }
 
   @override
@@ -184,15 +212,17 @@ class WeightLineGraphState extends State<WeightLineGraph> {
             if (snapshot.connectionState != ConnectionState.done) {
               return CircularProgressIndicator();
             } else {
-              return Container(
+              return SizedBox(
                 height: 200,
                 child: SfCartesianChart(
-                  primaryXAxis: NumericAxis(),
+                  primaryXAxis:
+                      CategoryAxis(labelPlacement: LabelPlacement.onTicks),
                   series: <ChartSeries>[
                     // Renders line chart
-                    LineSeries<Biometric, int>(
+                    SplineSeries<Biometric, String>(
                       dataSource: biometrics,
-                      xValueMapper: (Biometric biometric, _) => biometric.day,
+                      xValueMapper: (Biometric biometric, _) =>
+                          getWeekday(biometric.day),
                       yValueMapper: (Biometric biometric, _) =>
                           biometric.currentWeight,
                     )

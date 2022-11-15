@@ -1,5 +1,5 @@
 class Cycle {
-  final int id;
+  final int? id;
   final double startWeight;
   final double goalWeight;
   final int startBodyFat;
@@ -8,7 +8,7 @@ class Cycle {
   final String endDateTime;
 
   const Cycle({
-    required this.id,
+    this.id,
     required this.startWeight,
     required this.goalWeight,
     required this.startBodyFat,
