@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_history_controller.dart';
-import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
+import 'package:project_cut/model/cycle.dart';
+import 'package:project_cut/model/week.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -72,7 +73,7 @@ class NeumorphicCard extends StatelessWidget {
             ),
             value == 'settings_icon' || value == 'progress_pic_icon'
                 ? Padding(
-                    padding: EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(4),
                     child: icon,
                   )
                 : Text.rich(
@@ -106,54 +107,8 @@ class NeumorphicCard extends StatelessWidget {
   }
 }
 
-class WeeksRemainingIndicator extends StatefulWidget {
-  const WeeksRemainingIndicator({Key? key}) : super(key: key);
-
-  @override
-  State<WeeksRemainingIndicator> createState() =>
-      _WeeksRemainingIndicatorState();
-}
-
-class _WeeksRemainingIndicatorState extends State<WeeksRemainingIndicator> {
-  final DateTime currentDate = DateTime.now();
-  final DateTime startDate = DateTime.utc(2022, 09, 01);
-  final DateTime endDate = DateTime.utc(2022, 12, 25);
-
-  late int progress = (currentDate.difference(startDate).inDays / 7).ceil();
-  late int remaining = (endDate.difference(currentDate).inDays / 7).ceil();
-  late int total = progress + remaining;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Slider(
-          value: progress.toDouble(),
-          max: total.toDouble(),
-          divisions: total.toInt(),
-          label: progress.round().toString(),
-          activeColor: Theme.of(context).colorScheme.onPrimary,
-          inactiveColor:
-              Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-          thumbColor: Theme.of(context).colorScheme.onPrimary,
-          onChanged: (double value) {
-            setState(() {
-              progress = value.toInt();
-              remaining = total - progress;
-            });
-          },
-        ),
-        Text(
-          '$remaining WEEKS REMAINING',
-          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-        )
-      ],
-    );
-  }
-}
-
 class WeightLineGraph extends StatefulWidget {
-  WeightLineGraph({Key? key}) : super(key: key);
+  const WeightLineGraph({Key? key}) : super(key: key);
 
   @override
   State<WeightLineGraph> createState() => WeightLineGraphState();
@@ -161,17 +116,14 @@ class WeightLineGraph extends StatefulWidget {
 
 class WeightLineGraphState extends State<WeightLineGraph> {
   List<Biometric> biometrics = [];
+  List<Week> weeks = [];
+  Cycle? cycle;
+  DateTime currentDateTime = DateTime.now();
 
-  @override
-  void initState() {
-    super.initState();
-    getBiometricsData();
-  }
-
-  Future<void> getBiometricsData() async {
-    biometrics = await AppDatabase.db.getBiometricsForWeek(1);
-
-    setState(() {});
+  Future<void> getGraphData(BiometricsHistoryController controller) async {
+    biometrics = await controller.getBiometrics;
+    weeks = await controller.getWeeks;
+    cycle = await controller.getCycle;
   }
 
   String getWeekday(int day) {
@@ -207,27 +159,57 @@ class WeightLineGraphState extends State<WeightLineGraph> {
     return Consumer<BiometricsHistoryController>(
       builder: (context, controller, child) {
         return FutureBuilder(
-          future: controller.getBiometrics,
+          future: getGraphData(controller),
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return CircularProgressIndicator();
+            if (biometrics == [] || weeks == [] || cycle == null) {
+              return const CircularProgressIndicator();
             } else {
-              return SizedBox(
-                height: 200,
-                child: SfCartesianChart(
-                  primaryXAxis:
-                      CategoryAxis(labelPlacement: LabelPlacement.onTicks),
-                  series: <ChartSeries>[
-                    // Renders line chart
-                    SplineSeries<Biometric, String>(
-                      dataSource: biometrics,
-                      xValueMapper: (Biometric biometric, _) =>
-                          getWeekday(biometric.day),
-                      yValueMapper: (Biometric biometric, _) =>
-                          biometric.currentWeight,
-                    )
-                  ],
-                ),
+              DateTime endDateTime = DateTime.parse(cycle!.endDateTime);
+              int remaining =
+                  (endDateTime.difference(currentDateTime).inDays / 7).ceil();
+              int total = remaining - controller.getSliderValue.toInt();
+              return Column(
+                children: [
+                  SizedBox(
+                    height: 200,
+                    child: SfCartesianChart(
+                      primaryXAxis:
+                          CategoryAxis(labelPlacement: LabelPlacement.onTicks),
+                      series: <ChartSeries>[
+                        SplineSeries<Biometric, String>(
+                          dataSource: controller.getGraphData,
+                          xValueMapper: (Biometric biometric, _) =>
+                              getWeekday(biometric.day),
+                          yValueMapper: (Biometric biometric, _) =>
+                              biometric.currentWeight,
+                        )
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      Slider(
+                        value: controller.getSliderValue,
+                        max: remaining.toDouble(),
+                        divisions: remaining,
+                        activeColor: Theme.of(context).colorScheme.onPrimary,
+                        inactiveColor: Theme.of(context)
+                            .colorScheme
+                            .onPrimary
+                            .withOpacity(0.3),
+                        thumbColor: Theme.of(context).colorScheme.onPrimary,
+                        onChanged: (double value) {
+                          controller.setSliderValue(value);
+                        },
+                      ),
+                      Text(
+                        '$total WEEKS REMAINING',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary),
+                      )
+                    ],
+                  ),
+                ],
               );
             }
           },

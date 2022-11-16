@@ -93,9 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     ChangeNotifierProvider(
                       create: (context) => BiometricsHistoryController(),
-                      child: WeightLineGraph(),
+                      child: const WeightLineGraph(),
                     ),
-                    const WeeksRemainingIndicator(),
                     const SizedBox(
                       height: 24,
                     ),
@@ -207,10 +206,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                 var biometric = Biometric(
                                   weekId: 1,
                                   cycleId: 1,
-                                  currentWeight: 8.5,
+                                  currentWeight: 86,
                                   bodyFat: 8,
                                   dateTime: DateTime.now().toLocal().toString(),
-                                  day: 4,
+                                  day: 6,
                                 );
                                 AppDatabase.db.insertBiometric(biometric);
                                 setState(() {});
