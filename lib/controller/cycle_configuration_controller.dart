@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_cut/database/db.dart';
+import 'package:project_cut/extensions/double.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
@@ -27,9 +28,9 @@ class CycleConfigurationController with ChangeNotifier {
     notifyListeners();
   }
 
-  double toTwoDecimalPlaces(double value) {
-    return double.parse(value.toStringAsFixed(2));
-  }
+  // double toTwoDecimalPlaces(double value) {
+  //   return double.parse(value.toStringAsFixed(2));
+  // }
 
   Future<void> startCut(Cycle cycle) async {
     // insert cycle
@@ -72,9 +73,9 @@ class CycleConfigurationController with ChangeNotifier {
         cycleId: cycleId,
         week: weekNum,
         calorieDeficit: calorieDeficit,
-        weightLoss: toTwoDecimalPlaces(weightLoss),
-        weightGoal: toTwoDecimalPlaces(weightGoal),
-        bodyFatGoal: toTwoDecimalPlaces(cycle.startBodyFat - bodyFatGoal),
+        weightLoss: weightLoss.toTwoDecimalPlaces(),
+        weightGoal: weightGoal.toTwoDecimalPlaces(),
+        bodyFatGoal: (cycle.startBodyFat - bodyFatGoal).toTwoDecimalPlaces(),
       );
 
       previousWeight = weightGoal;

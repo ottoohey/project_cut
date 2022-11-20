@@ -204,39 +204,35 @@ class _MyHomePageState extends State<MyHomePage> {
                             MaterialButton(
                               child: const Text('add'),
                               onPressed: () async {
-                                double bodyFatGoal = 0;
-                                double previousWeight = 86.5;
-                                for (var i = 0; i < 100 / 7; i++) {
-                                  double bodyFatLossDaily = 0.12;
-                                  if (i == 0) {
-                                    bodyFatGoal += bodyFatLossDaily * (100 % 7);
-                                  } else {
-                                    bodyFatGoal += bodyFatLossDaily * 7;
-                                  }
-                                  double weight = 69.2 /
-                                      (1 -
-                                          0.2 +
-                                          (double.parse((bodyFatGoal)
-                                                  .toStringAsFixed(2)) /
-                                              100));
-                                  double weightLoss = previousWeight - weight;
-                                  previousWeight = weight;
-                                  print(double.parse(
-                                          (weightLoss).toStringAsFixed(2)) *
-                                      1000);
-                                }
+                                AppDatabase.db.addWeight(86.5);
+                              },
+                            ),
+                            MaterialButton(
+                              child: const Text('edit'),
+                              onPressed: () async {
+                                Biometric biometric = const Biometric(
+                                  id: 1,
+                                  weekId: 1,
+                                  cycleId: 1,
+                                  currentWeight: 87,
+                                  bodyFat: 20,
+                                  dateTime: '2022-11-17 17:17:32.230953',
+                                  day: 4,
+                                  estimated: 0,
+                                );
+                                AppDatabase.db.updateBiometric(biometric);
                               },
                             ),
                             MaterialButton(
                               child: const Text('delete'),
-                              // onPressed: () =>
-                              //     AppDatabase.db.deleteAllBiometrics(),
-                              onPressed: () async {
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                prefs.clear();
-                                AppDatabase.db.deleteAll();
-                              },
+                              onPressed: () =>
+                                  AppDatabase.db.deleteBiometrics(2),
+                              // onPressed: () async {
+                              //   final prefs =
+                              //       await SharedPreferences.getInstance();
+                              //   prefs.clear();
+                              //   AppDatabase.db.deleteAll();
+                              // },
                             ),
                           ],
                         )

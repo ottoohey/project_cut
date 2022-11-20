@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
+import 'package:project_cut/extensions/double.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
@@ -77,26 +78,17 @@ class AppDatabase {
     double weightDifference =
         enteredWeight - latestBiometricEntry.currentWeight;
 
-    int weeksToAdd = (daysSinceLastEntry / 7).floor();
-    // TODO: estimated week creation
-    Week latestWeekEntry = await getLatestWeek();
-    for (var i = 1; i <= weeksToAdd; i++) {
-      List<dynamic> weekMetrics = getWeekMetrics(latestBiometricEntry.bodyFat);
-      // int calorieDeficit =
-      // Week week = Week(cycleId: latestBiometricEntry.cycleId, week: latestWeekEntry.week + i, calorieDeficit: calorieDeficit, weightLoss: weightLoss, weightGoal: weightGoal, bodyFatGoal: bodyFatGoal)
-    }
-
     if (daysSinceLastEntry > 1) {
       double dailyWeightDifference = weightDifference / daysSinceLastEntry;
 
       for (var i = 1; i < daysSinceLastEntry; i++) {
         DateTime estimatedDateTime = lastEntryDateTime.add(Duration(days: i));
-        double estimatedWeight = enteredWeight + dailyWeightDifference;
+        double estimatedWeight = enteredWeight + (dailyWeightDifference * i);
 
         Biometric estimatedBiometric = Biometric(
           weekId: 0,
           cycleId: latestBiometricEntry.cycleId,
-          currentWeight: estimatedWeight,
+          currentWeight: estimatedWeight.toTwoDecimalPlaces(),
           // TODO: add measurements to shared prefs
           // add latest body measurements to shared preferences
           // calculate based on that
@@ -105,10 +97,22 @@ class AppDatabase {
           day: estimatedDateTime.weekday,
           estimated: 1,
         );
+
+        insertBiometric(estimatedBiometric);
       }
-    } else {
-      print('all good');
     }
+
+    Biometric enteredBiometric = Biometric(
+      weekId: 0,
+      cycleId: 1,
+      currentWeight: enteredWeight,
+      bodyFat: latestBiometricEntry.bodyFat,
+      dateTime: DateTime.now().toLocal().toString(),
+      day: DateTime.now().weekday,
+      estimated: 0,
+    );
+
+    insertBiometric(enteredBiometric);
   }
 
   Future<void> insertBiometric(Biometric biometric) async {
@@ -291,22 +295,6 @@ class AppDatabase {
     Week latestWeek = generateWeekList(maps).first;
 
     return latestWeek;
-  }
-
-  List<dynamic> getWeekMetrics(double bodyFatPercentage) {
-    if (bodyFatPercentage > 20) {
-      return [0.9, 600];
-    } else if (bodyFatPercentage > 18 && bodyFatPercentage < 20) {
-      return [0.8, 500];
-    } else if (bodyFatPercentage > 15 && bodyFatPercentage < 18) {
-      return [0.7, 400];
-    } else if (bodyFatPercentage > 12 && bodyFatPercentage < 15) {
-      return [0.6, 300];
-    } else if (bodyFatPercentage > 9 && bodyFatPercentage < 12) {
-      return [0.5, 200];
-    } else {
-      return [0.3, 100];
-    }
   }
 
   // CYCLE FUNCTIONS

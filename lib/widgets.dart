@@ -177,7 +177,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                           CategoryAxis(labelPlacement: LabelPlacement.onTicks),
                       series: <ChartSeries>[
                         SplineSeries<Biometric, String>(
-                          dataSource: controller.getGraphData,
+                          dataSource: biometrics,
                           xValueMapper: (Biometric biometric, _) =>
                               getWeekday(biometric.day),
                           yValueMapper: (Biometric biometric, _) =>
@@ -208,6 +208,10 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                             color: Theme.of(context).colorScheme.onPrimary),
                       )
                     ],
+                  ),
+                  MaterialButton(
+                    child: Text('test'),
+                    onPressed: () => print(biometrics),
                   ),
                 ],
               );
