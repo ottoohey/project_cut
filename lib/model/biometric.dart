@@ -3,9 +3,10 @@ class Biometric {
   final int weekId;
   final int cycleId;
   final double currentWeight;
-  final int bodyFat;
+  final double bodyFat;
   final String dateTime;
   final int day;
+  final int estimated;
 
   const Biometric({
     this.id,
@@ -15,6 +16,7 @@ class Biometric {
     required this.bodyFat,
     required this.dateTime,
     required this.day,
+    required this.estimated,
   });
 
   // Convert a Biometric into a Map. The keys must correspond to the names of the
@@ -28,6 +30,7 @@ class Biometric {
       'bodyFat': bodyFat,
       'dateTime': dateTime,
       'day': day,
+      'estimated': estimated,
     };
   }
 
@@ -35,6 +38,6 @@ class Biometric {
   // each biometric reading when using the print statement.
   @override
   String toString() {
-    return 'Biometric{id: $id, weekId: $weekId, cycleId: $cycleId, currentWeight: $currentWeight, bodyFat: $bodyFat, dateTime: $dateTime, day: $day}';
+    return 'Biometric{id: $id, weekId: $weekId, cycleId: $cycleId, currentWeight: $currentWeight, bodyFat: $bodyFat, dateTime: $dateTime, day: $day, estimated: $estimated}';
   }
 }

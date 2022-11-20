@@ -2,8 +2,8 @@ class Cycle {
   final int? id;
   final double startWeight;
   final double goalWeight;
-  final int startBodyFat;
-  final int goalBodyFat;
+  final double startBodyFat;
+  final double goalBodyFat;
   final String startDateTime;
   final String endDateTime;
 

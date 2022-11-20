@@ -15,17 +15,15 @@ class TesterWidget extends StatelessWidget {
     ];
     return Scaffold(
       body: Center(
-        child: Container(
-          child: SfCartesianChart(
-            primaryXAxis: DateTimeAxis(),
-            series: <ChartSeries>[
-              // Renders line chart
-              LineSeries<SalesData, DateTime>(
-                  dataSource: chartData,
-                  xValueMapper: (SalesData sales, _) => sales.year,
-                  yValueMapper: (SalesData sales, _) => sales.sales)
-            ],
-          ),
+        child: SfCartesianChart(
+          primaryXAxis: DateTimeAxis(),
+          series: <ChartSeries>[
+            // Renders line chart
+            LineSeries<SalesData, DateTime>(
+                dataSource: chartData,
+                xValueMapper: (SalesData sales, _) => sales.year,
+                yValueMapper: (SalesData sales, _) => sales.sales)
+          ],
         ),
       ),
     );

@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:project_cut/controller/biometrics_history_controller.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/cycle.dart';
@@ -65,9 +64,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    bool needSetup = false;
-    if (value == null) {
-      needSetup = true;
+    bool needSetup = true;
+    if (value != null) {
+      needSetup = false;
     }
 
     return Stack(
@@ -91,10 +90,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     const SizedBox(
                       height: 16,
                     ),
-                    ChangeNotifierProvider(
-                      create: (context) => BiometricsHistoryController(),
-                      child: const WeightLineGraph(),
-                    ),
+                    !needSetup
+                        ? ChangeNotifierProvider(
+                            create: (context) => BiometricsHistoryController(),
+                            child: const WeightLineGraph(),
+                          )
+                        : Container(),
                     const SizedBox(
                       height: 24,
                     ),
@@ -203,29 +204,38 @@ class _MyHomePageState extends State<MyHomePage> {
                             MaterialButton(
                               child: const Text('add'),
                               onPressed: () async {
-                                var biometric = Biometric(
-                                  weekId: 1,
-                                  cycleId: 1,
-                                  currentWeight: 86,
-                                  bodyFat: 8,
-                                  dateTime: DateTime.now().toLocal().toString(),
-                                  day: 6,
-                                );
-                                AppDatabase.db.insertBiometric(biometric);
-                                setState(() {});
+                                double bodyFatGoal = 0;
+                                double previousWeight = 86.5;
+                                for (var i = 0; i < 100 / 7; i++) {
+                                  double bodyFatLossDaily = 0.12;
+                                  if (i == 0) {
+                                    bodyFatGoal += bodyFatLossDaily * (100 % 7);
+                                  } else {
+                                    bodyFatGoal += bodyFatLossDaily * 7;
+                                  }
+                                  double weight = 69.2 /
+                                      (1 -
+                                          0.2 +
+                                          (double.parse((bodyFatGoal)
+                                                  .toStringAsFixed(2)) /
+                                              100));
+                                  double weightLoss = previousWeight - weight;
+                                  previousWeight = weight;
+                                  print(double.parse(
+                                          (weightLoss).toStringAsFixed(2)) *
+                                      1000);
+                                }
                               },
                             ),
                             MaterialButton(
                               child: const Text('delete'),
-                              // onPressed: () => AppDatabase
-                              //     .db
-                              //     .deleteAllBiometrics(),
+                              // onPressed: () =>
+                              //     AppDatabase.db.deleteAllBiometrics(),
                               onPressed: () async {
                                 final prefs =
                                     await SharedPreferences.getInstance();
                                 prefs.clear();
                                 AppDatabase.db.deleteAll();
-                                setState(() {});
                               },
                             ),
                           ],
@@ -291,10 +301,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           MaterialButton(
                             child: const Text('tester button'),
-                            onPressed: () {
-                              print(
-                                DateTime.now().add(const Duration(days: 50)),
-                              );
+                            onPressed: () async {
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              prefs.clear();
+                              AppDatabase.db.deleteAll();
                             },
                           )
                         ],

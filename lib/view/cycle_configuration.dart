@@ -14,11 +14,11 @@ class CycleConfiguration extends StatefulWidget {
 }
 
 class _CycleConfigurationState extends State<CycleConfiguration> {
-  List<bool> isSelected = [true, false, false];
+  List<bool> isSelected = [true, false];
   double earliestTime = 8;
   double latestTime = 18;
   int timeFrame = 0;
-  List<String> sexes = ['MALE', 'FEMALE', 'OTHER'];
+  List<String> sexes = ['MALE', 'FEMALE'];
 
   // Text Field Titles
   static const String heightTitle = 'HEIGHT';
@@ -80,11 +80,13 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
         break;
       case startingBodyfatTitle:
         startingBodyfat = newValue;
-        await sharedPreferences!.setInt('startingBodyfat', int.parse(newValue));
+        await sharedPreferences!
+            .setDouble('startingBodyfat', double.parse(newValue));
         break;
       case goalBodyfatTitle:
         goalBodyfat = newValue;
-        await sharedPreferences!.setInt('goalBodyFat', int.parse(newValue));
+        await sharedPreferences!
+            .setDouble('goalBodyFat', double.parse(newValue));
         break;
       default:
         height = newValue;
@@ -250,10 +252,9 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                       children: [
                         toggleButtonWidget(sexes[0]),
                         toggleButtonWidget(sexes[1]),
-                        toggleButtonWidget(sexes[2]),
                       ],
                       onPressed: (int newIndex) async {
-                        isSelected = [false, false];
+                        isSelected = [false];
                         isSelected.insert(newIndex, true);
                         config.setSex(sexes[newIndex]);
                         await sharedPreferences!
@@ -318,7 +319,9 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                                     Theme.of(context).colorScheme.onSecondary,
                                 fontSize: 16),
                           ),
-                          onPressed: () => print('instructions'),
+                          // TODO: Navy Method instructions
+                          // ignore: avoid_returning_null_for_void
+                          onPressed: () => null,
                         ),
                       ],
                     ),
@@ -354,18 +357,17 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                         Cycle cycle = Cycle(
                           startWeight: double.parse(startingWeight),
                           goalWeight: double.parse(goalWeight),
-                          startBodyFat: int.parse(startingBodyfat),
-                          goalBodyFat: int.parse(goalBodyfat),
+                          startBodyFat: double.parse(startingBodyfat),
+                          goalBodyFat: double.parse(goalBodyfat),
                           startDateTime: DateTime.now().toLocal().toString(),
                           endDateTime: endDateTime,
                         );
 
-                        // print(cycle);
-
+                        // TODO: add alert for values not filled out
                         checkEnteredValues()
                             ? config.startCut(cycle).then((value) =>
                                 Navigator.pop(context, int.parse(age)))
-                            : print('not all values filled out');
+                            : null;
                       },
                     ),
                   ],

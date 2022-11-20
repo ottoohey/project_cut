@@ -27,6 +27,7 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
       bodyFat: oldValue.bodyFat,
       dateTime: oldValue.dateTime,
       day: oldValue.day,
+      estimated: oldValue.estimated,
     );
 
     await AppDatabase.db.updateBiometric(biometric);
@@ -41,7 +42,7 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
         return Scaffold(
           body: Column(
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 150,
               ),
               MaterialButton(
@@ -56,7 +57,7 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
                   future: controller.getBiometrics,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState != ConnectionState.done) {
-                      return CircularProgressIndicator();
+                      return const CircularProgressIndicator();
                     } else {
                       return ListView.builder(
                         itemCount: snapshot.data!.length,

@@ -1,12 +1,12 @@
 import 'dart:async';
+import 'dart:math';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
-
-// TODO: create insert/update/delete/read functions for biometric table
-// TODO: create insert/update/delete/read functions for weeks table
 
 class AppDatabase {
   static final AppDatabase db = AppDatabase._init();
@@ -33,7 +33,7 @@ class AppDatabase {
   void createTables(Database db) {
     // CYCLES TABLE
     db.execute(
-      'CREATE TABLE cycles(id INTEGER PRIMARY KEY, startWeight REAL, goalWeight REAL, startBodyFat INTEGER, goalBodyFat INTEGER, startDateTime TEXT, endDateTime TEXT)',
+      'CREATE TABLE cycles(id INTEGER PRIMARY KEY, startWeight REAL, goalWeight REAL, startBodyFat REAL, goalBodyFat REAL, startDateTime TEXT, endDateTime TEXT)',
     );
     // WEEKS TABLE
     db.execute(
@@ -41,14 +41,78 @@ class AppDatabase {
     );
     // BIOMETRICS TABLE
     db.execute(
-      'CREATE TABLE biometrics(id INTEGER PRIMARY KEY, weekId INTEGER, cycleId INTEGER, currentWeight REAL, bodyFat INTEGER, dateTime TEXT, day INTEGER)',
+      'CREATE TABLE biometrics(id INTEGER PRIMARY KEY, weekId INTEGER, cycleId INTEGER, currentWeight REAL, bodyFat REAL, dateTime TEXT, day INTEGER, estimated INTEGER)',
     );
   }
 
   // BIOMETRIC FUNCTIONS
-  Future<void> insertBiometric(Biometric biometric) async {
+  List<Biometric> generateBiometricList(List<Map<String, dynamic>> maps) {
+    return List.generate(maps.length, (i) {
+      return Biometric(
+        id: maps[i]['id'],
+        weekId: maps[i]['weekId'],
+        cycleId: maps[i]['cycleId'],
+        currentWeight: maps[i]['currentWeight'],
+        bodyFat: maps[i]['bodyFat'],
+        dateTime: maps[i]['dateTime'],
+        day: maps[i]['day'],
+        estimated: maps[i]['estimated'],
+      );
+    });
+  }
+
+  Future<void> addWeight(double enteredWeight) async {
     final db = await database;
 
+    Biometric latestBiometricEntry = await getLatestBiometric();
+
+    DateTime currentDateTime =
+        DateTime.parse(DateFormat("yyyy-MM-dd").format(DateTime.now()));
+    DateTime lastEntryDateTime = DateTime.parse(DateFormat("yyyy-MM-dd")
+        .format(DateTime.parse(latestBiometricEntry.dateTime)));
+
+    int daysSinceLastEntry =
+        currentDateTime.difference(lastEntryDateTime).inDays;
+
+    double weightDifference =
+        enteredWeight - latestBiometricEntry.currentWeight;
+
+    int weeksToAdd = (daysSinceLastEntry / 7).floor();
+    // TODO: estimated week creation
+    Week latestWeekEntry = await getLatestWeek();
+    for (var i = 1; i <= weeksToAdd; i++) {
+      List<dynamic> weekMetrics = getWeekMetrics(latestBiometricEntry.bodyFat);
+      // int calorieDeficit =
+      // Week week = Week(cycleId: latestBiometricEntry.cycleId, week: latestWeekEntry.week + i, calorieDeficit: calorieDeficit, weightLoss: weightLoss, weightGoal: weightGoal, bodyFatGoal: bodyFatGoal)
+    }
+
+    if (daysSinceLastEntry > 1) {
+      double dailyWeightDifference = weightDifference / daysSinceLastEntry;
+
+      for (var i = 1; i < daysSinceLastEntry; i++) {
+        DateTime estimatedDateTime = lastEntryDateTime.add(Duration(days: i));
+        double estimatedWeight = enteredWeight + dailyWeightDifference;
+
+        Biometric estimatedBiometric = Biometric(
+          weekId: 0,
+          cycleId: latestBiometricEntry.cycleId,
+          currentWeight: estimatedWeight,
+          // TODO: add measurements to shared prefs
+          // add latest body measurements to shared preferences
+          // calculate based on that
+          bodyFat: latestBiometricEntry.bodyFat,
+          dateTime: estimatedDateTime.toLocal().toString(),
+          day: estimatedDateTime.weekday,
+          estimated: 1,
+        );
+      }
+    } else {
+      print('all good');
+    }
+  }
+
+  Future<void> insertBiometric(Biometric biometric) async {
+    final db = await database;
     await db.insert(
       'biometrics',
       biometric.toMap(),
@@ -88,17 +152,9 @@ class AppDatabase {
 
     final List<Map<String, dynamic>> maps = await db.query('biometrics');
 
-    return List.generate(maps.length, (i) {
-      return Biometric(
-        id: maps[i]['id'],
-        weekId: maps[i]['weekId'],
-        cycleId: maps[i]['cycleId'],
-        currentWeight: maps[i]['currentWeight'],
-        bodyFat: maps[i]['bodyFat'],
-        dateTime: maps[i]['dateTime'],
-        day: maps[i]['day'],
-      );
-    });
+    List<Biometric> biometrics = generateBiometricList(maps);
+
+    return biometrics;
   }
 
   Future<List<Biometric>> getBiometricsForWeek(int week) async {
@@ -107,20 +163,66 @@ class AppDatabase {
     final List<Map<String, dynamic>> maps =
         await db.rawQuery('SELECT * FROM biometrics WHERE weekId = $week');
 
+    List<Biometric> biometrics = generateBiometricList(maps);
+
+    return biometrics;
+  }
+
+  Future<Biometric> getLatestBiometric() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps =
+        await db.query('biometrics', limit: 1, orderBy: 'dateTime DESC');
+
+    Biometric latestBiometric = generateBiometricList(maps).first;
+
+    return latestBiometric;
+  }
+
+  double logBase(double x, int base) => log(x) / log(base);
+
+  int calculateBodyFatPercentage(
+      double waist, double hip, double neck, int height) {
+    int bodyFatPercentage = (495 /
+                (1.0324 -
+                    0.19077 * logBase((waist - neck), 10) +
+                    0.15456 * logBase(height.toDouble(), 10)) -
+            450)
+        .toInt();
+
+    return bodyFatPercentage;
+  }
+
+  Future<int> get estimatedBodyFatPercentage async {
+    final SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance();
+
+    double waist = sharedPreferences.getDouble('waist') ?? 0;
+    double hip = sharedPreferences.getDouble('hip') ?? 0;
+    double neck = sharedPreferences.getDouble('neck') ?? 0;
+    int height = sharedPreferences.getInt('height') ?? 0;
+
+    int estimatedBodyFatPercentage =
+        calculateBodyFatPercentage(waist, hip, neck, height);
+
+    return estimatedBodyFatPercentage;
+  }
+
+  // WEEK FUNCTIONS
+  List<Week> generateWeekList(List<Map<String, dynamic>> maps) {
     return List.generate(maps.length, (i) {
-      return Biometric(
+      return Week(
         id: maps[i]['id'],
-        weekId: maps[i]['weekId'],
         cycleId: maps[i]['cycleId'],
-        currentWeight: maps[i]['currentWeight'],
-        bodyFat: maps[i]['bodyFat'],
-        dateTime: maps[i]['dateTime'],
-        day: maps[i]['day'],
+        week: maps[i]['week'],
+        calorieDeficit: maps[i]['calorieDeficit'],
+        weightLoss: maps[i]['weightLoss'],
+        weightGoal: maps[i]['weightGoal'],
+        bodyFatGoal: maps[i]['bodyFatGoal'],
       );
     });
   }
 
-  // WEEK FUNCTIONS
   Future<void> insertWeek(Week week) async {
     final db = await database;
 
@@ -152,18 +254,12 @@ class AppDatabase {
     );
   }
 
-  List<Week> generateWeekList(List<Map<String, dynamic>> maps) {
-    return List.generate(maps.length, (i) {
-      return Week(
-        id: maps[i]['id'],
-        cycleId: maps[i]['cycleId'],
-        week: maps[i]['week'],
-        calorieDeficit: maps[i]['calorieDeficit'],
-        weightLoss: maps[i]['weightLoss'],
-        weightGoal: maps[i]['weightGoal'],
-        bodyFatGoal: maps[i]['bodyFatGoal'],
-      );
-    });
+  Future<void> deleteAllWeeks() async {
+    final db = await database;
+
+    await db.delete(
+      'weeks',
+    );
   }
 
   Future<List<Week>> getWeeks() async {
@@ -186,7 +282,48 @@ class AppDatabase {
     return generateWeekList(maps);
   }
 
+  Future<Week> getLatestWeek() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps =
+        await db.query('weeks', limit: 1, orderBy: 'id DESC');
+
+    Week latestWeek = generateWeekList(maps).first;
+
+    return latestWeek;
+  }
+
+  List<dynamic> getWeekMetrics(double bodyFatPercentage) {
+    if (bodyFatPercentage > 20) {
+      return [0.9, 600];
+    } else if (bodyFatPercentage > 18 && bodyFatPercentage < 20) {
+      return [0.8, 500];
+    } else if (bodyFatPercentage > 15 && bodyFatPercentage < 18) {
+      return [0.7, 400];
+    } else if (bodyFatPercentage > 12 && bodyFatPercentage < 15) {
+      return [0.6, 300];
+    } else if (bodyFatPercentage > 9 && bodyFatPercentage < 12) {
+      return [0.5, 200];
+    } else {
+      return [0.3, 100];
+    }
+  }
+
   // CYCLE FUNCTIONS
+  List<Cycle> generateCycleList(List<Map<String, dynamic>> maps) {
+    return List.generate(maps.length, (i) {
+      return Cycle(
+        id: maps[i]['id'],
+        startWeight: maps[i]['startWeight'],
+        goalWeight: maps[i]['goalWeight'],
+        startBodyFat: maps[i]['startBodyFat'],
+        goalBodyFat: maps[i]['goalBodyFat'],
+        startDateTime: maps[i]['startDateTime'],
+        endDateTime: maps[i]['endDateTime'],
+      );
+    });
+  }
+
   Future<void> insertCycle(Cycle cycle) async {
     final db = await database;
 
@@ -216,20 +353,6 @@ class AppDatabase {
       where: 'id = ?',
       whereArgs: [id],
     );
-  }
-
-  List<Cycle> generateCycleList(List<Map<String, dynamic>> maps) {
-    return List.generate(maps.length, (i) {
-      return Cycle(
-        id: maps[i]['id'],
-        startWeight: maps[i]['startWeight'],
-        goalWeight: maps[i]['goalWeight'],
-        startBodyFat: maps[i]['startBodyFat'],
-        goalBodyFat: maps[i]['goalBodyFat'],
-        startDateTime: maps[i]['startDateTime'],
-        endDateTime: maps[i]['endDateTime'],
-      );
-    });
   }
 
   Future<List<Cycle>> getCycles() async {
