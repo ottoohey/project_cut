@@ -8,6 +8,7 @@ import 'package:project_cut/model/week.dart';
 import 'package:project_cut/theme.dart';
 import 'package:project_cut/view/biometrics_history.dart';
 import 'package:project_cut/view/cycle_configuration.dart';
+import 'package:project_cut/view/insert_weight.dart';
 import 'package:project_cut/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,6 +48,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int? value;
+  double currentWeight = 0;
 
   @override
   void initState() {
@@ -57,8 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
   //Loading counter value on start
   Future<void> _loadCounter() async {
     final prefs = await SharedPreferences.getInstance();
+    Biometric biometric = await AppDatabase.db.getLatestBiometric();
     setState(() {
       value = (prefs.getInt('age'));
+      currentWeight = biometric.currentWeight;
     });
   }
 
@@ -82,9 +86,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     const SizedBox(
                       height: 75,
                     ),
-                    const NeumorphicCard(
+                    NeumorphicCard(
                       title: 'CURRENT WEIGHT',
-                      value: '79.4',
+                      value: currentWeight.toString(),
                       amount: 'kg',
                     ),
                     const SizedBox(
@@ -212,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               onPressed: () async {
                                 Biometric biometric = const Biometric(
                                   id: 1,
-                                  weekId: 1,
+                                  weekId: 0,
                                   cycleId: 1,
                                   currentWeight: 87,
                                   bodyFat: 20,
@@ -226,7 +230,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             MaterialButton(
                               child: const Text('delete'),
                               onPressed: () =>
-                                  AppDatabase.db.deleteBiometrics(2),
+                                  AppDatabase.db.deleteBiometrics(5),
                               // onPressed: () async {
                               //   final prefs =
                               //       await SharedPreferences.getInstance();
@@ -244,15 +248,20 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () async {
-              List<Cycle> cycle = await AppDatabase.db.getCurrentCycle();
-              List<Week> week = await AppDatabase.db.getWeeks();
-              List<Biometric> biometric = await AppDatabase.db.getBiometrics();
-              print(cycle);
-              print(week);
-              print(biometric);
-            },
-            tooltip: 'Increment',
+            // onPressed: () async {
+            // List<Cycle> cycle = await AppDatabase.db.getCurrentCycle();
+            // print(cycle);
+            // List<Week> week = await AppDatabase.db.getWeeks();
+            // print(week);
+            // List<Biometric> biometric = await AppDatabase.db.getBiometrics();
+            // print(biometric);
+            // },
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const InsertWeightScreen(),
+              ),
+            ),
             child: const Icon(Icons.add),
           ),
         ),

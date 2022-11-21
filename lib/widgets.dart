@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_history_controller.dart';
+import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
@@ -115,15 +116,16 @@ class WeightLineGraph extends StatefulWidget {
 }
 
 class WeightLineGraphState extends State<WeightLineGraph> {
-  List<Biometric> biometrics = [];
-  List<Week> weeks = [];
-  Cycle? cycle;
+  Future? dataFuture;
   DateTime currentDateTime = DateTime.now();
+  int sliderValue = 0;
 
-  Future<void> getGraphData(BiometricsHistoryController controller) async {
-    biometrics = await controller.getBiometrics;
-    weeks = await controller.getWeeks;
-    cycle = await controller.getCycle;
+  Future<List<dynamic>> getGraphData(int weekId) async {
+    List<Biometric> biometrics = await AppDatabase.db.getBiometrics();
+    List<Week> weeks = await AppDatabase.db.getWeeks();
+    List<Cycle> cycles = await AppDatabase.db.getCurrentCycle();
+
+    return [biometrics, weeks, cycles.first];
   }
 
   String getWeekday(int day) {
@@ -155,19 +157,37 @@ class WeightLineGraphState extends State<WeightLineGraph> {
   }
 
   @override
+  void initState() {
+    dataFuture = getGraphData(0);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<BiometricsHistoryController>(
       builder: (context, controller, child) {
+        sliderValue =
+            Provider.of<BiometricsHistoryController>(context, listen: false)
+                .getSliderValue
+                .toInt();
         return FutureBuilder(
-          future: getGraphData(controller),
+          future: dataFuture,
           builder: (context, snapshot) {
-            if (biometrics == [] || weeks == [] || cycle == null) {
+            if (snapshot.connectionState != ConnectionState.done) {
               return const CircularProgressIndicator();
             } else {
-              DateTime endDateTime = DateTime.parse(cycle!.endDateTime);
+              List<Biometric> biometrics = snapshot.data![0];
+              biometrics = biometrics
+                  .where((element) => element.weekId == sliderValue)
+                  .toList();
+              List<Week> weeks = snapshot.data![1];
+              Cycle cycle = snapshot.data![2];
+
+              DateTime endDateTime = DateTime.parse(cycle.endDateTime);
               int remaining =
                   (endDateTime.difference(currentDateTime).inDays / 7).ceil();
               int total = remaining - controller.getSliderValue.toInt();
+
               return Column(
                 children: [
                   SizedBox(
@@ -177,12 +197,21 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                           CategoryAxis(labelPlacement: LabelPlacement.onTicks),
                       series: <ChartSeries>[
                         SplineSeries<Biometric, String>(
+                            dataSource: biometrics,
+                            xValueMapper: (Biometric biometric, _) =>
+                                getWeekday(biometric.day),
+                            yValueMapper: (Biometric biometric, _) =>
+                                biometric.currentWeight,
+                            markerSettings:
+                                const MarkerSettings(isVisible: true)),
+                        SplineSeries<Biometric, String>(
                           dataSource: biometrics,
                           xValueMapper: (Biometric biometric, _) =>
                               getWeekday(biometric.day),
-                          yValueMapper: (Biometric biometric, _) =>
-                              biometric.currentWeight,
-                        )
+                          yValueMapper: (datum, index) =>
+                              weeks[sliderValue].weightGoal,
+                          dashArray: const <double>[5, 5],
+                        ),
                       ],
                     ),
                   ),
@@ -200,6 +229,8 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                         thumbColor: Theme.of(context).colorScheme.onPrimary,
                         onChanged: (double value) {
                           controller.setSliderValue(value);
+                          // print(biometrics
+                          //     .where((element) => element.weekId == value));
                         },
                       ),
                       Text(

@@ -68,9 +68,11 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
                               height: 50,
                               color: Colors.amber[index * 100],
                               child: Center(
-                                  child: Text(snapshot
-                                      .data![index].currentWeight
-                                      .toString())),
+                                child: Text(
+                                  snapshot.data![index].currentWeight
+                                      .toString(),
+                                ),
+                              ),
                             ),
                           );
                         },

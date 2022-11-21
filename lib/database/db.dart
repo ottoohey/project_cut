@@ -63,8 +63,6 @@ class AppDatabase {
   }
 
   Future<void> addWeight(double enteredWeight) async {
-    final db = await database;
-
     Biometric latestBiometricEntry = await getLatestBiometric();
 
     DateTime currentDateTime =
@@ -78,15 +76,18 @@ class AppDatabase {
     double weightDifference =
         enteredWeight - latestBiometricEntry.currentWeight;
 
+    int weekId = latestBiometricEntry.weekId;
+
     if (daysSinceLastEntry > 1) {
       double dailyWeightDifference = weightDifference / daysSinceLastEntry;
 
       for (var i = 1; i < daysSinceLastEntry; i++) {
         DateTime estimatedDateTime = lastEntryDateTime.add(Duration(days: i));
         double estimatedWeight = enteredWeight + (dailyWeightDifference * i);
+        if (estimatedDateTime.weekday == 7) () => weekId += 1;
 
         Biometric estimatedBiometric = Biometric(
-          weekId: 0,
+          weekId: weekId,
           cycleId: latestBiometricEntry.cycleId,
           currentWeight: estimatedWeight.toTwoDecimalPlaces(),
           // TODO: add measurements to shared prefs
@@ -103,8 +104,8 @@ class AppDatabase {
     }
 
     Biometric enteredBiometric = Biometric(
-      weekId: 0,
-      cycleId: 1,
+      weekId: latestBiometricEntry.day == 7 ? weekId + 1 : weekId,
+      cycleId: latestBiometricEntry.cycleId,
       currentWeight: enteredWeight,
       bodyFat: latestBiometricEntry.bodyFat,
       dateTime: DateTime.now().toLocal().toString(),
@@ -154,7 +155,8 @@ class AppDatabase {
   Future<List<Biometric>> getBiometrics() async {
     final db = await database;
 
-    final List<Map<String, dynamic>> maps = await db.query('biometrics');
+    final List<Map<String, dynamic>> maps =
+        await db.query('biometrics', orderBy: 'dateTime');
 
     List<Biometric> biometrics = generateBiometricList(maps);
 

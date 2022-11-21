@@ -26,22 +26,12 @@ class BiometricsHistoryController with ChangeNotifier {
     return cycles[0];
   }
 
-  Future<void> setSliderValue(double value) async {
+  void setSliderValue(double value) {
     sliderValue = value;
     notifyListeners();
   }
 
   double get getSliderValue {
     return sliderValue;
-  }
-
-  List<Biometric> get getGraphData {
-    biometrics = biometrics
-        .where((element) => element.weekId == sliderValue + 1)
-        .toList();
-
-    biometrics.sort((a, b) => a.day.compareTo(b.day));
-
-    return biometrics;
   }
 }
