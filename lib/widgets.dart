@@ -198,6 +198,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                       series: <ChartSeries>[
                         SplineSeries<Biometric, String>(
                             dataSource: biometrics,
+                            animationDuration: 0,
                             xValueMapper: (Biometric biometric, _) =>
                                 getWeekday(biometric.day),
                             yValueMapper: (Biometric biometric, _) =>
@@ -206,6 +207,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                                 const MarkerSettings(isVisible: true)),
                         SplineSeries<Biometric, String>(
                           dataSource: biometrics,
+                          animationDuration: 0,
                           xValueMapper: (Biometric biometric, _) =>
                               getWeekday(biometric.day),
                           yValueMapper: (datum, index) =>

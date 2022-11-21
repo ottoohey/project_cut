@@ -59,10 +59,9 @@ class _MyHomePageState extends State<MyHomePage> {
   //Loading counter value on start
   Future<void> _loadCounter() async {
     final prefs = await SharedPreferences.getInstance();
-    Biometric biometric = await AppDatabase.db.getLatestBiometric();
     setState(() {
       value = (prefs.getInt('age'));
-      currentWeight = biometric.currentWeight;
+      currentWeight = prefs.getDouble('currentWeight')!;
     });
   }
 
@@ -208,7 +207,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             MaterialButton(
                               child: const Text('add'),
                               onPressed: () async {
-                                AppDatabase.db.addWeight(86.5);
+                                // AppDatabase.db.addWeight(86.5);
+                                SharedPreferences sharedPreferences =
+                                    await SharedPreferences.getInstance();
+                                sharedPreferences.setDouble(
+                                    'currentWeight', 86.7);
                               },
                             ),
                             MaterialButton(

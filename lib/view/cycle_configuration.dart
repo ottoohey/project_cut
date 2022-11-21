@@ -72,6 +72,8 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
         startingWeight = newValue;
         await sharedPreferences!
             .setDouble('startingWeight', double.parse(newValue));
+        await sharedPreferences!
+            .setDouble('currentWeight', double.parse(newValue));
         break;
       case goalWeightTitle:
         goalWeight = newValue;

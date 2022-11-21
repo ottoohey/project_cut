@@ -113,6 +113,9 @@ class AppDatabase {
       estimated: 0,
     );
 
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setDouble('currentWeight', enteredWeight);
+
     insertBiometric(enteredBiometric);
   }
 
