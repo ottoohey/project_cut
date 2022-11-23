@@ -9,7 +9,7 @@ class BiometricsHistoryController with ChangeNotifier {
   List<Week> weeks = [];
   List<Cycle> cycles = [];
 
-  double sliderValue = 0;
+  double sliderValue = -1;
 
   Future<List<Biometric>> get getBiometrics async {
     biometrics = await AppDatabase.db.getBiometrics();

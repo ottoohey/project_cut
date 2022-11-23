@@ -19,12 +19,6 @@ class NeumorphicCard extends StatelessWidget {
   final String value;
   final String amount;
 
-  // Future<String> getCardValue(int weekId) async {
-  //   Week week = await AppDatabase.db.getWeekById(weekId);
-  //   String newValue = week.calorieDeficit.toString();
-  //   return ;
-  // }
-
   @override
   Widget build(BuildContext context) {
     Icon icon;
@@ -43,12 +37,6 @@ class NeumorphicCard extends StatelessWidget {
           color: Theme.of(context).colorScheme.onPrimary,
         );
     }
-    // return FutureBuilder(
-    //     future: getCardValue(0),
-    //     builder: (context, snapshot) {
-    //       if (snapshot.connectionState != ConnectionState.done) {
-    //         return CircularProgressIndicator();
-    //       } else {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -117,13 +105,14 @@ class NeumorphicCard extends StatelessWidget {
         ),
       ),
     );
-//           }
-//         });
   }
 }
 
 class WeightLineGraph extends StatefulWidget {
-  const WeightLineGraph({Key? key}) : super(key: key);
+  final int initialWeek;
+
+  const WeightLineGraph({Key? key, required this.initialWeek})
+      : super(key: key);
 
   @override
   State<WeightLineGraph> createState() => WeightLineGraphState();
@@ -134,7 +123,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
   DateTime currentDateTime = DateTime.now();
   int sliderValue = 0;
 
-  Future<List<dynamic>> getGraphData(int weekId) async {
+  Future<List<dynamic>> getGraphData() async {
     List<Biometric> biometrics = await AppDatabase.db.getBiometrics();
     List<Week> weeks = await AppDatabase.db.getWeeks();
     List<Cycle> cycles = await AppDatabase.db.getCurrentCycle();
@@ -172,7 +161,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
 
   @override
   void initState() {
-    dataFuture = getGraphData(0);
+    dataFuture = getGraphData();
     super.initState();
   }
 
@@ -184,6 +173,9 @@ class WeightLineGraphState extends State<WeightLineGraph> {
             Provider.of<BiometricsHistoryController>(context, listen: false)
                 .getSliderValue
                 .toInt();
+        if (sliderValue < 0) {
+          sliderValue = widget.initialWeek;
+        }
         return FutureBuilder(
           future: dataFuture,
           builder: (context, snapshot) {
@@ -234,7 +226,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                   Column(
                     children: [
                       Slider(
-                        value: controller.getSliderValue,
+                        value: sliderValue.toDouble(),
                         max: remaining.toDouble(),
                         divisions: remaining,
                         activeColor: Theme.of(context).colorScheme.onPrimary,
@@ -245,8 +237,6 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                         thumbColor: Theme.of(context).colorScheme.onPrimary,
                         onChanged: (double value) {
                           controller.setSliderValue(value);
-                          // print(biometrics
-                          //     .where((element) => element.weekId == value));
                         },
                       ),
                       Text(

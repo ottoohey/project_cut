@@ -103,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     !needSetup
                         ? ChangeNotifierProvider(
                             create: (context) => BiometricsHistoryController(),
-                            child: const WeightLineGraph(),
+                            child: WeightLineGraph(initialWeek: week.id!),
                           )
                         : Container(),
                     const SizedBox(
