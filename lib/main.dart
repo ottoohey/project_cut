@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_history_controller.dart';
 import 'package:project_cut/database/db.dart';
-import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
 import 'package:project_cut/theme.dart';
 import 'package:project_cut/view/biometrics_history.dart';
@@ -12,8 +11,6 @@ import 'package:project_cut/view/insert_weight.dart';
 import 'package:project_cut/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'model/biometric.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +46,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int? value;
   double currentWeight = 0;
+  Week week = const Week(
+      cycleId: 0,
+      week: 0,
+      calorieDeficit: 0,
+      weightLoss: 0,
+      weightGoal: 0,
+      bodyFatGoal: 0);
 
   @override
   void initState() {
@@ -59,9 +63,12 @@ class _MyHomePageState extends State<MyHomePage> {
   //Loading counter value on start
   Future<void> _loadCounter() async {
     final prefs = await SharedPreferences.getInstance();
+    int currentWeekId = prefs.getInt('currentWeekId')!;
+    Week newWeek = await AppDatabase.db.getWeekById(currentWeekId);
     setState(() {
       value = (prefs.getInt('age'));
       currentWeight = prefs.getDouble('currentWeight')!;
+      week = newWeek;
     });
   }
 
@@ -102,15 +109,19 @@ class _MyHomePageState extends State<MyHomePage> {
                     const SizedBox(
                       height: 24,
                     ),
+                    const Text('Weekly Goals'),
+                    const SizedBox(
+                      height: 24,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(
                           width: MediaQuery.of(context).size.width / 2 - 24,
                           height: 100,
-                          child: const NeumorphicCard(
+                          child: NeumorphicCard(
                             title: 'CALORIE DEFICIT',
-                            value: '300',
+                            value: week.calorieDeficit.toString(),
                             amount: 'cals/day',
                           ),
                         ),
@@ -120,9 +131,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         SizedBox(
                           width: MediaQuery.of(context).size.width / 2 - 24,
                           height: 100,
-                          child: const NeumorphicCard(
+                          child: NeumorphicCard(
                             title: 'WEIGHT LOSS',
-                            value: '0.3',
+                            value: week.weightLoss.toString(),
                             amount: 'kg/week',
                           ),
                         ),
@@ -139,9 +150,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             SizedBox(
                               width: MediaQuery.of(context).size.width / 2 - 24,
                               height: 100,
-                              child: const NeumorphicCard(
+                              child: NeumorphicCard(
                                 title: 'BODY FAT % GOAL',
-                                value: '9',
+                                value: week.bodyFatGoal.toString(),
                                 amount: '%',
                               ),
                             ),
@@ -151,9 +162,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             SizedBox(
                               width: MediaQuery.of(context).size.width / 2 - 24,
                               height: 100,
-                              child: const NeumorphicCard(
+                              child: NeumorphicCard(
                                 title: 'WEIGHT GOAL',
-                                value: '76',
+                                value: week.weightGoal.toString(),
                                 amount: 'kg',
                               ),
                             ),
@@ -215,19 +226,14 @@ class _MyHomePageState extends State<MyHomePage> {
                               },
                             ),
                             MaterialButton(
-                              child: const Text('edit'),
+                              child: const Text('data'),
                               onPressed: () async {
-                                Biometric biometric = const Biometric(
-                                  id: 1,
-                                  weekId: 0,
-                                  cycleId: 1,
-                                  currentWeight: 87,
-                                  bodyFat: 20,
-                                  dateTime: '2022-11-17 17:17:32.230953',
-                                  day: 4,
-                                  estimated: 0,
-                                );
-                                AppDatabase.db.updateBiometric(biometric);
+                                var bio = await AppDatabase.db.getWeekById(2);
+                                // var bio = await AppDatabase.db.getWeeks();
+                                // SharedPreferences sharedPreferences =
+                                //     await SharedPreferences.getInstance();
+
+                                print(bio);
                               },
                             ),
                             MaterialButton(

@@ -115,6 +115,7 @@ class AppDatabase {
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setDouble('currentWeight', enteredWeight);
+    sharedPreferences.setInt('currentWeekId', weekId);
 
     insertBiometric(enteredBiometric);
   }
@@ -291,15 +292,18 @@ class AppDatabase {
     return generateWeekList(maps);
   }
 
-  Future<Week> getLatestWeek() async {
+  Future<Week> getWeekById(int weekId) async {
     final db = await database;
 
-    final List<Map<String, dynamic>> maps =
-        await db.query('weeks', limit: 1, orderBy: 'id DESC');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'weeks',
+      where: 'id = ?',
+      whereArgs: [weekId],
+    );
 
-    Week latestWeek = generateWeekList(maps).first;
+    Week week = generateWeekList(maps)[0];
 
-    return latestWeek;
+    return week;
   }
 
   // CYCLE FUNCTIONS

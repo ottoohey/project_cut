@@ -19,6 +19,12 @@ class NeumorphicCard extends StatelessWidget {
   final String value;
   final String amount;
 
+  // Future<String> getCardValue(int weekId) async {
+  //   Week week = await AppDatabase.db.getWeekById(weekId);
+  //   String newValue = week.calorieDeficit.toString();
+  //   return ;
+  // }
+
   @override
   Widget build(BuildContext context) {
     Icon icon;
@@ -37,6 +43,12 @@ class NeumorphicCard extends StatelessWidget {
           color: Theme.of(context).colorScheme.onPrimary,
         );
     }
+    // return FutureBuilder(
+    //     future: getCardValue(0),
+    //     builder: (context, snapshot) {
+    //       if (snapshot.connectionState != ConnectionState.done) {
+    //         return CircularProgressIndicator();
+    //       } else {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -105,6 +117,8 @@ class NeumorphicCard extends StatelessWidget {
         ),
       ),
     );
+//           }
+//         });
   }
 }
 
