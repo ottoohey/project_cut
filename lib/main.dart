@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_history_controller.dart';
 import 'package:project_cut/database/db.dart';
+import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
 import 'package:project_cut/theme.dart';
 import 'package:project_cut/view/biometrics_history.dart';
@@ -63,8 +64,12 @@ class _MyHomePageState extends State<MyHomePage> {
   //Loading counter value on start
   Future<void> _loadCounter() async {
     final prefs = await SharedPreferences.getInstance();
-    int currentWeekId = prefs.getInt('currentWeekId')!;
-    Week newWeek = await AppDatabase.db.getWeekById(currentWeekId);
+    Cycle currentCycle = await AppDatabase.db.getCurrentCycle();
+    DateTime currentDateTime = DateTime.now();
+    Duration difference =
+        currentDateTime.difference(DateTime.parse(currentCycle.startDateTime));
+    int currentWeekId = (difference.inDays / 7).ceilToDouble().toInt();
+    Week newWeek = await AppDatabase.db.getWeekById(2);
     setState(() {
       value = (prefs.getInt('age'));
       currentWeight = prefs.getDouble('currentWeight')!;
@@ -219,16 +224,27 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: const Text('add'),
                               onPressed: () async {
                                 // AppDatabase.db.addWeight(86.5);
-                                SharedPreferences sharedPreferences =
-                                    await SharedPreferences.getInstance();
-                                sharedPreferences.setDouble(
-                                    'currentWeight', 86.7);
+                                //   SharedPreferences sharedPreferences =
+                                //       await SharedPreferences.getInstance();
+                                //   sharedPreferences.setDouble(
+                                //       'currentWeight', 86.7);
+                                Cycle cycle = Cycle(
+                                    id: 1,
+                                    startWeight: 87,
+                                    goalWeight: 76,
+                                    startBodyFat: 20,
+                                    goalBodyFat: 8,
+                                    startDateTime: '2022-11-17 00:00:00.000000',
+                                    endDateTime: '2023-03-05 00:00:00.000000');
+                                AppDatabase.db.updateCycle(cycle);
                               },
                             ),
                             MaterialButton(
                               child: const Text('data'),
                               onPressed: () async {
-                                var bio = await AppDatabase.db.getWeekById(2);
+                                // var bio = await AppDatabase.db.getWeekById(2);
+                                var bio =
+                                    await AppDatabase.db.getCurrentCycle();
                                 // var bio = await AppDatabase.db.getWeeks();
                                 // SharedPreferences sharedPreferences =
                                 //     await SharedPreferences.getInstance();
@@ -239,7 +255,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             MaterialButton(
                               child: const Text('delete'),
                               onPressed: () =>
-                                  AppDatabase.db.deleteBiometrics(5),
+                                  AppDatabase.db.deleteBiometrics(8),
                               // onPressed: () async {
                               //   final prefs =
                               //       await SharedPreferences.getInstance();

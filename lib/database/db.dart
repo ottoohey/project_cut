@@ -83,7 +83,9 @@ class AppDatabase {
 
       for (var i = 1; i < daysSinceLastEntry; i++) {
         DateTime estimatedDateTime = lastEntryDateTime.add(Duration(days: i));
-        double estimatedWeight = enteredWeight + (dailyWeightDifference * i);
+        double estimatedWeight =
+            latestBiometricEntry.currentWeight + (dailyWeightDifference * i);
+
         if (estimatedDateTime.weekday == 7) () => weekId += 1;
 
         Biometric estimatedBiometric = Biometric(
@@ -102,7 +104,6 @@ class AppDatabase {
         insertBiometric(estimatedBiometric);
       }
     }
-
     Biometric enteredBiometric = Biometric(
       weekId: latestBiometricEntry.day == 7 ? weekId + 1 : weekId,
       cycleId: latestBiometricEntry.cycleId,
@@ -114,8 +115,8 @@ class AppDatabase {
     );
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
     sharedPreferences.setDouble('currentWeight', enteredWeight);
-    sharedPreferences.setInt('currentWeekId', weekId);
 
     insertBiometric(enteredBiometric);
   }
@@ -360,7 +361,7 @@ class AppDatabase {
     return generateCycleList(maps);
   }
 
-  Future<List<Cycle>> getCurrentCycle() async {
+  Future<Cycle> getCurrentCycle() async {
     final db = await database;
 
     final List<Map<String, dynamic>> maps = await db.query(
@@ -369,7 +370,7 @@ class AppDatabase {
       orderBy: 'id DESC',
     );
 
-    return generateCycleList(maps);
+    return generateCycleList(maps).first;
   }
 
   Future<void> deleteAll() async {

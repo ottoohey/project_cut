@@ -126,9 +126,9 @@ class WeightLineGraphState extends State<WeightLineGraph> {
   Future<List<dynamic>> getGraphData() async {
     List<Biometric> biometrics = await AppDatabase.db.getBiometrics();
     List<Week> weeks = await AppDatabase.db.getWeeks();
-    List<Cycle> cycles = await AppDatabase.db.getCurrentCycle();
+    Cycle cycle = await AppDatabase.db.getCurrentCycle();
 
-    return [biometrics, weeks, cycles.first];
+    return [biometrics, weeks, cycle];
   }
 
   String getWeekday(int day) {
@@ -174,7 +174,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                 .getSliderValue
                 .toInt();
         if (sliderValue < 0) {
-          sliderValue = widget.initialWeek;
+          sliderValue = widget.initialWeek - 1;
         }
         return FutureBuilder(
           future: dataFuture,

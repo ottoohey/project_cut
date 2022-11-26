@@ -7,7 +7,13 @@ import 'package:project_cut/model/week.dart';
 class BiometricsHistoryController with ChangeNotifier {
   List<Biometric> biometrics = [];
   List<Week> weeks = [];
-  List<Cycle> cycles = [];
+  Cycle cycle = const Cycle(
+      startWeight: 0,
+      goalWeight: 0,
+      startBodyFat: 0,
+      goalBodyFat: 0,
+      startDateTime: '0',
+      endDateTime: '0');
 
   double sliderValue = -1;
 
@@ -22,8 +28,8 @@ class BiometricsHistoryController with ChangeNotifier {
   }
 
   Future<Cycle> get getCycle async {
-    cycles = await AppDatabase.db.getCurrentCycle();
-    return cycles[0];
+    cycle = await AppDatabase.db.getCurrentCycle();
+    return cycle;
   }
 
   void setSliderValue(double value) {
