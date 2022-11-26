@@ -51,36 +51,36 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
                   AppDatabase.db.deleteAll();
                 },
               ),
-              SizedBox(
-                height: 300,
-                child: FutureBuilder(
-                  future: controller.getBiometrics,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState != ConnectionState.done) {
-                      return const CircularProgressIndicator();
-                    } else {
-                      return ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () => modifyBiometric(snapshot.data![index]),
-                            child: Container(
-                              height: 50,
-                              color: Colors.amber[index * 100],
-                              child: Center(
-                                child: Text(
-                                  snapshot.data![index].currentWeight
-                                      .toString(),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    }
-                  },
-                ),
-              ),
+              // SizedBox(
+              //   height: 300,
+              //   child: FutureBuilder(
+              //     future: controller.getBiometrics,
+              //     builder: (context, snapshot) {
+              //       if (snapshot.connectionState != ConnectionState.done) {
+              //         return const CircularProgressIndicator();
+              //       } else {
+              //         return ListView.builder(
+              //           itemCount: snapshot.data!.length,
+              //           itemBuilder: (context, index) {
+              //             return GestureDetector(
+              //               onTap: () => modifyBiometric(snapshot.data![index]),
+              //               child: Container(
+              //                 height: 50,
+              //                 color: Colors.amber[index * 100],
+              //                 child: Center(
+              //                   child: Text(
+              //                     snapshot.data![index].currentWeight
+              //                         .toString(),
+              //                   ),
+              //                 ),
+              //               ),
+              //             );
+              //           },
+              //         );
+              //       }
+              //     },
+              //   ),
+              // ),
             ],
           ),
         );

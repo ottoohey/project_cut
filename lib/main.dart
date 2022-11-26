@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:project_cut/controller/biometrics_history_controller.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
+import 'package:project_cut/test.dart';
 import 'package:project_cut/theme.dart';
 import 'package:project_cut/view/biometrics_history.dart';
 import 'package:project_cut/view/cycle_configuration.dart';
@@ -29,7 +31,9 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        home: ChangeNotifierProvider<BiometricsHistoryController>(
+            create: (context) => BiometricsHistoryController(),
+            child: const MyHomePage(title: 'Flutter Demo Home Page')),
       ),
     );
   }
@@ -54,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
       weightLoss: 0,
       weightGoal: 0,
       bodyFatGoal: 0);
+  bool expanded = false;
 
   @override
   void initState() {
@@ -69,7 +74,8 @@ class _MyHomePageState extends State<MyHomePage> {
     Duration difference =
         currentDateTime.difference(DateTime.parse(currentCycle.startDateTime));
     int currentWeekId = (difference.inDays / 7).ceilToDouble().toInt();
-    Week newWeek = await AppDatabase.db.getWeekById(2);
+    Week newWeek = await AppDatabase.db.getWeekById(currentWeekId);
+
     setState(() {
       value = (prefs.getInt('age'));
       currentWeight = prefs.getDouble('currentWeight')!;
@@ -87,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Stack(
       children: [
         Scaffold(
+          resizeToAvoidBottomInset: false,
           body: SingleChildScrollView(
             child: Center(
               child: Padding(
@@ -106,10 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       height: 16,
                     ),
                     !needSetup
-                        ? ChangeNotifierProvider(
-                            create: (context) => BiometricsHistoryController(),
-                            child: WeightLineGraph(initialWeek: week.id!),
-                          )
+                        ? WeightLineGraph(initialWeek: week.id!)
                         : Container(),
                     const SizedBox(
                       height: 24,
@@ -186,14 +190,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               height: 100,
                               child: GestureDetector(
                                 onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            ChangeNotifierProvider(
-                                              create: (context) =>
-                                                  BiometricsHistoryController(),
-                                              child: const BiometricsHistory(),
-                                            ))),
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const TesterWidget(),
+                                  ),
+                                ),
                                 child: const NeumorphicCard(
                                   title: 'SETTINGS',
                                   value: 'settings_icon',
@@ -228,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 //       await SharedPreferences.getInstance();
                                 //   sharedPreferences.setDouble(
                                 //       'currentWeight', 86.7);
-                                Cycle cycle = Cycle(
+                                Cycle cycle = const Cycle(
                                     id: 1,
                                     startWeight: 87,
                                     goalWeight: 76,
@@ -242,9 +243,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             MaterialButton(
                               child: const Text('data'),
                               onPressed: () async {
+                                var bio = await AppDatabase.db
+                                    .getBiometricsForWeek(1);
                                 // var bio = await AppDatabase.db.getWeekById(2);
-                                var bio =
-                                    await AppDatabase.db.getCurrentCycle();
+                                // var bio =
+                                //     await AppDatabase.db.getCurrentCycle();
                                 // var bio = await AppDatabase.db.getWeeks();
                                 // SharedPreferences sharedPreferences =
                                 //     await SharedPreferences.getInstance();
@@ -255,7 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             MaterialButton(
                               child: const Text('delete'),
                               onPressed: () =>
-                                  AppDatabase.db.deleteBiometrics(8),
+                                  AppDatabase.db.deleteBiometrics(11),
                               // onPressed: () async {
                               //   final prefs =
                               //       await SharedPreferences.getInstance();
@@ -273,20 +276,21 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           floatingActionButton: FloatingActionButton(
-            // onPressed: () async {
-            // List<Cycle> cycle = await AppDatabase.db.getCurrentCycle();
-            // print(cycle);
-            // List<Week> week = await AppDatabase.db.getWeeks();
-            // print(week);
-            // List<Biometric> biometric = await AppDatabase.db.getBiometrics();
-            // print(biometric);
-            // },
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const InsertWeightScreen(),
-              ),
-            ),
+            // onPressed: () => Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => const InsertWeightScreen(),
+            //   ),
+            // ),
+            onPressed: () {
+              if (expanded) {
+                expanded = false;
+              } else {
+                expanded = true;
+              }
+
+              setState(() {});
+            },
             child: const Icon(Icons.add),
           ),
         ),
@@ -345,6 +349,81 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               )
             : const SizedBox(),
+        GestureDetector(
+          onTap: () {
+            expanded = false;
+            print('touched');
+            setState(() {});
+          },
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: AnimatedContainer(
+              curve: Curves.easeOutCirc,
+              duration: const Duration(milliseconds: 300),
+              height:
+                  expanded ? MediaQuery.of(context).size.height - 340 - 32 : 0,
+              width: MediaQuery.of(context).size.width - 32,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onSecondary,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: expanded
+                  ? Card(
+                      color: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Todays Weight :)',
+                              style: TextStyle(
+                                  fontSize: 42,
+                                  color:
+                                      Theme.of(context).colorScheme.secondary),
+                            ),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            const TextField(
+                              autofocus: true,
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
+                              style: TextStyle(fontSize: 36),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            Consumer<BiometricsHistoryController>(
+                              builder: (context, controller, child) {
+                                return MaterialButton(
+                                  child: Text(
+                                    'Save',
+                                    style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary),
+                                  ),
+                                  onPressed: () async {
+                                    expanded = false;
+                                    await controller.addWeight(86);
+                                    setState(() {});
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Container(),
+            ),
+          ),
+        ),
       ],
     );
   }

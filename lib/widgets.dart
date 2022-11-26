@@ -120,16 +120,9 @@ class WeightLineGraph extends StatefulWidget {
 
 class WeightLineGraphState extends State<WeightLineGraph> {
   Future? dataFuture;
+  Future? testFuture;
   DateTime currentDateTime = DateTime.now();
   int sliderValue = 0;
-
-  Future<List<dynamic>> getGraphData() async {
-    List<Biometric> biometrics = await AppDatabase.db.getBiometrics();
-    List<Week> weeks = await AppDatabase.db.getWeeks();
-    Cycle cycle = await AppDatabase.db.getCurrentCycle();
-
-    return [biometrics, weeks, cycle];
-  }
 
   String getWeekday(int day) {
     String weekday;
@@ -161,8 +154,10 @@ class WeightLineGraphState extends State<WeightLineGraph> {
 
   @override
   void initState() {
-    dataFuture = getGraphData();
     super.initState();
+    dataFuture =
+        Provider.of<BiometricsHistoryController>(context, listen: false)
+            .updateGraphData();
   }
 
   @override
@@ -179,15 +174,13 @@ class WeightLineGraphState extends State<WeightLineGraph> {
         return FutureBuilder(
           future: dataFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const CircularProgressIndicator();
-            } else {
-              List<Biometric> biometrics = snapshot.data![0];
+            if (snapshot.connectionState == ConnectionState.done) {
+              List<Biometric> biometrics = controller.getBiometrics;
+              List<Week> weeks = controller.getWeeks;
+              Cycle cycle = controller.getCycle;
               biometrics = biometrics
                   .where((element) => element.weekId == sliderValue)
                   .toList();
-              List<Week> weeks = snapshot.data![1];
-              Cycle cycle = snapshot.data![2];
 
               DateTime endDateTime = DateTime.parse(cycle.endDateTime);
               int remaining =
@@ -196,6 +189,14 @@ class WeightLineGraphState extends State<WeightLineGraph> {
 
               return Column(
                 children: [
+                  MaterialButton(
+                    onPressed: () => controller.addWeight(86),
+                    child: Text('db test'),
+                  ),
+                  Text(
+                    '${biometrics.last.currentWeight}',
+                    style: TextStyle(fontSize: 30, color: Colors.black),
+                  ),
                   SizedBox(
                     height: 200,
                     child: SfCartesianChart(
@@ -256,6 +257,8 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                   ),
                 ],
               );
+            } else {
+              return const CircularProgressIndicator();
             }
           },
         );
