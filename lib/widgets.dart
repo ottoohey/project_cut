@@ -209,6 +209,10 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                                 getWeekday(biometric.day),
                             yValueMapper: (Biometric biometric, _) =>
                                 biometric.currentWeight,
+                            pointColorMapper: (Biometric biometric, index) =>
+                                biometric.estimated == 1
+                                    ? Colors.lightBlue[200]
+                                    : Colors.blue,
                             markerSettings:
                                 const MarkerSettings(isVisible: true)),
                         SplineSeries<Biometric, String>(
