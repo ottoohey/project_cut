@@ -103,9 +103,11 @@ class CycleConfigurationController with ChangeNotifier {
   Future<void> startCut(Cycle cycle) async {
     // insert cycle
     await AppDatabase.db.insertCycle(cycle);
+    print(cycle);
 
     // get newly inserted cycle to retrieve ID
     List<Cycle> newCycle = await AppDatabase.db.getCycles();
+    // int cycleId = 0;
     int cycleId = newCycle[0].id!;
     double currentBF = cycle.startBodyFat;
     double currentWeight = cycle.startWeight;
@@ -119,12 +121,13 @@ class CycleConfigurationController with ChangeNotifier {
       double equationWeight = currentWeight / startingWeight;
       currentBF = (equationWeight - 1 + (startingBodyFat / 100)) * 100;
       double calorieDeficit = 1100 * weightLossForWeek;
+      int weekday = DateTime.now().weekday;
 
-      if (weekNum == 0) {
-        int weekday = DateTime.now().weekday;
-        weightLossForWeek = (weightLossForWeek / 7) * weekday;
-        currentBF = (currentBF / 7) * weekday;
-        calorieDeficit = (calorieDeficit / 7) * weekday;
+      if (weekNum == 0 && weekday != 7) {
+        weightLossForWeek = (weightLossForWeek / 7) * (7 - weekday);
+        currentBF = cycle.startBodyFat -
+            (cycle.startBodyFat - currentBF) / 7 * (7 - weekday);
+        calorieDeficit = (calorieDeficit / 7) * (7 - weekday);
         currentWeight =
             (cycle.startWeight - weightLossForWeek).toTwoDecimalPlaces();
       }
@@ -133,7 +136,7 @@ class CycleConfigurationController with ChangeNotifier {
         cycleId: cycleId,
         week: weekNum,
         calorieDeficit: calorieDeficit.toInt(),
-        weightLoss: weightLossForWeek,
+        weightLoss: weightLossForWeek.toTwoDecimalPlaces(),
         weightGoal: currentWeight,
         bodyFatGoal: currentBF.toTwoDecimalPlaces(),
       );
@@ -146,6 +149,7 @@ class CycleConfigurationController with ChangeNotifier {
     }
 
     List<Week> newWeek = await AppDatabase.db.getWeekListFromCycleId(cycleId);
+    // int weekId = 0;
     int weekId = newWeek.first.id!;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final DateTime dateTime = DateTime.now();
@@ -159,6 +163,8 @@ class CycleConfigurationController with ChangeNotifier {
       day: dateTime.weekday,
       estimated: 0,
     );
+
+    print(biometric);
 
     await AppDatabase.db.insertBiometric(biometric);
 

@@ -256,8 +256,8 @@ class _TesterWidgetState extends State<TesterWidget> {
                   .toString(),
             );
             Provider.of<CycleConfigurationController>(context, listen: false)
-                .startCut(cycle);
-            Navigator.of(context).pop();
+                .startCut(cycle)
+                .whenComplete(() => Navigator.of(context).pop());
           },
         );
       default:

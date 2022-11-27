@@ -259,12 +259,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                   MaterialButton(
                                     child: const Text('data'),
                                     onPressed: () async {
-                                      var bio = await AppDatabase.db
-                                          .getBiometricsForWeek(1);
+                                      // var bio = await AppDatabase.db
+                                      //     .getBiometricsForWeek(1);
                                       // var bio = await AppDatabase.db.getWeekById(2);
                                       // var bio =
                                       //     await AppDatabase.db.getCurrentCycle();
-                                      // var bio = await AppDatabase.db.getWeeks();
+                                      var bio = await AppDatabase.db.getWeeks();
                                       // SharedPreferences sharedPreferences =
                                       //     await SharedPreferences.getInstance();
 
@@ -353,8 +353,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 MaterialButton(
                                   child: const Text('Get Started'),
                                   onPressed: () async {
-                                    Navigator.of(context)
-                                        .push(
+                                    await Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (context) =>
                                             ChangeNotifierProvider(
@@ -363,10 +362,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                           child: const TesterWidget(),
                                         ),
                                       ),
-                                    )
-                                        .then((value) {
-                                      needSetup = false;
-                                      setState(() {});
+                                    );
+                                    needSetup = false;
+                                    setState(() {
+                                      print('setting state');
                                     });
                                   },
                                 ),
