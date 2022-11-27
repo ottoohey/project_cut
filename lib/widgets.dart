@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_history_controller.dart';
-import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
@@ -189,14 +188,6 @@ class WeightLineGraphState extends State<WeightLineGraph> {
 
               return Column(
                 children: [
-                  MaterialButton(
-                    onPressed: () => controller.addWeight(86),
-                    child: Text('db test'),
-                  ),
-                  Text(
-                    '${biometrics.last.currentWeight}',
-                    style: TextStyle(fontSize: 30, color: Colors.black),
-                  ),
                   SizedBox(
                     height: 200,
                     child: SfCartesianChart(
@@ -252,7 +243,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                     ],
                   ),
                   MaterialButton(
-                    child: Text('test'),
+                    child: const Text('test'),
                     onPressed: () => print(biometrics),
                   ),
                 ],

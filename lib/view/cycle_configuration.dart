@@ -97,7 +97,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
   }
 
   Widget textInputWidget(BuildContext context, String hint, String unit,
-      CycleConfigurationController? config) {
+      [CycleConfigurationController? config]) {
     Color onPrimary = Theme.of(context).colorScheme.onPrimary;
     String? value;
     bool canEdit = true;
@@ -269,7 +269,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        textInputWidget(context, heightTitle, 'cm', null),
+                        textInputWidget(context, heightTitle, 'cm'),
                         const SizedBox(
                           width: 32,
                         ),

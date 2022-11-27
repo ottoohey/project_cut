@@ -3,6 +3,7 @@ import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BiometricsHistoryController with ChangeNotifier {
   List<Biometric> biometrics = [];
@@ -16,8 +17,7 @@ class BiometricsHistoryController with ChangeNotifier {
       endDateTime: '0');
 
   double sliderValue = -1;
-
-  var testValue = 0;
+  double currentWeight = 0;
 
   List<Biometric> get getBiometrics {
     return biometrics;
@@ -29,6 +29,15 @@ class BiometricsHistoryController with ChangeNotifier {
 
   Cycle get getCycle {
     return cycle;
+  }
+
+  double get getCurrentWeight {
+    return currentWeight;
+  }
+
+  void setCurrentWeight() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    currentWeight = sharedPreferences.getDouble('currentWeight')!;
   }
 
   void setSliderValue(double value) {
@@ -43,6 +52,10 @@ class BiometricsHistoryController with ChangeNotifier {
   Future<void> addWeight(double weight) async {
     await AppDatabase.db.addWeight(weight);
     biometrics = await AppDatabase.db.getBiometrics();
+    currentWeight = weight;
+    final SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance();
+    sharedPreferences.setDouble('currentWeight', weight);
     notifyListeners();
   }
 
@@ -52,36 +65,5 @@ class BiometricsHistoryController with ChangeNotifier {
     cycle = await AppDatabase.db.getCurrentCycle();
 
     notifyListeners();
-  }
-
-  Future<void> addTestBiometric() async {
-    var bio = Biometric(
-        id: 11,
-        weekId: 1,
-        cycleId: 1,
-        currentWeight: 85,
-        bodyFat: 1,
-        dateTime: '2022-11-27 00:00:00.000',
-        day: 7,
-        estimated: 0);
-
-    await AppDatabase.db.updateBiometric(bio);
-
-    biometrics = await AppDatabase.db.getBiometricsForWeek(1);
-
-    notifyListeners();
-  }
-
-  Future<void> updateTestValue() async {
-    var pickUpLocation =
-        await Future.delayed(Duration(seconds: 2)); // Request mock
-
-    testValue += 1;
-
-    notifyListeners();
-  }
-
-  get getTestValue {
-    return testValue;
   }
 }

@@ -9,6 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CycleConfigurationController with ChangeNotifier {
   String sex = 'MALE';
   double timeFrame = 0.0;
+  double startingWeight = 0;
+  double startingBodyFat = 0;
+  double goalBodyFat = 0;
+  int totalWeeks = 0;
 
   String get getSex {
     return sex;
@@ -28,9 +32,56 @@ class CycleConfigurationController with ChangeNotifier {
     notifyListeners();
   }
 
-  // double toTwoDecimalPlaces(double value) {
-  //   return double.parse(value.toStringAsFixed(2));
-  // }
+  void setStartingWeight(double weight) {
+    startingWeight = weight;
+  }
+
+  void setStartingBodyFat(double bodyFat) {
+    startingBodyFat = bodyFat;
+  }
+
+  void setGoalBodyFat(double bodyFat) {
+    goalBodyFat = bodyFat;
+  }
+
+  double getWeightLossForWeek(double currentBF) {
+    if (currentBF > 19) {
+      return 1.4;
+    } else if (currentBF > 18 && currentBF <= 19) {
+      return 1.2;
+    } else if (currentBF > 15 && currentBF <= 18) {
+      return 1;
+    } else if (currentBF > 12 && currentBF <= 15) {
+      return 0.8;
+    } else if (currentBF > 9 && currentBF <= 12) {
+      return 0.5;
+    } else {
+      return 0.3;
+    }
+  }
+
+  void newStartCut() {
+    // insert cycle
+    // await AppDatabase.db.insertCycle(cycle);
+
+    timeFrame = 0;
+
+    double currentBF = startingBodyFat;
+    double currentWeight = startingWeight;
+
+    while (currentBF > goalBodyFat) {
+      double weightLossForWeek = getWeightLossForWeek(currentBF);
+      currentWeight = (currentWeight - weightLossForWeek).toTwoDecimalPlaces();
+
+      double equationWeight = currentWeight / startingWeight;
+      currentBF = (equationWeight - 1 + (startingBodyFat / 100)) * 100;
+
+      timeFrame += 1;
+    }
+
+    print(timeFrame);
+    notifyListeners();
+  }
 
   Future<void> startCut(Cycle cycle) async {
     // insert cycle
