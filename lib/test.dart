@@ -168,85 +168,126 @@ class _TesterWidgetState extends State<TesterWidget> {
   }
 
   Widget gaugeWidget(CycleConfigurationController config) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width / 2 - 32,
-      height: 200,
-      child: SfRadialGauge(
-        axes: [
-          RadialAxis(
-            minimum: 8,
-            maximum: 16,
-            startAngle: 180,
-            endAngle: 360,
-            showLastLabel: true,
-            axisLabelStyle: GaugeTextStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-            majorTickStyle: MajorTickStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-            minorTickStyle: MinorTickStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-            ranges: <GaugeRange>[
-              GaugeRange(
-                startValue: 8,
-                endValue: 10,
-                color: Theme.of(context).colorScheme.onPrimary.withBlue(125),
-              ),
-              GaugeRange(
-                startValue: 10,
-                endValue: 14,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-              GaugeRange(
-                startValue: 14,
-                endValue: 18,
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
+    return Stack(
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: 260,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const Text('Recommended Cut Time'),
+              Text(
+                '${config.timeFrame} Weeks',
+                style: const TextStyle(fontSize: 32),
               ),
             ],
-            pointers: <GaugePointer>[
-              NeedlePointer(
-                enableDragging: true,
-                value: config.getTimeFrame,
-                onValueChanged: (double newValue) async {
-                  config.setTimeFrame(newValue);
-                  await sharedPreferences!
-                      .setInt('timeFrame', newValue.roundToDouble().toInt());
-                  timeFrame = newValue.toInt();
-                },
-                needleLength: 0.5,
-                needleColor: Theme.of(context).colorScheme.onPrimary,
-                knobStyle: KnobStyle(
+          ),
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: 300,
+          child: SfRadialGauge(
+            axes: [
+              RadialAxis(
+                minimum: 8,
+                maximum: 16,
+                startAngle: 180,
+                endAngle: 360,
+                showLastLabel: true,
+                axisLabelStyle: GaugeTextStyle(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
+                majorTickStyle: MajorTickStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                minorTickStyle: MinorTickStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                ranges: <GaugeRange>[
+                  GaugeRange(
+                    startValue: 8,
+                    endValue: 10,
+                    color:
+                        Theme.of(context).colorScheme.onPrimary.withBlue(125),
+                  ),
+                  GaugeRange(
+                    startValue: 10,
+                    endValue: 14,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  GaugeRange(
+                    startValue: 14,
+                    endValue: 18,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.5),
+                  ),
+                ],
+                pointers: <GaugePointer>[
+                  NeedlePointer(
+                    enableDragging: true,
+                    value: config.getTimeFrame,
+                    onValueChanged: (double newValue) async {
+                      config.setTimeFrame(newValue);
+                      await sharedPreferences!.setInt(
+                          'timeFrame', newValue.roundToDouble().toInt());
+                      timeFrame = newValue.toInt();
+                    },
+                    needleLength: 0.5,
+                    needleColor: Theme.of(context).colorScheme.onPrimary,
+                    knobStyle: KnobStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  )
+                ],
               )
             ],
-          )
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget scrollToNextPageButton(int pageNumber,
-      [CycleConfigurationController? config]) {
-    return MaterialButton(
-        child: const Text('Next'),
-        onPressed: () {
-          pageNumber == 2 ? config!.newStartCut() : null;
-          pageController.animateToPage(pageNumber,
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOutCubic);
-        });
+  Widget scrollToNextPageButton(int pageNumber) {
+    switch (pageNumber) {
+      case 3:
+        return MaterialButton(
+          child: const Text('Next'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        );
+      default:
+        return MaterialButton(
+          child: const Text('Next'),
+          onPressed: () {
+            pageController.animateToPage(pageNumber,
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutCubic);
+          },
+        );
+    }
   }
 
   Widget scrollToPreviousPageButton(int pageNumber) {
-    return MaterialButton(
-      child: const Text('Back'),
-      onPressed: () => pageController.animateToPage(pageNumber,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeOutCubic),
-    );
+    switch (pageNumber) {
+      case 999:
+        return MaterialButton(
+          child: const Text('Back'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        );
+      default:
+        return MaterialButton(
+          child: const Text('Back'),
+          onPressed: () => pageController.animateToPage(pageNumber,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutCubic),
+        );
+    }
   }
 
   Widget pageOne(CycleConfigurationController config) {
@@ -300,7 +341,7 @@ class _TesterWidgetState extends State<TesterWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              scrollToPreviousPageButton(0),
+              scrollToPreviousPageButton(999),
               scrollToNextPageButton(1),
             ],
           ),
@@ -340,7 +381,7 @@ class _TesterWidgetState extends State<TesterWidget> {
                 height: 64,
               ),
               MaterialButton(
-                  child: Text('Calculate BF%'),
+                  child: const Text('Calculate BF%'),
                   onPressed: () => print('Calculate BF%'))
             ],
           ),
@@ -348,7 +389,7 @@ class _TesterWidgetState extends State<TesterWidget> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               scrollToPreviousPageButton(0),
-              scrollToNextPageButton(2, config),
+              scrollToNextPageButton(2),
             ],
           ),
         ],
@@ -370,20 +411,36 @@ class _TesterWidgetState extends State<TesterWidget> {
                     height: 100,
                   ),
                   gaugeWidget(config),
-                  const SizedBox(
-                    width: 16,
-                  ),
-                  textInputWidget(context, timeFrameTitle, 'weeks', config),
-                  MaterialButton(
-                      child: Text('start cut'),
-                      onPressed: () => config.newStartCut())
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () => config.removeWeekFromTimeFrame(),
+                        child: const Card(
+                          child: Icon(
+                            Icons.remove,
+                            size: 40,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => config.addWeekToTimeFrame(),
+                        child: const Card(
+                          child: Icon(
+                            Icons.add,
+                            size: 40,
+                          ),
+                        ),
+                      )
+                    ],
+                  )
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   scrollToPreviousPageButton(1),
-                  scrollToNextPageButton(2),
+                  scrollToNextPageButton(3),
                 ],
               )
             ]));
@@ -403,6 +460,7 @@ class _TesterWidgetState extends State<TesterWidget> {
               pageTwo(config),
               pageThree(config),
             ],
+            onPageChanged: (value) => value == 2 ? config.newStartCut() : null,
           ),
         );
       },

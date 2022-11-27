@@ -32,6 +32,16 @@ class CycleConfigurationController with ChangeNotifier {
     notifyListeners();
   }
 
+  void addWeekToTimeFrame() {
+    timeFrame += 1;
+    notifyListeners();
+  }
+
+  void removeWeekFromTimeFrame() {
+    timeFrame -= 1;
+    notifyListeners();
+  }
+
   void setStartingWeight(double weight) {
     startingWeight = weight;
   }
@@ -79,7 +89,12 @@ class CycleConfigurationController with ChangeNotifier {
       timeFrame += 1;
     }
 
-    print(timeFrame);
+    if (timeFrame > 16) {
+      timeFrame = 16;
+    } else if (timeFrame < 8) {
+      timeFrame = 8;
+    }
+
     notifyListeners();
   }
 
