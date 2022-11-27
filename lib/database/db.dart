@@ -302,9 +302,15 @@ class AppDatabase {
       whereArgs: [weekId],
     );
 
-    Week week = generateWeekList(maps)[0];
-
-    return week;
+    return maps.isNotEmpty
+        ? generateWeekList(maps).first
+        : Week(
+            cycleId: 0,
+            week: 0,
+            calorieDeficit: 0,
+            weightLoss: 0,
+            weightGoal: 0,
+            bodyFatGoal: 0);
   }
 
   // CYCLE FUNCTIONS
@@ -370,7 +376,16 @@ class AppDatabase {
       orderBy: 'id DESC',
     );
 
-    return generateCycleList(maps).first;
+    return maps.isNotEmpty
+        ? generateCycleList(maps).first
+        : Cycle(
+            startWeight: 0,
+            goalWeight: 0,
+            startBodyFat: 0,
+            goalBodyFat: 0,
+            startDateTime: '2022-11-01 12:00:00.000000',
+            endDateTime: '2022-11-10 12:00:00.000000',
+          );
   }
 
   Future<void> deleteAll() async {

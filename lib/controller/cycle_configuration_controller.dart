@@ -70,9 +70,11 @@ class CycleConfigurationController with ChangeNotifier {
     }
   }
 
-  void newStartCut() {
-    // insert cycle
-    // await AppDatabase.db.insertCycle(cycle);
+  Future<void> estimateTimeFrame() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    startingWeight = sharedPreferences.getDouble('startingWeight')!;
+    startingBodyFat = sharedPreferences.getDouble('startingBodyFat')!;
+    goalBodyFat = sharedPreferences.getDouble('goalBodyFat')!;
 
     timeFrame = 0;
 
@@ -105,48 +107,42 @@ class CycleConfigurationController with ChangeNotifier {
     // get newly inserted cycle to retrieve ID
     List<Cycle> newCycle = await AppDatabase.db.getCycles();
     int cycleId = newCycle[0].id!;
-    DateTime startDateTime = DateTime.parse(cycle.startDateTime);
-    DateTime endDateTime = DateTime.parse(cycle.endDateTime);
+    double currentBF = cycle.startBodyFat;
+    double currentWeight = cycle.startWeight;
 
-    int totalDays = endDateTime.difference(startDateTime).inDays;
+    int weekNum = 0;
 
-    double bodyFatLossTotal = cycle.startBodyFat - cycle.goalBodyFat;
-    double bodyFatLossDaily = bodyFatLossTotal / totalDays;
+    while (currentBF > goalBodyFat) {
+      double weightLossForWeek = getWeightLossForWeek(currentBF);
+      currentWeight = (currentWeight - weightLossForWeek).toTwoDecimalPlaces();
 
-    double bodyFatGoal = 0;
-    double previousWeight = cycle.startWeight;
-    double leanWeight =
-        previousWeight - (previousWeight * (cycle.startBodyFat / 100));
+      double equationWeight = currentWeight / startingWeight;
+      currentBF = (equationWeight - 1 + (startingBodyFat / 100)) * 100;
+      double calorieDeficit = 1100 * weightLossForWeek;
 
-    // for each week, calculate:
-    // bodyFatGoal --> % of bodyfat to lose that week
-    // weightGoal --> weight goal for that week
-    // weightLoss --> how much weight to aim to lose that week
-    // calorieDeficit --> how many calories to be in deficit per day
-    for (var weekNum = 0; weekNum < totalDays / 7; weekNum++) {
       if (weekNum == 0) {
-        bodyFatGoal += bodyFatLossDaily * (totalDays % 7);
-      } else {
-        bodyFatGoal += bodyFatLossDaily * 7;
+        int weekday = DateTime.now().weekday;
+        weightLossForWeek = (weightLossForWeek / 7) * weekday;
+        currentBF = (currentBF / 7) * weekday;
+        calorieDeficit = (calorieDeficit / 7) * weekday;
+        currentWeight =
+            (cycle.startWeight - weightLossForWeek).toTwoDecimalPlaces();
       }
-      double weightGoal =
-          leanWeight / (1 - ((cycle.startBodyFat / 100) - (bodyFatGoal / 100)));
-      double weightLoss = previousWeight - weightGoal;
-
-      int calorieDeficit = (weightLoss * 1000).toInt();
 
       Week week = Week(
         cycleId: cycleId,
         week: weekNum,
-        calorieDeficit: calorieDeficit,
-        weightLoss: weightLoss.toTwoDecimalPlaces(),
-        weightGoal: weightGoal.toTwoDecimalPlaces(),
-        bodyFatGoal: (cycle.startBodyFat - bodyFatGoal).toTwoDecimalPlaces(),
+        calorieDeficit: calorieDeficit.toInt(),
+        weightLoss: weightLossForWeek,
+        weightGoal: currentWeight,
+        bodyFatGoal: currentBF.toTwoDecimalPlaces(),
       );
 
-      previousWeight = weightGoal;
+      print(week);
 
       await AppDatabase.db.insertWeek(week);
+
+      weekNum += 1;
     }
 
     List<Week> newWeek = await AppDatabase.db.getWeekListFromCycleId(cycleId);
@@ -157,8 +153,8 @@ class CycleConfigurationController with ChangeNotifier {
     Biometric biometric = Biometric(
       weekId: weekId,
       cycleId: cycleId,
-      currentWeight: prefs.getDouble('startingWeight')!,
-      bodyFat: prefs.getDouble('startingBodyfat')!,
+      currentWeight: cycle.startWeight,
+      bodyFat: cycle.startBodyFat,
       dateTime: dateTime.toLocal().toString(),
       day: dateTime.weekday,
       estimated: 0,

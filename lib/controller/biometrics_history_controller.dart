@@ -37,7 +37,7 @@ class BiometricsHistoryController with ChangeNotifier {
 
   void setCurrentWeight() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    currentWeight = sharedPreferences.getDouble('currentWeight')!;
+    currentWeight = sharedPreferences.getDouble('currentWeight') ?? 0;
   }
 
   void setSliderValue(double value) {

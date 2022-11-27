@@ -108,10 +108,7 @@ class NeumorphicCard extends StatelessWidget {
 }
 
 class WeightLineGraph extends StatefulWidget {
-  final int initialWeek;
-
-  const WeightLineGraph({Key? key, required this.initialWeek})
-      : super(key: key);
+  const WeightLineGraph({Key? key}) : super(key: key);
 
   @override
   State<WeightLineGraph> createState() => WeightLineGraphState();
@@ -168,7 +165,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                 .getSliderValue
                 .toInt();
         if (sliderValue < 0) {
-          sliderValue = widget.initialWeek - 1;
+          sliderValue = 1;
         }
         return FutureBuilder(
           future: dataFuture,
@@ -224,6 +221,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                       Slider(
                         value: sliderValue.toDouble(),
                         max: remaining.toDouble(),
+                        min: 1,
                         divisions: remaining,
                         activeColor: Theme.of(context).colorScheme.onPrimary,
                         inactiveColor: Theme.of(context)

@@ -50,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool needSetup = true;
   double currentWeight = 0;
   Week week = const Week(
+      id: 0,
       cycleId: 0,
       week: 0,
       calorieDeficit: 0,
@@ -71,16 +72,16 @@ class _MyHomePageState extends State<MyHomePage> {
     Provider.of<BiometricsHistoryController>(context, listen: false)
         .setCurrentWeight();
     final prefs = await SharedPreferences.getInstance();
+    if (prefs.getInt('age') != null) {
+      needSetup = false;
+      return;
+    }
     Cycle currentCycle = await AppDatabase.db.getCurrentCycle();
     DateTime currentDateTime = DateTime.now();
     Duration difference =
         currentDateTime.difference(DateTime.parse(currentCycle.startDateTime));
     int currentWeekId = (difference.inDays / 7).ceilToDouble().toInt();
     Week newWeek = await AppDatabase.db.getWeekById(currentWeekId);
-
-    if (prefs.getInt('age') != null) {
-      needSetup = false;
-    }
 
     week = newWeek;
   }
@@ -116,9 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           const SizedBox(
                             height: 16,
                           ),
-                          !needSetup
-                              ? WeightLineGraph(initialWeek: week.id!)
-                              : Container(),
+                          !needSetup ? WeightLineGraph() : Container(),
                           const SizedBox(
                             height: 24,
                           ),
@@ -274,14 +273,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                   MaterialButton(
                                     child: const Text('delete'),
-                                    onPressed: () =>
-                                        AppDatabase.db.deleteBiometrics(11),
-                                    // onPressed: () async {
-                                    //   final prefs =
-                                    //       await SharedPreferences.getInstance();
-                                    //   prefs.clear();
-                                    //   AppDatabase.db.deleteAll();
-                                    // },
+                                    // onPressed: () =>
+                                    //     AppDatabase.db.deleteBiometrics(11),
+                                    onPressed: () async {
+                                      final prefs =
+                                          await SharedPreferences.getInstance();
+                                      prefs.clear();
+                                      AppDatabase.db.deleteAll();
+                                    },
                                   ),
                                   MaterialButton(
                                     child: const Text('Cycle Config'),
@@ -354,13 +353,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                 MaterialButton(
                                   child: const Text('Get Started'),
                                   onPressed: () async {
-                                    await Navigator.of(context).push(
+                                    Navigator.of(context)
+                                        .push(
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const CycleConfiguration(),
+                                            ChangeNotifierProvider(
+                                          create: (context) =>
+                                              CycleConfigurationController(),
+                                          child: const TesterWidget(),
+                                        ),
                                       ),
-                                    );
-                                    setState(() {});
+                                    )
+                                        .then((value) {
+                                      needSetup = false;
+                                      setState(() {});
+                                    });
                                   },
                                 ),
                                 MaterialButton(

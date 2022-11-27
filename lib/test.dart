@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
+import 'package:project_cut/model/cycle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
@@ -20,18 +21,14 @@ class _TesterWidgetState extends State<TesterWidget> {
   static const String heightTitle = 'HEIGHT';
   static const String ageTitle = 'AGE';
   static const String startingWeightTitle = 'STARTING WEIGHT';
-  static const String goalWeightTitle = 'GOAL WEIGHT';
   static const String startingBodyfatTitle = 'BODYFAT %';
   static const String goalBodyfatTitle = 'GOAL BODYFAT %';
-  static const String timeFrameTitle = 'TIMEFRAME';
 
   String height = '';
   String age = '';
   String startingWeight = '';
-  String goalWeight = '';
   String startingBodyfat = '';
   String goalBodyfat = '';
-  int timeFrame = 0;
 
   SharedPreferences? sharedPreferences;
 
@@ -45,8 +42,7 @@ class _TesterWidgetState extends State<TesterWidget> {
     sharedPreferences = await SharedPreferences.getInstance();
   }
 
-  Future<void> _updateSharedPreferences(String newValue, String field,
-      CycleConfigurationController config) async {
+  Future<void> _updateSharedPreferences(String newValue, String field) async {
     switch (field) {
       case ageTitle:
         age = newValue;
@@ -58,24 +54,17 @@ class _TesterWidgetState extends State<TesterWidget> {
             .setDouble('startingWeight', double.parse(newValue));
         await sharedPreferences!
             .setDouble('currentWeight', double.parse(newValue));
-        config.startingWeight = double.parse(newValue);
-        break;
-      case goalWeightTitle:
-        goalWeight = newValue;
-        await sharedPreferences!
-            .setDouble('goalWeight', double.parse(newValue));
         break;
       case startingBodyfatTitle:
         startingBodyfat = newValue;
         await sharedPreferences!
-            .setDouble('startingBodyfat', double.parse(newValue));
-        config.startingBodyFat = double.parse(newValue);
+            .setDouble('startingBodyFat', double.parse(newValue));
         break;
       case goalBodyfatTitle:
         goalBodyfat = newValue;
         await sharedPreferences!
             .setDouble('goalBodyFat', double.parse(newValue));
-        config.goalBodyFat = double.parse(newValue);
+
         break;
       default:
         height = newValue;
@@ -105,10 +94,6 @@ class _TesterWidgetState extends State<TesterWidget> {
         break;
       case startingWeightTitle:
         value = startingWeight;
-        decimal = true;
-        break;
-      case goalWeightTitle:
-        value = goalWeight;
         decimal = true;
         break;
       case startingBodyfatTitle:
@@ -155,7 +140,7 @@ class _TesterWidgetState extends State<TesterWidget> {
               if (value == '') {
                 value = '0';
               }
-              _updateSharedPreferences(value, hint, config!);
+              _updateSharedPreferences(value, hint);
             },
           ),
           const SizedBox(
@@ -233,7 +218,6 @@ class _TesterWidgetState extends State<TesterWidget> {
                       config.setTimeFrame(newValue);
                       await sharedPreferences!.setInt(
                           'timeFrame', newValue.roundToDouble().toInt());
-                      timeFrame = newValue.toInt();
                     },
                     needleLength: 0.5,
                     needleColor: Theme.of(context).colorScheme.onPrimary,
@@ -254,8 +238,25 @@ class _TesterWidgetState extends State<TesterWidget> {
     switch (pageNumber) {
       case 3:
         return MaterialButton(
-          child: const Text('Next'),
+          child: const Text('Start Cut'),
           onPressed: () {
+            int timeFrame = Provider.of<CycleConfigurationController>(context,
+                    listen: false)
+                .getTimeFrame
+                .toInt();
+            Cycle cycle = Cycle(
+              startWeight: double.parse(startingWeight),
+              goalWeight: 0,
+              startBodyFat: double.parse(startingBodyfat),
+              goalBodyFat: double.parse(goalBodyfat),
+              startDateTime: DateTime.now().toLocal().toString(),
+              endDateTime: DateTime.now()
+                  .add(Duration(days: timeFrame * 7))
+                  .toLocal()
+                  .toString(),
+            );
+            Provider.of<CycleConfigurationController>(context, listen: false)
+                .startCut(cycle);
             Navigator.of(context).pop();
           },
         );
@@ -453,15 +454,16 @@ class _TesterWidgetState extends State<TesterWidget> {
         return Scaffold(
           resizeToAvoidBottomInset: false,
           body: PageView(
-            controller: pageController,
-            scrollDirection: Axis.vertical,
-            children: [
-              pageOne(config),
-              pageTwo(config),
-              pageThree(config),
-            ],
-            onPageChanged: (value) => value == 2 ? config.newStartCut() : null,
-          ),
+              controller: pageController,
+              scrollDirection: Axis.vertical,
+              children: [
+                pageOne(config),
+                pageTwo(config),
+                pageThree(config),
+              ],
+              onPageChanged: (value) {
+                value == 2 ? config.estimateTimeFrame() : null;
+              }),
         );
       },
     );
