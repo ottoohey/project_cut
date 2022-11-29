@@ -169,6 +169,7 @@ class CycleConfigurationController with ChangeNotifier {
     await AppDatabase.db.insertBiometric(biometric);
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setInt('currentWeekId', 1);
+    await sharedPreferences.setInt('currentWeekId', 1);
+    await sharedPreferences.setDouble('currentWeight', cycle.startWeight);
   }
 }

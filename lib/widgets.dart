@@ -1,10 +1,157 @@
 import 'package:flutter/material.dart';
-import 'package:project_cut/controller/biometrics_history_controller.dart';
+import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+class CurrentWeightNeumorphicCard extends StatelessWidget {
+  const CurrentWeightNeumorphicCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).canvasColor,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).splashColor,
+            offset: const Offset(-1, -1),
+            blurRadius: 15,
+            spreadRadius: 1,
+          ),
+          BoxShadow(
+            color: Theme.of(context).shadowColor,
+            offset: const Offset(3, 3),
+            blurRadius: 5,
+            spreadRadius: 0.5,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FittedBox(
+              fit: BoxFit.contain,
+              child: Text(
+                'CURRENT WEIGHT',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            Consumer<BiometricsDataController>(
+              builder: (context, provider, child) {
+                return Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: provider.currentWeight.toString(),
+                        style: TextStyle(
+                          fontSize: 40,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'amount',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  textHeightBehavior:
+                      const TextHeightBehavior(applyHeightToFirstAscent: false),
+                  textAlign: TextAlign.center,
+                  softWrap: false,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class NeumorphicCardGrid extends StatelessWidget {
+  const NeumorphicCardGrid({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<BiometricsDataController>(
+      builder: (context, controller, child) {
+        return Container(
+          height: ((MediaQuery.of(context).size.width / 2) * (2 / 3) * 3) - 24,
+          width: MediaQuery.of(context).size.width,
+          child: GridView.count(
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            crossAxisCount: 2,
+            childAspectRatio: 3 / 2,
+            physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.all(8),
+            children: <Widget>[
+              Card(
+                color: Theme.of(context).colorScheme.primary,
+                shadowColor: Colors.white,
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.contain,
+                        child: Text(
+                          'title',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'value',
+                              style: TextStyle(
+                                fontSize: 40,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'amount',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        textHeightBehavior: const TextHeightBehavior(
+                            applyHeightToFirstAscent: false),
+                        textAlign: TextAlign.center,
+                        softWrap: false,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
 
 class NeumorphicCard extends StatelessWidget {
   const NeumorphicCard(
@@ -151,17 +298,16 @@ class WeightLineGraphState extends State<WeightLineGraph> {
   @override
   void initState() {
     super.initState();
-    dataFuture =
-        Provider.of<BiometricsHistoryController>(context, listen: false)
-            .updateGraphData();
+    dataFuture = Provider.of<BiometricsDataController>(context, listen: false)
+        .updateGraphData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BiometricsHistoryController>(
+    return Consumer<BiometricsDataController>(
       builder: (context, controller, child) {
         sliderValue =
-            Provider.of<BiometricsHistoryController>(context, listen: false)
+            Provider.of<BiometricsDataController>(context, listen: false)
                 .getSliderValue
                 .toInt();
         if (sliderValue < 0) {
@@ -171,9 +317,9 @@ class WeightLineGraphState extends State<WeightLineGraph> {
           future: dataFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
-              List<Biometric> biometrics = controller.getBiometrics;
-              List<Week> weeks = controller.getWeeks;
-              Cycle cycle = controller.getCycle;
+              List<Biometric> biometrics = controller.biometrics;
+              List<Week> weeks = controller.weeks;
+              Cycle cycle = controller.cycle;
               biometrics = biometrics
                   .where((element) => element.weekId == sliderValue)
                   .toList();
@@ -222,7 +368,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                         value: sliderValue.toDouble(),
                         max: remaining.toDouble(),
                         min: 1,
-                        divisions: remaining,
+                        divisions: remaining - 1,
                         activeColor: Theme.of(context).colorScheme.onPrimary,
                         inactiveColor: Theme.of(context)
                             .colorScheme

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_cut/controller/biometrics_history_controller.dart';
+import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +37,7 @@ class _BiometricsHistoryState extends State<BiometricsHistory> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BiometricsHistoryController>(
+    return Consumer<BiometricsDataController>(
       builder: (context, controller, child) {
         return Scaffold(
           body: Column(
