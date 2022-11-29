@@ -151,116 +151,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             const SizedBox(
                               height: 24,
                             ),
-                            const Text('Weekly Goals'),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            NeumorphicCardGrid(),
-                            // Row(
-                            //   mainAxisAlignment: MainAxisAlignment.center,
-                            //   children: [
-                            //     SizedBox(
-                            //       width: MediaQuery.of(context).size.width / 2 -
-                            //           24,
-                            //       height: 100,
-                            //       child: NeumorphicCard(
-                            //         title: 'CALORIE DEFICIT',
-                            //         value: '0',
-                            //         amount: 'cals/day',
-                            //       ),
-                            //     ),
-                            //     const SizedBox(
-                            //       width: 16,
-                            //     ),
-                            //     SizedBox(
-                            //       width: MediaQuery.of(context).size.width / 2 -
-                            //           24,
-                            //       height: 100,
-                            //       child: NeumorphicCard(
-                            //         title: 'WEIGHT LOSS',
-                            //         value: '0',
-                            //         amount: 'kg/week',
-                            //       ),
-                            //     ),
-                            //   ],
-                            // ),
-                            // const SizedBox(
-                            //   height: 16,
-                            // ),
+                            const WeeklyDataGrid(),
                             Column(
                               children: [
-                                // Row(
-                                //   mainAxisAlignment: MainAxisAlignment.center,
-                                //   children: [
-                                //     SizedBox(
-                                //       width: MediaQuery.of(context).size.width /
-                                //               2 -
-                                //           24,
-                                //       height: 100,
-                                //       child: NeumorphicCard(
-                                //         title: 'BODY FAT % GOAL',
-                                //         value: '0',
-                                //         amount: '%',
-                                //       ),
-                                //     ),
-                                //     const SizedBox(
-                                //       width: 16,
-                                //     ),
-                                //     SizedBox(
-                                //       width: MediaQuery.of(context).size.width /
-                                //               2 -
-                                //           24,
-                                //       height: 100,
-                                //       child: NeumorphicCard(
-                                //         title: 'WEIGHT GOAL',
-                                //         value: '0',
-                                //         amount: 'kg',
-                                //       ),
-                                //     ),
-                                //   ],
-                                // ),
-                                // const SizedBox(
-                                //   height: 16,
-                                // ),
-                                // Row(
-                                // mainAxisAlignment: MainAxisAlignment.center,
-                                // children: [
-                                //   SizedBox(
-                                //     width: MediaQuery.of(context).size.width /
-                                //             2 -
-                                //         24,
-                                //     height: 100,
-                                //     child: GestureDetector(
-                                //       onTap: () => Navigator.push(
-                                //         context,
-                                //         MaterialPageRoute(
-                                //           builder: (context) =>
-                                //               const TesterWidget(),
-                                //         ),
-                                //       ),
-                                //       child: const NeumorphicCard(
-                                //         title: 'SETTINGS',
-                                //         value: 'settings_icon',
-                                //         amount: '',
-                                //       ),
-                                //     ),
-                                //   ),
-                                //   const SizedBox(
-                                //     width: 16,
-                                //   ),
-                                //   SizedBox(
-                                //     width: MediaQuery.of(context).size.width /
-                                //             2 -
-                                //         24,
-                                //     height: 100,
-                                //     child: const NeumorphicCard(
-                                //       title: 'PROGRESS PIC',
-                                //       value: 'progress_pic_icon',
-                                //       amount: '',
-                                //     ),
-                                //   ),
-                                // ],
-                                // ),
                                 const SizedBox(
                                   height: 16,
                                 ),
@@ -305,14 +198,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                     ),
                                     MaterialButton(
                                       child: const Text('delete'),
-                                      // onPressed: () =>
-                                      //     AppDatabase.db.deleteBiometrics(11),
-                                      onPressed: () async {
-                                        final prefs = await SharedPreferences
-                                            .getInstance();
-                                        prefs.clear();
-                                        AppDatabase.db.deleteAll();
-                                      },
+                                      onPressed: () =>
+                                          AppDatabase.db.deleteBiometrics(3),
+                                      // onPressed: () async {
+                                      //   final prefs = await SharedPreferences
+                                      //       .getInstance();
+                                      //   prefs.clear();
+                                      //   AppDatabase.db.deleteAll();
+                                      // },
                                     ),
                                     MaterialButton(
                                       child: const Text('Cycle Config'),

@@ -81,13 +81,20 @@ class CurrentWeightNeumorphicCard extends StatelessWidget {
   }
 }
 
-class NeumorphicCardGrid extends StatelessWidget {
-  const NeumorphicCardGrid({Key? key}) : super(key: key);
+class WeeklyDataGrid extends StatelessWidget {
+  const WeeklyDataGrid({Key? key}) : super(key: key);
+
+  final String _calorieDeficit = 'CALORIE_DEFICIT';
+  final String _weightLoss = 'WEIGHT_LOSS';
+  final String _bodyFat = 'BODY_FAT';
+  final String _weightGoal = 'WEIGHT_GOAL';
+  final String _settings = 'SETTINGS';
+  final String _progressPic = 'PROGRESS_PIC';
 
   @override
   Widget build(BuildContext context) {
     return Consumer<BiometricsDataController>(
-      builder: (context, controller, child) {
+      builder: (context, provider, child) {
         return Container(
           height: ((MediaQuery.of(context).size.width / 2) * (2 / 3) * 3) - 24,
           width: MediaQuery.of(context).size.width,
@@ -99,56 +106,136 @@ class NeumorphicCardGrid extends StatelessWidget {
             physics: NeverScrollableScrollPhysics(),
             padding: EdgeInsets.all(8),
             children: <Widget>[
-              Card(
-                color: Theme.of(context).colorScheme.primary,
-                shadowColor: Colors.white,
-                child: Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.contain,
-                        child: Text(
-                          'title',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'value',
-                              style: TextStyle(
-                                fontSize: 40,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                            TextSpan(
-                              text: 'amount',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        textHeightBehavior: const TextHeightBehavior(
-                            applyHeightToFirstAscent: false),
-                        textAlign: TextAlign.center,
-                        softWrap: false,
-                      ),
-                    ],
-                  ),
-                ),
+              WeeklyDataGridCard(
+                card: _calorieDeficit,
+              ),
+              WeeklyDataGridCard(
+                card: _weightLoss,
+              ),
+              WeeklyDataGridCard(
+                card: _bodyFat,
+              ),
+              WeeklyDataGridCard(
+                card: _weightGoal,
+              ),
+              WeeklyDataGridCard(
+                card: _settings,
+              ),
+              WeeklyDataGridCard(
+                card: _progressPic,
               ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class WeeklyDataGridCard extends StatelessWidget {
+  const WeeklyDataGridCard({Key? key, required this.card}) : super(key: key);
+
+  final String card;
+
+  String _getCardTitle() {
+    switch (card) {
+      case 'CALORIE_DEFICIT':
+        return 'CALORIE DEFICIT';
+      case 'WEIGHT_LOSS':
+        return 'WEIGHT LOSS';
+      case 'BODY_FAT':
+        return 'BODY FAT';
+      case 'WEIGHT_GOAL':
+        return 'WEIGHT GOAL';
+      case 'SETTINGS':
+        return 'SETTINGS';
+      case 'PROGRESS_PIC':
+        return 'PROGRESS PIC';
+      default:
+        return 'NO TITLE';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.primary,
+      shadowColor: Colors.transparent,
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FittedBox(
+              fit: BoxFit.contain,
+              child: Text(
+                _getCardTitle(),
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            Consumer<BiometricsDataController>(
+              builder: (context, provider, child) {
+                String cardValue = '0';
+                String cardAmount = '';
+                switch (card) {
+                  case 'CALORIE_DEFICIT':
+                    cardValue = provider.currentCalorieDeficit.toString();
+                    cardAmount = 'cals/day';
+                    break;
+                  case 'WEIGHT_LOSS':
+                    cardValue = provider.currentWeightLoss.toString();
+                    cardAmount = 'kg/week';
+                    break;
+                  case 'BODY_FAT':
+                    cardValue = provider.currentBodyFatGoal.toString();
+                    cardAmount = '%';
+                    break;
+                  case 'WEIGHT_GOAL':
+                    cardValue = provider.currentWeightGoal.toString();
+                    cardAmount = 'kg';
+                    break;
+                  case 'SETTINGS':
+                    cardValue = provider.currentCalorieDeficit.toString();
+                    break;
+                  case 'PROGRESS_PIC':
+                    cardValue = provider.currentCalorieDeficit.toString();
+                    break;
+                  default:
+                    cardValue = '0';
+                    break;
+                }
+                return Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: cardValue,
+                        style: TextStyle(
+                          fontSize: 40,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      TextSpan(
+                        text: cardAmount,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  textHeightBehavior:
+                      const TextHeightBehavior(applyHeightToFirstAscent: false),
+                  textAlign: TextAlign.center,
+                  softWrap: false,
+                );
+              },
+            )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -296,106 +383,80 @@ class WeightLineGraphState extends State<WeightLineGraph> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    dataFuture = Provider.of<BiometricsDataController>(context, listen: false)
-        .updateGraphData();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Consumer<BiometricsDataController>(
-      builder: (context, controller, child) {
+      builder: (context, provider, child) {
         sliderValue =
             Provider.of<BiometricsDataController>(context, listen: false)
-                .getSliderValue
+                .sliderValue
                 .toInt();
         if (sliderValue < 0) {
           sliderValue = 1;
         }
-        return FutureBuilder(
-          future: dataFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              List<Biometric> biometrics = controller.biometrics;
-              List<Week> weeks = controller.weeks;
-              Cycle cycle = controller.cycle;
-              biometrics = biometrics
-                  .where((element) => element.weekId == sliderValue)
-                  .toList();
+        List<Biometric> biometrics = provider.biometrics;
+        List<Week> weeks = provider.weeks;
+        Cycle cycle = provider.cycle;
 
-              DateTime endDateTime = DateTime.parse(cycle.endDateTime);
-              int remaining =
-                  (endDateTime.difference(currentDateTime).inDays / 7).ceil();
-              int total = remaining - controller.getSliderValue.toInt();
+        DateTime endDateTime = DateTime.parse(cycle.endDateTime);
+        int remaining =
+            (endDateTime.difference(currentDateTime).inDays / 7).ceil();
+        int total = remaining - provider.sliderValue.toInt();
 
-              return Column(
-                children: [
-                  SizedBox(
-                    height: 200,
-                    child: SfCartesianChart(
-                      primaryXAxis:
-                          CategoryAxis(labelPlacement: LabelPlacement.onTicks),
-                      series: <ChartSeries>[
-                        SplineSeries<Biometric, String>(
-                            dataSource: biometrics,
-                            animationDuration: 0,
-                            xValueMapper: (Biometric biometric, _) =>
-                                getWeekday(biometric.day),
-                            yValueMapper: (Biometric biometric, _) =>
-                                biometric.currentWeight,
-                            pointColorMapper: (Biometric biometric, index) =>
-                                biometric.estimated == 1
-                                    ? Colors.lightBlue[200]
-                                    : Colors.blue,
-                            markerSettings:
-                                const MarkerSettings(isVisible: true)),
-                        SplineSeries<Biometric, String>(
-                          dataSource: biometrics,
-                          animationDuration: 0,
-                          xValueMapper: (Biometric biometric, _) =>
-                              getWeekday(biometric.day),
-                          yValueMapper: (datum, index) =>
-                              weeks[sliderValue].weightGoal,
-                          dashArray: const <double>[5, 5],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      Slider(
-                        value: sliderValue.toDouble(),
-                        max: remaining.toDouble(),
-                        min: 1,
-                        divisions: remaining - 1,
-                        activeColor: Theme.of(context).colorScheme.onPrimary,
-                        inactiveColor: Theme.of(context)
-                            .colorScheme
-                            .onPrimary
-                            .withOpacity(0.3),
-                        thumbColor: Theme.of(context).colorScheme.onPrimary,
-                        onChanged: (double value) {
-                          controller.setSliderValue(value);
-                        },
-                      ),
-                      Text(
-                        '$total WEEKS REMAINING',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary),
-                      )
-                    ],
-                  ),
-                  MaterialButton(
-                    child: const Text('test'),
-                    onPressed: () => print(biometrics),
+        return Column(
+          children: [
+            SizedBox(
+              height: 200,
+              child: SfCartesianChart(
+                primaryXAxis:
+                    CategoryAxis(labelPlacement: LabelPlacement.onTicks),
+                series: <ChartSeries>[
+                  SplineSeries<Biometric, String>(
+                      dataSource: biometrics,
+                      animationDuration: 0,
+                      xValueMapper: (Biometric biometric, _) =>
+                          getWeekday(biometric.day),
+                      yValueMapper: (Biometric biometric, _) =>
+                          biometric.currentWeight,
+                      pointColorMapper: (Biometric biometric, index) =>
+                          biometric.estimated == 1
+                              ? Colors.lightBlue[200]
+                              : Colors.blue,
+                      markerSettings: const MarkerSettings(isVisible: true)),
+                  SplineSeries<Biometric, String>(
+                    dataSource: biometrics,
+                    animationDuration: 0,
+                    xValueMapper: (Biometric biometric, _) =>
+                        getWeekday(biometric.day),
+                    yValueMapper: (datum, index) =>
+                        weeks[sliderValue].weightGoal,
+                    dashArray: const <double>[5, 5],
                   ),
                 ],
-              );
-            } else {
-              return const CircularProgressIndicator();
-            }
-          },
+              ),
+            ),
+            Column(
+              children: [
+                Slider(
+                  value: sliderValue.toDouble(),
+                  max: remaining.toDouble(),
+                  min: 1,
+                  divisions: remaining - 1,
+                  activeColor: Theme.of(context).colorScheme.onPrimary,
+                  inactiveColor:
+                      Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                  thumbColor: Theme.of(context).colorScheme.onPrimary,
+                  onChanged: (double value) {
+                    provider.setSliderValue(value);
+                  },
+                ),
+                Text(
+                  '$total WEEKS REMAINING',
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                )
+              ],
+            ),
+          ],
         );
       },
     );

@@ -3,7 +3,6 @@ import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BiometricsDataController with ChangeNotifier {
   List<Biometric> _biometrics = [];
@@ -20,13 +19,10 @@ class BiometricsDataController with ChangeNotifier {
   double _currentWeightLoss = 0;
   double _currentBodyFatGoal = 0;
   double _currentWeightGoal = 0;
-
-  double sliderValue = -1;
+  double _sliderValue = -1;
 
   List<Biometric> get biometrics => _biometrics;
-
   List<Week> get weeks => _weeks;
-
   Cycle get cycle => _cycle;
 
   double get currentWeight => _currentWeight;
@@ -34,10 +30,12 @@ class BiometricsDataController with ChangeNotifier {
   double get currentWeightLoss => _currentWeightLoss;
   double get currentBodyFatGoal => _currentBodyFatGoal;
   double get currentWeightGoal => _currentWeightGoal;
+  double get sliderValue => _sliderValue;
 
   Future<void> setHomePageData() async {
     Biometric latestBiometric = await AppDatabase.db.getLatestBiometric();
     Week latestWeek = await AppDatabase.db.getWeekById(latestBiometric.weekId);
+    _cycle = await AppDatabase.db.getCurrentCycle();
     _currentWeight = latestBiometric.currentWeight;
     _currentCalorieDeficit = latestWeek.calorieDeficit;
     _currentWeightLoss = latestWeek.weightLoss;
@@ -46,26 +44,18 @@ class BiometricsDataController with ChangeNotifier {
     notifyListeners();
   }
 
-  void setSliderValue(double value) {
-    sliderValue = value;
+  Future<void> setSliderValue(double value) async {
+    _sliderValue = value;
+    _biometrics =
+        await AppDatabase.db.getBiometricsForWeek(_sliderValue.toInt());
     notifyListeners();
-  }
-
-  double get getSliderValue {
-    return sliderValue;
   }
 
   Future<void> addWeight(double weight) async {
     await AppDatabase.db.addWeight(weight);
     _currentWeight = weight;
-    notifyListeners();
-  }
-
-  Future<void> updateGraphData() async {
-    _biometrics = await AppDatabase.db.getBiometrics();
-    _weeks = await AppDatabase.db.getWeeks();
-    _cycle = await AppDatabase.db.getCurrentCycle();
-
+    _biometrics =
+        await AppDatabase.db.getBiometricsForWeek(_sliderValue.toInt());
     notifyListeners();
   }
 }
