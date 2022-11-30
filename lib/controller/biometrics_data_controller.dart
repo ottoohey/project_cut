@@ -35,6 +35,8 @@ class BiometricsDataController with ChangeNotifier {
   Future<void> setHomePageData() async {
     Biometric latestBiometric = await AppDatabase.db.getLatestBiometric();
     Week latestWeek = await AppDatabase.db.getWeekById(latestBiometric.weekId);
+    _biometrics = await AppDatabase.db.getBiometricsForWeek(1);
+    _weeks = await AppDatabase.db.getWeeks();
     _cycle = await AppDatabase.db.getCurrentCycle();
     _currentWeight = latestBiometric.currentWeight;
     _currentCalorieDeficit = latestWeek.calorieDeficit;
@@ -53,9 +55,25 @@ class BiometricsDataController with ChangeNotifier {
 
   Future<void> addWeight(double weight) async {
     await AppDatabase.db.addWeight(weight);
+    Biometric latestBiometric = await AppDatabase.db.getLatestBiometric();
     _currentWeight = weight;
     _biometrics =
-        await AppDatabase.db.getBiometricsForWeek(_sliderValue.toInt());
+        await AppDatabase.db.getBiometricsForWeek(latestBiometric.weekId);
+    notifyListeners();
+  }
+
+  Future<void> testChangeWeight() async {
+    Biometric bio = Biometric(
+        id: 3,
+        weekId: 1,
+        cycleId: 1,
+        currentWeight: 85,
+        bodyFat: 20,
+        dateTime: '2022-11-30 00:00:00.000000',
+        day: 3,
+        estimated: 0);
+    await AppDatabase.db.updateBiometric(bio);
+    _currentWeight = 85;
     notifyListeners();
   }
 }

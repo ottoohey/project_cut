@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
 import 'package:project_cut/database/db.dart';
-import 'package:project_cut/model/cycle.dart';
-import 'package:project_cut/model/week.dart';
+import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/test.dart';
 import 'package:project_cut/theme.dart';
+import 'package:project_cut/view/cycle_configuration.dart';
 import 'package:project_cut/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +45,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool needSetup = false;
   final enterWeightText = TextEditingController();
   Future? _cycleConfigurationRequiredFuture;
   bool expanded = false;
@@ -57,7 +55,6 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  //Loading counter value on start
   Future _cycleConfigurationRequired() async {
     await Provider.of<BiometricsDataController>(context, listen: false)
         .setHomePageData();
@@ -70,8 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           double currentWeight =
-              Provider.of<BiometricsDataController>(context, listen: false)
-                  .currentWeight;
+              Provider.of<BiometricsDataController>(context).currentWeight;
           if (currentWeight == 0) {
             return Container(
               width: MediaQuery.of(context).size.width,
@@ -104,24 +100,22 @@ class _MyHomePageState extends State<MyHomePage> {
                           onPressed: () async {
                             await Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => ChangeNotifierProvider(
-                                  create: (context) =>
-                                      CycleConfigurationController(),
-                                  child: const TesterWidget(),
+                                builder: (context) => MultiProvider(
+                                  providers: [
+                                    ChangeNotifierProvider(
+                                        create: (context) =>
+                                            CycleConfigurationController()),
+                                    ChangeNotifierProvider(
+                                        create: (context) =>
+                                            BiometricsDataController()),
+                                  ],
+                                  child: const CycleConfiguration(),
                                 ),
                               ),
                             );
-                            needSetup = false;
+                            await _cycleConfigurationRequired();
                           },
                         ),
-                        MaterialButton(
-                          child: const Text('tester button'),
-                          onPressed: () async {
-                            final prefs = await SharedPreferences.getInstance();
-                            prefs.clear();
-                            AppDatabase.db.deleteAll();
-                          },
-                        )
                       ],
                     ),
                   ),
@@ -167,17 +161,18 @@ class _MyHomePageState extends State<MyHomePage> {
                                         //       await SharedPreferences.getInstance();
                                         //   sharedPreferences.setDouble(
                                         //       'currentWeight', 86.7);
-                                        Cycle cycle = const Cycle(
-                                            id: 1,
-                                            startWeight: 87,
-                                            goalWeight: 76,
-                                            startBodyFat: 20,
-                                            goalBodyFat: 8,
-                                            startDateTime:
-                                                '2022-11-17 00:00:00.000000',
-                                            endDateTime:
-                                                '2023-03-05 00:00:00.000000');
-                                        AppDatabase.db.updateCycle(cycle);
+                                        Biometric bio = Biometric(
+                                            id: 3,
+                                            weekId: 1,
+                                            cycleId: 1,
+                                            currentWeight: 0,
+                                            bodyFat: 20,
+                                            dateTime:
+                                                '2022-11-30 00:00:00.000000',
+                                            day: 3,
+                                            estimated: 0);
+                                        await AppDatabase.db
+                                            .updateBiometric(bio);
                                       },
                                     ),
                                     MaterialButton(
@@ -199,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     MaterialButton(
                                       child: const Text('delete'),
                                       onPressed: () =>
-                                          AppDatabase.db.deleteBiometrics(3),
+                                          AppDatabase.db.deleteBiometrics(4),
                                       // onPressed: () async {
                                       //   final prefs = await SharedPreferences
                                       //       .getInstance();

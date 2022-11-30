@@ -71,11 +71,6 @@ class CycleConfigurationController with ChangeNotifier {
   }
 
   Future<void> estimateTimeFrame() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    startingWeight = sharedPreferences.getDouble('startingWeight')!;
-    startingBodyFat = sharedPreferences.getDouble('startingBodyFat')!;
-    goalBodyFat = sharedPreferences.getDouble('goalBodyFat')!;
-
     timeFrame = 0;
 
     double currentBF = startingBodyFat;
@@ -103,7 +98,6 @@ class CycleConfigurationController with ChangeNotifier {
   Future<void> startCut(Cycle cycle) async {
     // insert cycle
     await AppDatabase.db.insertCycle(cycle);
-    print(cycle);
 
     // get newly inserted cycle to retrieve ID
     List<Cycle> newCycle = await AppDatabase.db.getCycles();
@@ -141,8 +135,6 @@ class CycleConfigurationController with ChangeNotifier {
         bodyFatGoal: currentBF.toTwoDecimalPlaces(),
       );
 
-      print(week);
-
       await AppDatabase.db.insertWeek(week);
 
       weekNum += 1;
@@ -164,12 +156,6 @@ class CycleConfigurationController with ChangeNotifier {
       estimated: 0,
     );
 
-    print(biometric);
-
     await AppDatabase.db.insertBiometric(biometric);
-
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.setInt('currentWeekId', 1);
-    await sharedPreferences.setDouble('currentWeight', cycle.startWeight);
   }
 }
