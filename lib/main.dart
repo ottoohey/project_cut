@@ -5,7 +5,6 @@ import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
-import 'package:project_cut/test.dart';
 import 'package:project_cut/theme.dart';
 import 'package:project_cut/view/cycle_configuration.dart';
 import 'package:project_cut/widgets.dart';
@@ -161,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         //       await SharedPreferences.getInstance();
                                         //   sharedPreferences.setDouble(
                                         //       'currentWeight', 86.7);
-                                        Biometric bio = Biometric(
+                                        Biometric bio = const Biometric(
                                             id: 3,
                                             weekId: 1,
                                             cycleId: 1,
@@ -204,20 +203,22 @@ class _MyHomePageState extends State<MyHomePage> {
                                     ),
                                     MaterialButton(
                                       child: const Text('Cycle Config'),
-                                      onPressed: () => Navigator.of(context)
-                                          .push(
+                                      onPressed: () =>
+                                          Navigator.of(context).push(
                                         MaterialPageRoute(
-                                          builder: (context) =>
+                                          builder: (context) => MultiProvider(
+                                            providers: [
                                               ChangeNotifierProvider(
-                                            create: (context) =>
-                                                CycleConfigurationController(),
-                                            child: const TesterWidget(),
+                                                  create: (context) =>
+                                                      CycleConfigurationController()),
+                                              ChangeNotifierProvider(
+                                                  create: (context) =>
+                                                      BiometricsDataController()),
+                                            ],
+                                            child: const CycleConfiguration(),
                                           ),
                                         ),
-                                      )
-                                          .whenComplete(() {
-                                        setState(() {});
-                                      }),
+                                      ),
                                     ),
                                   ],
                                 )

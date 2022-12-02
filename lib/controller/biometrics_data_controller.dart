@@ -63,7 +63,7 @@ class BiometricsDataController with ChangeNotifier {
   }
 
   Future<void> testChangeWeight() async {
-    Biometric bio = Biometric(
+    Biometric bio = const Biometric(
         id: 3,
         weekId: 1,
         cycleId: 1,

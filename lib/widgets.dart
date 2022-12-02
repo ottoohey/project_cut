@@ -95,7 +95,7 @@ class WeeklyDataGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<BiometricsDataController>(
       builder: (context, provider, child) {
-        return Container(
+        return SizedBox(
           height: ((MediaQuery.of(context).size.width / 2) * (2 / 3) * 3) - 24,
           width: MediaQuery.of(context).size.width,
           child: GridView.count(
@@ -103,8 +103,8 @@ class WeeklyDataGrid extends StatelessWidget {
             mainAxisSpacing: 8,
             crossAxisCount: 2,
             childAspectRatio: 3 / 2,
-            physics: NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.all(8),
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(8),
             children: <Widget>[
               WeeklyDataGridCard(
                 card: _calorieDeficit,
@@ -198,11 +198,9 @@ class WeeklyDataGridCard extends StatelessWidget {
                     cardAmount = 'kg';
                     break;
                   case 'SETTINGS':
-                    cardValue = provider.currentCalorieDeficit.toString();
-                    break;
+                    return const Icon(Icons.settings);
                   case 'PROGRESS_PIC':
-                    cardValue = provider.currentCalorieDeficit.toString();
-                    break;
+                    return const Icon(Icons.camera_alt_rounded);
                   default:
                     cardValue = '0';
                     break;

@@ -1,57 +1,89 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/extensions/double.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CycleConfigurationController with ChangeNotifier {
-  String sex = 'MALE';
-  double timeFrame = 0.0;
-  double startingWeight = 0;
-  double startingBodyFat = 0;
-  double goalBodyFat = 0;
-  int totalWeeks = 0;
+  String _sex = 'MALE';
+  int _age = 0;
+  double _timeFrame = 0.0;
+  double _startingWeight = 0;
+  double _startingBodyFat = 0;
+  double _goalBodyFat = 0;
+  double _height = 0;
+  double _neck = 0;
+  double _waist = 0;
+  double _hips = 0;
+  double _estimatedBodyFatPercentage = 0;
+  bool _expanded = false;
 
-  String get getSex {
-    return sex;
-  }
+  String get sex => _sex;
+  int get age => _age;
+  double get timeFrame => _timeFrame;
+  double get startingWeight => _startingWeight;
+  double get startingBodyFat => _startingBodyFat;
+  double get goalBodyFat => _goalBodyFat;
+  double get height => _height;
+  double get neck => _neck;
+  double get waist => _waist;
+  double get hips => _hips;
+  double get estimatedBodyFatPercentage => _estimatedBodyFatPercentage;
+  bool get expanded => _expanded;
 
-  void setSex(String value) {
-    sex = value;
+  void setSex(String sex) {
+    _sex = sex;
     notifyListeners();
   }
 
-  double get getTimeFrame {
-    return timeFrame;
+  void setAge(String age) {
+    _age = int.parse(age);
   }
 
-  void setTimeFrame(double value) {
-    timeFrame = value.roundToDouble();
+  void setTimeFrame(double timeFrame) {
+    _timeFrame = timeFrame.roundToDouble();
     notifyListeners();
+  }
+
+  void setHeight(String height) {
+    _height = double.parse(height);
+  }
+
+  void setNeck(String neck) {
+    _neck = double.parse(neck);
+  }
+
+  void setWaist(String waist) {
+    _waist = double.parse(waist);
+  }
+
+  void setHips(String hips) {
+    _hips = double.parse(hips);
   }
 
   void addWeekToTimeFrame() {
-    timeFrame += 1;
+    _timeFrame += 1;
     notifyListeners();
   }
 
   void removeWeekFromTimeFrame() {
-    timeFrame -= 1;
+    _timeFrame -= 1;
     notifyListeners();
   }
 
-  void setStartingWeight(double weight) {
-    startingWeight = weight;
+  void setStartingWeight(String startingWeight) {
+    _startingWeight = double.parse(startingWeight);
   }
 
-  void setStartingBodyFat(double bodyFat) {
-    startingBodyFat = bodyFat;
+  void setStartingBodyFat(String startingBodyFat) {
+    _startingBodyFat = double.parse(startingBodyFat);
   }
 
-  void setGoalBodyFat(double bodyFat) {
-    goalBodyFat = bodyFat;
+  void setGoalBodyFat(String goalBodyFat) {
+    _goalBodyFat = double.parse(goalBodyFat);
   }
 
   double getWeightLossForWeek(double currentBF) {
@@ -71,25 +103,25 @@ class CycleConfigurationController with ChangeNotifier {
   }
 
   Future<void> estimateTimeFrame() async {
-    timeFrame = 0;
+    _timeFrame = 0;
 
-    double currentBF = startingBodyFat;
-    double currentWeight = startingWeight;
+    double currentBF = _startingBodyFat;
+    double currentWeight = _startingWeight;
 
-    while (currentBF > goalBodyFat) {
+    while (currentBF > _goalBodyFat) {
       double weightLossForWeek = getWeightLossForWeek(currentBF);
       currentWeight = (currentWeight - weightLossForWeek).toTwoDecimalPlaces();
 
-      double equationWeight = currentWeight / startingWeight;
-      currentBF = (equationWeight - 1 + (startingBodyFat / 100)) * 100;
+      double equationWeight = currentWeight / _startingWeight;
+      currentBF = (equationWeight - 1 + (_startingBodyFat / 100)) * 100;
 
-      timeFrame += 1;
+      _timeFrame += 1;
     }
 
-    if (timeFrame > 16) {
-      timeFrame = 16;
-    } else if (timeFrame < 8) {
-      timeFrame = 8;
+    if (_timeFrame > 16) {
+      _timeFrame = 16;
+    } else if (_timeFrame < 8) {
+      _timeFrame = 8;
     }
 
     notifyListeners();
@@ -101,19 +133,18 @@ class CycleConfigurationController with ChangeNotifier {
 
     // get newly inserted cycle to retrieve ID
     List<Cycle> newCycle = await AppDatabase.db.getCycles();
-    // int cycleId = 0;
     int cycleId = newCycle[0].id!;
     double currentBF = cycle.startBodyFat;
     double currentWeight = cycle.startWeight;
 
     int weekNum = 0;
 
-    while (currentBF > goalBodyFat) {
+    while (currentBF > _goalBodyFat) {
       double weightLossForWeek = getWeightLossForWeek(currentBF);
       currentWeight = (currentWeight - weightLossForWeek).toTwoDecimalPlaces();
 
-      double equationWeight = currentWeight / startingWeight;
-      currentBF = (equationWeight - 1 + (startingBodyFat / 100)) * 100;
+      double equationWeight = currentWeight / _startingWeight;
+      currentBF = (equationWeight - 1 + (_startingBodyFat / 100)) * 100;
       double calorieDeficit = 1100 * weightLossForWeek;
       int weekday = DateTime.now().weekday;
 
@@ -141,9 +172,7 @@ class CycleConfigurationController with ChangeNotifier {
     }
 
     List<Week> newWeek = await AppDatabase.db.getWeekListFromCycleId(cycleId);
-    // int weekId = 0;
     int weekId = newWeek.first.id!;
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
     final DateTime dateTime = DateTime.now();
 
     Biometric biometric = Biometric(
@@ -157,5 +186,28 @@ class CycleConfigurationController with ChangeNotifier {
     );
 
     await AppDatabase.db.insertBiometric(biometric);
+  }
+
+  void setExpanded() {
+    if (_expanded) {
+      _expanded = false;
+    } else {
+      _expanded = true;
+    }
+
+    notifyListeners();
+  }
+
+  double logBase(double x, int base) => log(x) / log(base);
+
+  void calculateBodyFatPercentage() {
+    _estimatedBodyFatPercentage = (495 /
+                (1.0324 -
+                    0.19077 * logBase((_waist - _neck), 10) +
+                    0.15456 * logBase(_height, 10)) -
+            450)
+        .toTwoDecimalPlaces();
+    print(_estimatedBodyFatPercentage);
+    notifyListeners();
   }
 }

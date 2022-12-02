@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:project_cut/extensions/double.dart';
@@ -92,7 +91,6 @@ class AppDatabase {
           weekId: weekId,
           cycleId: latestBiometricEntry.cycleId,
           currentWeight: estimatedWeight.toTwoDecimalPlaces(),
-          // TODO: add measurements to shared prefs
           // add latest body measurements to shared preferences
           // calculate based on that
           bodyFat: latestBiometricEntry.bodyFat,
@@ -190,35 +188,6 @@ class AppDatabase {
     return latestBiometric;
   }
 
-  double logBase(double x, int base) => log(x) / log(base);
-
-  int calculateBodyFatPercentage(
-      double waist, double hip, double neck, int height) {
-    int bodyFatPercentage = (495 /
-                (1.0324 -
-                    0.19077 * logBase((waist - neck), 10) +
-                    0.15456 * logBase(height.toDouble(), 10)) -
-            450)
-        .toInt();
-
-    return bodyFatPercentage;
-  }
-
-  Future<int> get estimatedBodyFatPercentage async {
-    final SharedPreferences sharedPreferences =
-        await SharedPreferences.getInstance();
-
-    double waist = sharedPreferences.getDouble('waist') ?? 0;
-    double hip = sharedPreferences.getDouble('hip') ?? 0;
-    double neck = sharedPreferences.getDouble('neck') ?? 0;
-    int height = sharedPreferences.getInt('height') ?? 0;
-
-    int estimatedBodyFatPercentage =
-        calculateBodyFatPercentage(waist, hip, neck, height);
-
-    return estimatedBodyFatPercentage;
-  }
-
   // WEEK FUNCTIONS
   List<Week> generateWeekList(List<Map<String, dynamic>> maps) {
     return List.generate(maps.length, (i) {
@@ -304,7 +273,7 @@ class AppDatabase {
 
     return maps.isNotEmpty
         ? generateWeekList(maps).first
-        : Week(
+        : const Week(
             cycleId: 0,
             week: 0,
             calorieDeficit: 0,
@@ -378,7 +347,7 @@ class AppDatabase {
 
     return maps.isNotEmpty
         ? generateCycleList(maps).first
-        : Cycle(
+        : const Cycle(
             startWeight: 0,
             goalWeight: 0,
             startBodyFat: 0,

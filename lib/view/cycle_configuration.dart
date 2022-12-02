@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:provider/provider.dart';
@@ -8,32 +7,25 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 class CycleConfiguration extends StatefulWidget {
   const CycleConfiguration({Key? key}) : super(key: key);
 
-  static const String heightTitle = 'HEIGHT';
-  static const String ageTitle = 'AGE';
-  static const String startingWeightTitle = 'STARTING WEIGHT';
-  static const String startingBodyfatTitle = 'BODYFAT %';
-  static const String goalBodyfatTitle = 'GOAL BODYFAT %';
-
   @override
   State<CycleConfiguration> createState() => _CycleConfigurationState();
 }
 
 class _CycleConfigurationState extends State<CycleConfiguration> {
   PageController pageController = PageController(initialPage: 0);
-
   List<bool> isSelected = [true, false];
-
   List<String> sexes = ['MALE', 'FEMALE'];
-
   String height = '';
-
   String age = '';
-
   String startingWeight = '';
-
   String startingBodyfat = '';
-
   String goalBodyfat = '';
+
+  static const String heightTitle = 'HEIGHT';
+  static const String ageTitle = 'AGE';
+  static const String startingWeightTitle = 'STARTING WEIGHT';
+  static const String startingBodyfatTitle = 'BODYFAT %';
+  static const String goalBodyfatTitle = 'GOAL BODYFAT %';
 
   Widget toggleButtonWidget(String title) {
     return SizedBox(
@@ -43,37 +35,36 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
   }
 
   Widget textInputWidget(BuildContext context, String hint, String unit,
-      [CycleConfigurationController? cycleProvider]) {
+      CycleConfigurationController cycleProvider) {
     Color onPrimary = Theme.of(context).colorScheme.onPrimary;
-    String? value;
+    String value = '';
     bool canEdit = true;
     bool decimal = false;
 
     double width = MediaQuery.of(context).size.width - 128;
 
     switch (hint) {
-      case CycleConfiguration.ageTitle:
-        value = age;
+      case ageTitle:
+        value = cycleProvider.age.toString();
         break;
-      case CycleConfiguration.startingWeightTitle:
-        value = startingWeight;
+      case startingWeightTitle:
         decimal = true;
+        value = cycleProvider.startingWeight.toString();
         break;
-      case CycleConfiguration.startingBodyfatTitle:
-        value = startingBodyfat;
+      case startingBodyfatTitle:
         width = MediaQuery.of(context).size.width / 2 - 64;
+        value = cycleProvider.startingBodyFat.toString();
         break;
-      case CycleConfiguration.goalBodyfatTitle:
-        value = goalBodyfat;
+      case goalBodyfatTitle:
         width = MediaQuery.of(context).size.width / 2 - 64;
+        value = cycleProvider.goalBodyFat.toString();
         break;
       default:
-        value = height;
+        value = cycleProvider.height.toString();
     }
 
-    if (hint == 'TIMEFRAME') {
-      value = cycleProvider!.getTimeFrame.toString();
-      canEdit = false;
+    if (value == '0' || value == '0.0') {
+      value = '';
     }
 
     return SizedBox(
@@ -99,11 +90,29 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                 style: TextStyle(color: onPrimary),
               ),
             ),
-            onChanged: (value) {
-              if (value == '') {
-                value = '0';
+            onChanged: (enteredValue) {
+              if (enteredValue == '') {
+                enteredValue = '0';
               }
-              print('update');
+
+              value = enteredValue;
+
+              switch (hint) {
+                case ageTitle:
+                  cycleProvider.setAge(enteredValue);
+                  break;
+                case startingWeightTitle:
+                  cycleProvider.setStartingWeight(enteredValue);
+                  break;
+                case startingBodyfatTitle:
+                  cycleProvider.setStartingBodyFat(enteredValue);
+                  break;
+                case goalBodyfatTitle:
+                  cycleProvider.setGoalBodyFat(enteredValue);
+                  break;
+                default:
+                  cycleProvider.setHeight(enteredValue);
+              }
             },
           ),
           const SizedBox(
@@ -118,7 +127,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
   Widget gaugeWidget(CycleConfigurationController cycleProvider) {
     return Stack(
       children: [
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width,
           height: 260,
           child: Column(
@@ -132,7 +141,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
             ],
           ),
         ),
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width,
           height: 300,
           child: SfRadialGauge(
@@ -176,10 +185,9 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                 pointers: <GaugePointer>[
                   NeedlePointer(
                     enableDragging: true,
-                    value: cycleProvider.getTimeFrame,
+                    value: cycleProvider.timeFrame,
                     onValueChanged: (double newValue) async {
                       cycleProvider.setTimeFrame(newValue);
-                      print('update timeframe');
                     },
                     needleLength: 0.5,
                     needleColor: Theme.of(context).colorScheme.onPrimary,
@@ -204,7 +212,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
           onPressed: () {
             int timeFrame = Provider.of<CycleConfigurationController>(context,
                     listen: false)
-                .getTimeFrame
+                .timeFrame
                 .toInt();
             Cycle cycle = Cycle(
               startWeight: double.parse(startingWeight),
@@ -253,198 +261,368 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     }
   }
 
-  Widget pageOne(CycleConfigurationController cycleProvider) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      color: Theme.of(context).colorScheme.primary,
+  Widget bodyFatCalculationTextEntry(
+      String hint, CycleConfigurationController cycleProvider) {
+    String value = '';
+    switch (hint) {
+      case 'NECK':
+        value = cycleProvider.neck.toString();
+        break;
+      case 'WAIST':
+        value = cycleProvider.waist.toString();
+        break;
+      default:
+        value = cycleProvider.hips.toString();
+    }
+
+    if (value == '0' || value == '0.0') {
+      value = '';
+    }
+
+    return SizedBox(
+      width: MediaQuery.of(context).size.width / 2 - 32,
+      // height: 100,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Column(
-            children: [
-              const SizedBox(
-                height: 100,
-              ),
-              Center(
-                child: ToggleButtons(
-                  isSelected: isSelected,
-                  selectedColor: Theme.of(context).colorScheme.primary,
+          Consumer<CycleConfigurationController>(
+            builder: (context, cycleProvider, child) {
+              return TextField(
+                showCursor: true,
+                cursorColor: Colors.blue,
+                maxLines: 1,
+                textAlign: TextAlign.end,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                controller: TextEditingController(text: value),
+                enabled: true,
+                style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimary,
-                  fillColor: Theme.of(context).colorScheme.onPrimary,
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  renderBorder: true,
-                  borderColor: Theme.of(context).colorScheme.onPrimary,
-                  borderWidth: 0.5,
-                  borderRadius: BorderRadius.circular(10),
-                  children: [
-                    toggleButtonWidget(sexes[0]),
-                    toggleButtonWidget(sexes[1]),
-                  ],
-                  onPressed: (int newIndex) async {
-                    isSelected = [false];
-                    isSelected.insert(newIndex, true);
-                    cycleProvider.setSex(sexes[newIndex]);
-                    print('update sex');
-                  },
+                  fontSize: 32,
                 ),
-              ),
-              const SizedBox(
-                height: 64,
-              ),
-              textInputWidget(context, CycleConfiguration.heightTitle, 'cm'),
-              const SizedBox(
-                height: 32,
-              ),
-              textInputWidget(context, CycleConfiguration.ageTitle, 'yrs'),
-              const SizedBox(
-                height: 100,
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              scrollToPreviousPageButton(999),
-              scrollToNextPageButton(1),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget pageTwo(CycleConfigurationController cycleProvider) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      color: Theme.of(context).colorScheme.primary,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            children: [
-              const SizedBox(
-                height: 100,
-              ),
-              textInputWidget(context, CycleConfiguration.startingWeightTitle,
-                  'kg', cycleProvider),
-              const SizedBox(
-                height: 32,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  textInputWidget(
-                      context,
-                      CycleConfiguration.startingBodyfatTitle,
-                      '%',
-                      cycleProvider),
-                  const Icon(
-                    Icons.arrow_forward,
-                    size: 32,
+                decoration: InputDecoration(
+                  suffix: Text(
+                    'cm',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary),
                   ),
-                  textInputWidget(context, CycleConfiguration.goalBodyfatTitle,
-                      '%', cycleProvider),
-                ],
-              ),
-              const SizedBox(
-                height: 64,
-              ),
-              MaterialButton(
-                  child: const Text('Calculate BF%'),
-                  onPressed: () => print('Calculate BF%'))
-            ],
+                ),
+                onChanged: (enteredValue) {
+                  if (enteredValue == '') {
+                    enteredValue = '0';
+                  }
+                  value = enteredValue;
+
+                  switch (hint) {
+                    case 'NECK':
+                      cycleProvider.setNeck(value);
+                      break;
+                    case 'WAIST':
+                      cycleProvider.setWaist(value);
+                      break;
+                    default:
+                      cycleProvider.setHips(value);
+                      break;
+                  }
+                },
+              );
+            },
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              scrollToPreviousPageButton(0),
-              scrollToNextPageButton(2),
-            ],
+          const SizedBox(
+            height: 8,
           ),
+          Text(hint),
         ],
       ),
     );
   }
 
-  Widget pageThree(CycleConfigurationController cycleProvider) {
-    return Container(
-        padding: const EdgeInsets.all(32),
-        color: Theme.of(context).colorScheme.primary,
-        child: Column(
+  Widget pageOne() {
+    return Consumer<CycleConfigurationController>(
+      builder: (context, cycleProvider, child) {
+        return Container(
+          padding: const EdgeInsets.all(32),
+          color: Theme.of(context).colorScheme.primary,
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(
                     height: 100,
                   ),
-                  gaugeWidget(cycleProvider),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () => cycleProvider.removeWeekFromTimeFrame(),
-                        child: const Card(
-                          child: Icon(
-                            Icons.remove,
-                            size: 40,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => cycleProvider.addWeekToTimeFrame(),
-                        child: const Card(
-                          child: Icon(
-                            Icons.add,
-                            size: 40,
-                          ),
-                        ),
-                      )
-                    ],
-                  )
+                  Center(
+                    child: ToggleButtons(
+                      isSelected: isSelected,
+                      selectedColor: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fillColor: Theme.of(context).colorScheme.onPrimary,
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      renderBorder: true,
+                      borderColor: Theme.of(context).colorScheme.onPrimary,
+                      borderWidth: 0.5,
+                      borderRadius: BorderRadius.circular(10),
+                      children: [
+                        toggleButtonWidget(sexes[0]),
+                        toggleButtonWidget(sexes[1]),
+                      ],
+                      onPressed: (int newIndex) async {
+                        isSelected = [false];
+                        isSelected.insert(newIndex, true);
+                        cycleProvider.setSex(sexes[newIndex]);
+                      },
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 64,
+                  ),
+                  textInputWidget(context, heightTitle, 'cm', cycleProvider),
+                  const SizedBox(
+                    height: 32,
+                  ),
+                  textInputWidget(context, ageTitle, 'yrs', cycleProvider),
+                  const SizedBox(
+                    height: 100,
+                  ),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  scrollToPreviousPageButton(1),
-                  scrollToNextPageButton(3),
+                  scrollToPreviousPageButton(999),
+                  scrollToNextPageButton(1),
                 ],
-              )
-            ]));
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget pageTwo() {
+    return Consumer<CycleConfigurationController>(
+      builder: (context, cycleProvider, child) {
+        return Stack(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(32),
+              color: Theme.of(context).colorScheme.primary,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    children: [
+                      const SizedBox(
+                        height: 100,
+                      ),
+                      textInputWidget(
+                          context, startingWeightTitle, 'kg', cycleProvider),
+                      const SizedBox(
+                        height: 32,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          textInputWidget(context, startingBodyfatTitle, '%',
+                              cycleProvider),
+                          const Icon(
+                            Icons.arrow_forward,
+                            size: 32,
+                          ),
+                          textInputWidget(
+                              context, goalBodyfatTitle, '%', cycleProvider),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 64,
+                      ),
+                      MaterialButton(
+                          child: const Text('Calculate BF%'),
+                          onPressed: () => cycleProvider.setExpanded())
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      scrollToPreviousPageButton(0),
+                      scrollToNextPageButton(2),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: AnimatedContainer(
+                curve: Curves.easeOutCirc,
+                // TODO: Text in dropdown container overflowing whilst container expanding
+                duration: const Duration(milliseconds: 400),
+                height: cycleProvider.expanded
+                    ? MediaQuery.of(context).size.height
+                    : 0,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.onSecondary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: cycleProvider.expanded
+                    ? Card(
+                        color: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 50,
+                              ),
+                              Text(
+                                'US Navy Bodyfat % Calculator',
+                                style: TextStyle(
+                                    fontSize: 42,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              Text(
+                                'This bodyfat calculator uses the US Navy method, which is fairly accurate with little equipment',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              Column(
+                                children: [
+                                  bodyFatCalculationTextEntry(
+                                      'NECK', cycleProvider),
+                                  bodyFatCalculationTextEntry(
+                                      'WAIST', cycleProvider),
+                                  cycleProvider.sex == 'FEMALE'
+                                      ? bodyFatCalculationTextEntry(
+                                          'HIPS', cycleProvider)
+                                      : const SizedBox(),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              MaterialButton(
+                                child: Text(
+                                  'Save',
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary),
+                                ),
+                                onPressed: () {
+                                  cycleProvider.calculateBodyFatPercentage();
+                                  cycleProvider.setExpanded();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget pageThree() {
+    return Consumer<CycleConfigurationController>(
+      builder: (context, cycleProvider, child) {
+        return Container(
+            padding: const EdgeInsets.all(32),
+            color: Theme.of(context).colorScheme.primary,
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 100,
+                      ),
+                      gaugeWidget(cycleProvider),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () =>
+                                cycleProvider.removeWeekFromTimeFrame(),
+                            child: const Card(
+                              child: Icon(
+                                Icons.remove,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => cycleProvider.addWeekToTimeFrame(),
+                            child: const Card(
+                              child: Icon(
+                                Icons.add,
+                                size: 40,
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      scrollToPreviousPageButton(1),
+                      scrollToNextPageButton(3),
+                    ],
+                  )
+                ]));
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<CycleConfigurationController, BiometricsDataController>(
-      builder: (context, cycleProvider, biometricsProvider, child) {
+    return Consumer<CycleConfigurationController>(
+      builder: (context, cycleProvider, child) {
         return Scaffold(
           resizeToAvoidBottomInset: false,
           body: PageView(
               controller: pageController,
               scrollDirection: Axis.vertical,
               children: [
-                Container(
-                  color: Colors.amber,
-                  child: Center(
-                    child: MaterialButton(
-                      child: Text('test'),
-                      onPressed: () => biometricsProvider
-                          .testChangeWeight()
-                          .then((value) => Navigator.pop(context)),
-                    ),
-                  ),
-                ),
-                pageOne(cycleProvider),
-                pageTwo(cycleProvider),
-                pageThree(cycleProvider),
+                // Container(
+                //   color: Colors.amber,
+                //   child: Center(
+                //     child: MaterialButton(
+                //       child: Text('test'),
+                //       onPressed: () => biometricsProvider
+                //           .testChangeWeight()
+                //           .then((value) => Navigator.pop(context)),
+                //     ),
+                //   ),
+                // ),
+                pageOne(),
+                pageTwo(),
+                pageThree(),
               ],
               onPageChanged: (value) {
                 value == 2 ? cycleProvider.estimateTimeFrame() : null;
-                if (value == 2) {
-                  cycleProvider.estimateTimeFrame();
-                }
               }),
         );
       },
