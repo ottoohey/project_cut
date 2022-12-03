@@ -289,21 +289,21 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
             builder: (context, cycleProvider, child) {
               return TextField(
                 showCursor: true,
-                cursorColor: Colors.blue,
+                cursorColor: Colors.white,
                 maxLines: 1,
                 textAlign: TextAlign.end,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 controller: TextEditingController(text: value),
                 enabled: true,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  color: Colors.white,
                   fontSize: 32,
                 ),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   suffix: Text(
                     'cm',
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
                 onChanged: (enteredValue) {
@@ -330,7 +330,10 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
           const SizedBox(
             height: 8,
           ),
-          Text(hint),
+          Text(
+            hint,
+            style: const TextStyle(color: Colors.white),
+          ),
         ],
       ),
     );
@@ -462,7 +465,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                     : 0,
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSecondary,
+                  color: Theme.of(context).colorScheme.onPrimary,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: cycleProvider.expanded
@@ -480,7 +483,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                               Text(
                                 'US Navy Bodyfat % Calculator',
                                 style: TextStyle(
-                                    fontSize: 42,
+                                    fontSize: 36,
                                     color: Theme.of(context)
                                         .colorScheme
                                         .secondary),

@@ -3,6 +3,8 @@ import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
+import 'package:project_cut/view/progress_pics.dart';
+import 'package:project_cut/view/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -158,80 +160,98 @@ class WeeklyDataGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.primary,
-      shadowColor: Colors.transparent,
-      child: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FittedBox(
-              fit: BoxFit.contain,
-              child: Text(
-                _getCardTitle(),
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontSize: 16,
+    return GestureDetector(
+      onTap: () {
+        if (card == 'SETTINGS') {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const Settings(),
+            ),
+          );
+        } else if (card == 'PROGRESS_PIC') {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const ProgressPictures(),
+            ),
+          );
+        }
+      },
+      child: Card(
+        color: Theme.of(context).colorScheme.primary,
+        shadowColor: Colors.transparent,
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  _getCardTitle(),
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 16,
+                  ),
                 ),
               ),
-            ),
-            Consumer<BiometricsDataController>(
-              builder: (context, provider, child) {
-                String cardValue = '0';
-                String cardAmount = '';
-                switch (card) {
-                  case 'CALORIE_DEFICIT':
-                    cardValue = provider.currentCalorieDeficit.toString();
-                    cardAmount = 'cals/day';
-                    break;
-                  case 'WEIGHT_LOSS':
-                    cardValue = provider.currentWeightLoss.toString();
-                    cardAmount = 'kg/week';
-                    break;
-                  case 'BODY_FAT':
-                    cardValue = provider.currentBodyFatGoal.toString();
-                    cardAmount = '%';
-                    break;
-                  case 'WEIGHT_GOAL':
-                    cardValue = provider.currentWeightGoal.toString();
-                    cardAmount = 'kg';
-                    break;
-                  case 'SETTINGS':
-                    return const Icon(Icons.settings);
-                  case 'PROGRESS_PIC':
-                    return const Icon(Icons.camera_alt_rounded);
-                  default:
-                    cardValue = '0';
-                    break;
-                }
-                return Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: cardValue,
-                        style: TextStyle(
-                          fontSize: 40,
-                          color: Theme.of(context).primaryColor,
+              Consumer<BiometricsDataController>(
+                builder: (context, provider, child) {
+                  String cardValue = '0';
+                  String cardAmount = '';
+                  switch (card) {
+                    case 'CALORIE_DEFICIT':
+                      cardValue = provider.currentCalorieDeficit.toString();
+                      cardAmount = 'cals/day';
+                      break;
+                    case 'WEIGHT_LOSS':
+                      cardValue = provider.currentWeightLoss.toString();
+                      cardAmount = 'kg/week';
+                      break;
+                    case 'BODY_FAT':
+                      cardValue = provider.currentBodyFatGoal.toString();
+                      cardAmount = '%';
+                      break;
+                    case 'WEIGHT_GOAL':
+                      cardValue = provider.currentWeightGoal.toString();
+                      cardAmount = 'kg';
+                      break;
+                    case 'SETTINGS':
+                      return const Icon(Icons.settings);
+                    case 'PROGRESS_PIC':
+                      return const Icon(Icons.camera_alt_rounded);
+                    default:
+                      cardValue = '0';
+                      break;
+                  }
+
+                  return Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: cardValue,
+                          style: TextStyle(
+                            fontSize: 40,
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
-                      ),
-                      TextSpan(
-                        text: cardAmount,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).primaryColor,
+                        TextSpan(
+                          text: cardAmount,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  textHeightBehavior:
-                      const TextHeightBehavior(applyHeightToFirstAscent: false),
-                  textAlign: TextAlign.center,
-                  softWrap: false,
-                );
-              },
-            )
-          ],
+                      ],
+                    ),
+                    textHeightBehavior: const TextHeightBehavior(
+                        applyHeightToFirstAscent: false),
+                    textAlign: TextAlign.center,
+                    softWrap: false,
+                  );
+                },
+              )
+            ],
+          ),
         ),
       ),
     );

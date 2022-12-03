@@ -203,11 +203,11 @@ class CycleConfigurationController with ChangeNotifier {
   void calculateBodyFatPercentage() {
     _estimatedBodyFatPercentage = (495 /
                 (1.0324 -
-                    0.19077 * logBase((_waist - _neck), 10) +
+                    0.19077 * logBase((_waist + _hips - _neck), 10) +
                     0.15456 * logBase(_height, 10)) -
             450)
         .toTwoDecimalPlaces();
-    print(_estimatedBodyFatPercentage);
+    _startingBodyFat = _estimatedBodyFatPercentage;
     notifyListeners();
   }
 }
