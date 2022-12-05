@@ -215,10 +215,16 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                 .timeFrame
                 .toInt();
             Cycle cycle = Cycle(
-              startWeight: double.parse(startingWeight),
+              startWeight: Provider.of<CycleConfigurationController>(context,
+                      listen: false)
+                  .startingWeight,
               goalWeight: 0,
-              startBodyFat: double.parse(startingBodyfat),
-              goalBodyFat: double.parse(goalBodyfat),
+              startBodyFat: Provider.of<CycleConfigurationController>(context,
+                      listen: false)
+                  .startingBodyFat,
+              goalBodyFat: Provider.of<CycleConfigurationController>(context,
+                      listen: false)
+                  .goalBodyFat,
               startDateTime: DateTime.now().toLocal().toString(),
               endDateTime: DateTime.now()
                   .add(Duration(days: timeFrame * 7))

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/edit_biometrics_history_controller.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:provider/provider.dart';
@@ -46,8 +47,7 @@ class _EditWeightsState extends State<EditWeights> {
                 builder: (context, editBiometricsProvider, child) {
                   List<Biometric> allBiometrics =
                       editBiometricsProvider.allBiometrics;
-                  double initialWeight =
-                      editBiometricsProvider.initialWeightToEdit;
+                  double initialWeight = editBiometricsProvider.weight;
                   return Stack(
                     children: [
                       ListView.builder(
@@ -86,6 +86,9 @@ class _EditWeightsState extends State<EditWeights> {
                               editBiometricsProvider.setExpanded();
                               editBiometricsProvider
                                   .setBiometricIdToEdit(biometric.id!);
+                              // Provider.of<BiometricsDataController>(context,
+                              //         listen: false)
+                              //     .setHomePageData();
                             },
                           );
                         },
@@ -149,6 +152,9 @@ class _EditWeightsState extends State<EditWeights> {
                                             if (enteredValue == '') {
                                               enteredValue = '0';
                                             }
+
+                                            initialWeight =
+                                                double.parse(enteredValue);
 
                                             editBiometricsProvider.setWeight(
                                                 double.parse(enteredValue));

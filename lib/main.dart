@@ -104,9 +104,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                     ChangeNotifierProvider(
                                         create: (context) =>
                                             CycleConfigurationController()),
-                                    ChangeNotifierProvider(
-                                        create: (context) =>
-                                            BiometricsDataController()),
                                   ],
                                   child: const CycleConfiguration(),
                                 ),

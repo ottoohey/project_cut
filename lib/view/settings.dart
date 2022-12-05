@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/edit_biometrics_history_controller.dart';
 import 'package:project_cut/view/edit_weights.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,7 @@ class Settings extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Container(
           padding: const EdgeInsets.all(16),
-          height: 170,
+          // height: 200,
           decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.secondary,
               borderRadius: BorderRadius.circular(25)),
@@ -39,8 +40,8 @@ class Settings extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () {
+                  MaterialButton(
+                    onPressed: () {
                       if (index == 0) {
                         print('start new cut');
                       } else if (index == 1) {
@@ -48,10 +49,18 @@ class Settings extends StatelessWidget {
                       } else if (index == 2) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => ChangeNotifierProvider(
-                              create: (context) =>
-                                  EditBiometricsHistoryController(),
-                              child: const EditWeights(),
+                            builder: (context) => MultiProvider(
+                              providers: [
+                                ChangeNotifierProvider(
+                                  create: (context) =>
+                                      EditBiometricsHistoryController(),
+                                ),
+                                ChangeNotifierProvider(
+                                  create: (context) =>
+                                      BiometricsDataController(),
+                                )
+                              ],
+                              child: EditWeights(),
                             ),
                           ),
                         );

@@ -6,14 +6,13 @@ class EditBiometricsHistoryController with ChangeNotifier {
   List<Biometric> _allBiometrics = [];
   bool _expanded = false;
   int _biometricIdToEdit = 0;
-  double _initialWeightToEdit = 0;
   double _weight = 0;
   Biometric? _biometric;
 
   List<Biometric> get allBiometrics => _allBiometrics;
   bool get expanded => _expanded;
   int get biometricIdToEdit => _biometricIdToEdit;
-  double get initialWeightToEdit => _initialWeightToEdit;
+  double get weight => _weight;
 
   Future<void> setAllBiometrics() async {
     _allBiometrics = await AppDatabase.db.getBiometrics();
@@ -32,7 +31,7 @@ class EditBiometricsHistoryController with ChangeNotifier {
   void setBiometricIdToEdit(int id) {
     _biometricIdToEdit = id;
     _biometric = _allBiometrics.where((element) => element.id == id).first;
-    _initialWeightToEdit = _biometric!.currentWeight;
+    _weight = _biometric!.currentWeight;
     notifyListeners();
   }
 

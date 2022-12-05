@@ -185,7 +185,18 @@ class AppDatabase {
     final List<Map<String, dynamic>> maps =
         await db.query('biometrics', limit: 1, orderBy: 'dateTime DESC');
 
-    Biometric latestBiometric = generateBiometricList(maps).first;
+    List<Biometric> biometrics = generateBiometricList(maps);
+    Biometric latestBiometric = Biometric(
+        weekId: 0,
+        cycleId: 0,
+        currentWeight: 0,
+        bodyFat: 0,
+        dateTime: '0',
+        day: 0,
+        estimated: 0);
+    if (biometrics.isNotEmpty) {
+      latestBiometric = biometrics.first;
+    }
 
     return latestBiometric;
   }
