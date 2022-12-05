@@ -69,6 +69,12 @@ class _EditWeightsState extends State<EditWeights> {
                                 Text(
                                   biometric.estimated == 1 ? '(estimated)' : '',
                                 ),
+                                const SizedBox(
+                                  width: 8,
+                                ),
+                                Text(
+                                  biometric.weekId.toString(),
+                                ),
                               ],
                             ),
                             subtitle: Text(

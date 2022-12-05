@@ -57,6 +57,7 @@ class BiometricsDataController with ChangeNotifier {
     await AppDatabase.db.addWeight(weight);
     Biometric latestBiometric = await AppDatabase.db.getLatestBiometric();
     _currentWeight = weight;
+    _sliderValue = latestBiometric.weekId.toDouble();
     _biometrics =
         await AppDatabase.db.getBiometricsForWeek(latestBiometric.weekId);
     notifyListeners();

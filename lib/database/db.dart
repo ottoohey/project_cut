@@ -85,8 +85,6 @@ class AppDatabase {
         double estimatedWeight =
             latestBiometricEntry.currentWeight + (dailyWeightDifference * i);
 
-        if (estimatedDateTime.weekday == 7) () => weekId += 1;
-
         Biometric estimatedBiometric = Biometric(
           weekId: weekId,
           cycleId: latestBiometricEntry.cycleId,
@@ -100,10 +98,14 @@ class AppDatabase {
         );
 
         insertBiometric(estimatedBiometric);
+        // incremement week if previous estimated week added was day 7
+        latestBiometricEntry = estimatedBiometric;
       }
     }
     Biometric enteredBiometric = Biometric(
-      weekId: latestBiometricEntry.day == 7 ? weekId + 1 : weekId,
+      weekId: latestBiometricEntry.day == 7
+          ? weekId + 1
+          : latestBiometricEntry.weekId,
       cycleId: latestBiometricEntry.cycleId,
       currentWeight: enteredWeight,
       bodyFat: latestBiometricEntry.bodyFat,

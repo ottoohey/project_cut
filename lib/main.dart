@@ -191,16 +191,18 @@ class _MyHomePageState extends State<MyHomePage> {
                                       },
                                     ),
                                     MaterialButton(
-                                      child: const Text('delete'),
-                                      onPressed: () =>
-                                          AppDatabase.db.deleteBiometrics(4),
-                                      // onPressed: () async {
-                                      //   final prefs = await SharedPreferences
-                                      //       .getInstance();
-                                      //   prefs.clear();
-                                      //   AppDatabase.db.deleteAll();
-                                      // },
-                                    ),
+                                        child: const Text('delete'),
+                                        onPressed: () {
+                                          AppDatabase.db.deleteBiometrics(7);
+                                          AppDatabase.db.deleteBiometrics(8);
+                                        }
+                                        // onPressed: () async {
+                                        //   final prefs = await SharedPreferences
+                                        //       .getInstance();
+                                        //   prefs.clear();
+                                        //   AppDatabase.db.deleteAll();
+                                        // },
+                                        ),
                                     MaterialButton(
                                       child: const Text('Cycle Config'),
                                       onPressed: () =>
