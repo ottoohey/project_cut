@@ -35,7 +35,9 @@ class BiometricsDataController with ChangeNotifier {
   Future<void> setHomePageData() async {
     Biometric latestBiometric = await AppDatabase.db.getLatestBiometric();
     Week latestWeek = await AppDatabase.db.getWeekById(latestBiometric.weekId);
-    _biometrics = await AppDatabase.db.getBiometricsForWeek(1);
+    _biometrics =
+        await AppDatabase.db.getBiometricsForWeek(latestBiometric.weekId);
+    _sliderValue = latestBiometric.weekId.toDouble();
     _weeks = await AppDatabase.db.getWeeks();
     _cycle = await AppDatabase.db.getCurrentCycle();
     _currentWeight = latestBiometric.currentWeight;
