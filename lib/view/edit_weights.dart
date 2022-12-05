@@ -48,6 +48,10 @@ class _EditWeightsState extends State<EditWeights> {
                   List<Biometric> allBiometrics =
                       editBiometricsProvider.allBiometrics;
                   double initialWeight = editBiometricsProvider.weight;
+                  TextEditingController textEditingController =
+                      TextEditingController(text: initialWeight.toString());
+                  textEditingController.selection = TextSelection.collapsed(
+                      offset: initialWeight.toString().length);
                   return Stack(
                     children: [
                       ListView.builder(
@@ -134,10 +138,9 @@ class _EditWeightsState extends State<EditWeights> {
                                           textAlign: TextAlign.end,
                                           keyboardType: const TextInputType
                                               .numberWithOptions(decimal: true),
-                                          controller: TextEditingController(
-                                              text: initialWeight.toString()),
-                                          enabled: true,
-                                          style: TextStyle(
+                                          controller: textEditingController,
+                                          autofocus: true,
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 32,
                                           ),
