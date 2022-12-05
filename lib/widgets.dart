@@ -176,81 +176,102 @@ class WeeklyDataGridCard extends StatelessWidget {
           );
         }
       },
-      child: Card(
-        color: Theme.of(context).colorScheme.primary,
-        shadowColor: Colors.transparent,
-        child: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FittedBox(
-                fit: BoxFit.contain,
-                child: Text(
-                  _getCardTitle(),
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 16,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: card == 'SETTINGS' || card == 'PROGRESS_PIC'
+                ? Theme.of(context).colorScheme.secondary
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FittedBox(
+                  fit: BoxFit.contain,
+                  child: Text(
+                    _getCardTitle(),
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              ),
-              Consumer<BiometricsDataController>(
-                builder: (context, provider, child) {
-                  String cardValue = '0';
-                  String cardAmount = '';
-                  switch (card) {
-                    case 'CALORIE_DEFICIT':
-                      cardValue = provider.currentCalorieDeficit.toString();
-                      cardAmount = 'cals/day';
-                      break;
-                    case 'WEIGHT_LOSS':
-                      cardValue = provider.currentWeightLoss.toString();
-                      cardAmount = 'kg/week';
-                      break;
-                    case 'BODY_FAT':
-                      cardValue = provider.currentBodyFatGoal.toString();
-                      cardAmount = '%';
-                      break;
-                    case 'WEIGHT_GOAL':
-                      cardValue = provider.currentWeightGoal.toString();
-                      cardAmount = 'kg';
-                      break;
-                    case 'SETTINGS':
-                      return const Icon(Icons.settings);
-                    case 'PROGRESS_PIC':
-                      return const Icon(Icons.camera_alt_rounded);
-                    default:
-                      cardValue = '0';
-                      break;
-                  }
+                Consumer<BiometricsDataController>(
+                  builder: (context, provider, child) {
+                    String cardValue = '0';
+                    String cardAmount = '';
+                    switch (card) {
+                      case 'CALORIE_DEFICIT':
+                        cardValue = provider.currentCalorieDeficit.toString();
+                        cardAmount = 'cals/day';
+                        break;
+                      case 'WEIGHT_LOSS':
+                        cardValue = provider.currentWeightLoss.toString();
+                        cardAmount = 'kg/week';
+                        break;
+                      case 'BODY_FAT':
+                        cardValue = provider.currentBodyFatGoal.toString();
+                        cardAmount = '%';
+                        break;
+                      case 'WEIGHT_GOAL':
+                        cardValue = provider.currentWeightGoal.toString();
+                        cardAmount = 'kg';
+                        break;
+                      case 'SETTINGS':
+                        return Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.settings,
+                            size: 42,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        );
+                      case 'PROGRESS_PIC':
+                        return Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.camera_alt_rounded,
+                            size: 42,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        );
+                      default:
+                        cardValue = '0';
+                        break;
+                    }
 
-                  return Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: cardValue,
-                          style: TextStyle(
-                            fontSize: 40,
-                            color: Theme.of(context).primaryColor,
+                    return Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: cardValue,
+                            style: TextStyle(
+                              fontSize: 40,
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: cardAmount,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).primaryColor,
+                          TextSpan(
+                            text: cardAmount,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    textHeightBehavior: const TextHeightBehavior(
-                        applyHeightToFirstAscent: false),
-                    textAlign: TextAlign.center,
-                    softWrap: false,
-                  );
-                },
-              )
-            ],
+                        ],
+                      ),
+                      textHeightBehavior: const TextHeightBehavior(
+                          applyHeightToFirstAscent: false),
+                      textAlign: TextAlign.center,
+                      softWrap: false,
+                    );
+                  },
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -367,8 +388,6 @@ class WeightLineGraph extends StatefulWidget {
 }
 
 class WeightLineGraphState extends State<WeightLineGraph> {
-  Future? dataFuture;
-  Future? testFuture;
   DateTime currentDateTime = DateTime.now();
   int sliderValue = 0;
 

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:project_cut/controller/edit_biometrics_history_controller.dart';
+import 'package:project_cut/view/edit_weights.dart';
+import 'package:provider/provider.dart';
 
 class Settings extends StatelessWidget {
   const Settings({super.key});
@@ -36,15 +39,44 @@ class Settings extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Card(
-                    color: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    child: Text(
-                      _settings[index],
-                      style: TextStyle(fontSize: 18),
+                  GestureDetector(
+                    onTap: () {
+                      if (index == 0) {
+                        print('start new cut');
+                      } else if (index == 1) {
+                        print('View previous cut');
+                      } else if (index == 2) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ChangeNotifierProvider(
+                              create: (context) =>
+                                  EditBiometricsHistoryController(),
+                              child: const EditWeights(),
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Card(
+                          color: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          child: Text(
+                            _settings[index],
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                        ),
+                        const SizedBox(
+                          child: Icon(Icons.arrow_forward_ios_rounded),
+                        ),
+                      ],
                     ),
                   ),
-                  index == _settings.length - 1 ? SizedBox() : Divider(),
+                  index == _settings.length - 1
+                      ? const SizedBox()
+                      : const Divider(),
                   const SizedBox(
                     height: 8,
                   ),
