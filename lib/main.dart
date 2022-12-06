@@ -7,6 +7,8 @@ import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/theme.dart';
 import 'package:project_cut/view/cycle_configuration.dart';
+import 'package:project_cut/view/progress_pics.dart';
+import 'package:project_cut/view/settings.dart';
 import 'package:project_cut/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -57,6 +59,76 @@ class _MyHomePageState extends State<MyHomePage> {
   Future _cycleConfigurationRequired() async {
     await Provider.of<BiometricsDataController>(context, listen: false)
         .setHomePageData();
+  }
+
+  Widget _buttonRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        MaterialButton(
+          color: Theme.of(context).colorScheme.secondary,
+          height: (MediaQuery.of(context).size.width / 2) * (2 / 3) - 24,
+          minWidth: MediaQuery.of(context).size.width / 2 - 32,
+          padding: const EdgeInsets.all(8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          elevation: 0,
+          onPressed: () async {
+            await Navigator.of(context)
+                .push(
+                  MaterialPageRoute(
+                    builder: (context) => const Settings(),
+                  ),
+                )
+                .whenComplete(_cycleConfigurationRequired);
+          },
+          child: Column(
+            children: [
+              Text('SETTINGS'),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(
+                  Icons.settings,
+                  size: 42,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        MaterialButton(
+          color: Theme.of(context).colorScheme.secondary,
+          height: (MediaQuery.of(context).size.width / 2) * (2 / 3) - 24,
+          minWidth: MediaQuery.of(context).size.width / 2 - 32,
+          padding: const EdgeInsets.all(8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          elevation: 0,
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const ProgressPictures(),
+              ),
+            );
+          },
+          child: Column(
+            children: [
+              Text('PROGRESS PIC'),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(
+                  Icons.camera_alt_rounded,
+                  size: 42,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -142,6 +214,10 @@ class _MyHomePageState extends State<MyHomePage> {
                               height: 24,
                             ),
                             const WeeklyDataGrid(),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            _buttonRow(),
                             Column(
                               children: [
                                 const SizedBox(

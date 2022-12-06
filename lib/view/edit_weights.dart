@@ -90,9 +90,6 @@ class _EditWeightsState extends State<EditWeights> {
                               editBiometricsProvider.setExpanded();
                               editBiometricsProvider
                                   .setBiometricIdToEdit(biometric.id!);
-                              // Provider.of<BiometricsDataController>(context,
-                              //         listen: false)
-                              //     .setHomePageData();
                             },
                           );
                         },
@@ -180,6 +177,10 @@ class _EditWeightsState extends State<EditWeights> {
                                             editBiometricsProvider.editWeight();
                                             editBiometricsProvider
                                                 .setExpanded();
+                                            Provider.of<BiometricsDataController>(
+                                                    context,
+                                                    listen: false)
+                                                .setWeight(100);
                                           },
                                         ),
                                       ],

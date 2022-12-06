@@ -48,6 +48,11 @@ class BiometricsDataController with ChangeNotifier {
     notifyListeners();
   }
 
+  void setWeight(double weight) {
+    _currentWeight = weight;
+    notifyListeners();
+  }
+
   Future<void> setSliderValue(double value) async {
     _sliderValue = value;
     _biometrics =

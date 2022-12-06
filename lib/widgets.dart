@@ -3,8 +3,6 @@ import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
-import 'package:project_cut/view/progress_pics.dart';
-import 'package:project_cut/view/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -90,15 +88,13 @@ class WeeklyDataGrid extends StatelessWidget {
   final String _weightLoss = 'WEIGHT_LOSS';
   final String _bodyFat = 'BODY_FAT';
   final String _weightGoal = 'WEIGHT_GOAL';
-  final String _settings = 'SETTINGS';
-  final String _progressPic = 'PROGRESS_PIC';
 
   @override
   Widget build(BuildContext context) {
     return Consumer<BiometricsDataController>(
       builder: (context, provider, child) {
         return SizedBox(
-          height: ((MediaQuery.of(context).size.width / 2) * (2 / 3) * 3) - 24,
+          height: ((MediaQuery.of(context).size.width / 2) * (2 / 3) * 2) - 24,
           width: MediaQuery.of(context).size.width,
           child: GridView.count(
             crossAxisSpacing: 8,
@@ -119,12 +115,6 @@ class WeeklyDataGrid extends StatelessWidget {
               ),
               WeeklyDataGridCard(
                 card: _weightGoal,
-              ),
-              WeeklyDataGridCard(
-                card: _settings,
-              ),
-              WeeklyDataGridCard(
-                card: _progressPic,
               ),
             ],
           ),
@@ -149,10 +139,6 @@ class WeeklyDataGridCard extends StatelessWidget {
         return 'BODY FAT';
       case 'WEIGHT_GOAL':
         return 'WEIGHT GOAL';
-      case 'SETTINGS':
-        return 'SETTINGS';
-      case 'PROGRESS_PIC':
-        return 'PROGRESS PIC';
       default:
         return 'NO TITLE';
     }
@@ -160,118 +146,83 @@ class WeeklyDataGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (card == 'SETTINGS') {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const Settings(),
-            ),
-          );
-        } else if (card == 'PROGRESS_PIC') {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const ProgressPictures(),
-            ),
-          );
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: card == 'SETTINGS' || card == 'PROGRESS_PIC'
-                ? Theme.of(context).colorScheme.secondary
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FittedBox(
-                  fit: BoxFit.contain,
-                  child: Text(
-                    _getCardTitle(),
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 16,
-                    ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: card == 'SETTINGS' || card == 'PROGRESS_PIC'
+              ? Theme.of(context).colorScheme.secondary
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  _getCardTitle(),
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 16,
                   ),
                 ),
-                Consumer<BiometricsDataController>(
-                  builder: (context, provider, child) {
-                    String cardValue = '0';
-                    String cardAmount = '';
-                    switch (card) {
-                      case 'CALORIE_DEFICIT':
-                        cardValue = provider.currentCalorieDeficit.toString();
-                        cardAmount = 'cals/day';
-                        break;
-                      case 'WEIGHT_LOSS':
-                        cardValue = provider.currentWeightLoss.toString();
-                        cardAmount = 'kg/week';
-                        break;
-                      case 'BODY_FAT':
-                        cardValue = provider.currentBodyFatGoal.toString();
-                        cardAmount = '%';
-                        break;
-                      case 'WEIGHT_GOAL':
-                        cardValue = provider.currentWeightGoal.toString();
-                        cardAmount = 'kg';
-                        break;
-                      case 'SETTINGS':
-                        return Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Icon(
-                            Icons.settings,
-                            size: 42,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        );
-                      case 'PROGRESS_PIC':
-                        return Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Icon(
-                            Icons.camera_alt_rounded,
-                            size: 42,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        );
-                      default:
-                        cardValue = '0';
-                        break;
-                    }
+              ),
+              Consumer<BiometricsDataController>(
+                builder: (context, provider, child) {
+                  String cardValue = '0';
+                  String cardAmount = '';
+                  switch (card) {
+                    case 'CALORIE_DEFICIT':
+                      cardValue = provider.currentCalorieDeficit.toString();
+                      cardAmount = 'cals/day';
+                      break;
+                    case 'WEIGHT_LOSS':
+                      cardValue = provider.currentWeightLoss.toString();
+                      cardAmount = 'kg/week';
+                      break;
+                    case 'BODY_FAT':
+                      cardValue = provider.currentBodyFatGoal.toString();
+                      cardAmount = '%';
+                      break;
+                    case 'WEIGHT_GOAL':
+                      cardValue = provider.currentWeightGoal.toString();
+                      cardAmount = 'kg';
+                      break;
+                    default:
+                      cardValue = '0';
+                      break;
+                  }
 
-                    return Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: cardValue,
-                            style: TextStyle(
-                              fontSize: 40,
-                              color: Theme.of(context).primaryColor,
-                            ),
+                  return Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: cardValue,
+                          style: TextStyle(
+                            fontSize: 40,
+                            color: Theme.of(context).primaryColor,
                           ),
-                          TextSpan(
-                            text: cardAmount,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).primaryColor,
-                            ),
+                        ),
+                        TextSpan(
+                          text: cardAmount,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).primaryColor,
                           ),
-                        ],
-                      ),
-                      textHeightBehavior: const TextHeightBehavior(
-                          applyHeightToFirstAscent: false),
-                      textAlign: TextAlign.center,
-                      softWrap: false,
-                    );
-                  },
-                )
-              ],
-            ),
+                        ),
+                      ],
+                    ),
+                    textHeightBehavior: const TextHeightBehavior(
+                        applyHeightToFirstAscent: false),
+                    textAlign: TextAlign.center,
+                    softWrap: false,
+                  );
+                },
+              )
+            ],
           ),
         ),
       ),
