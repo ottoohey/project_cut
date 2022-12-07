@@ -47,5 +47,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access needed to take progress pics</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Won't actually use the microphone, just gets requested with camera.</string>
 </dict>
 </plist>
