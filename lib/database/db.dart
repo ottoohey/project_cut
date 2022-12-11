@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import 'package:project_cut/extensions/double.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
+import 'package:project_cut/model/progress_pic.dart';
 import 'package:project_cut/model/week.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -42,6 +43,10 @@ class AppDatabase {
     // BIOMETRICS TABLE
     db.execute(
       'CREATE TABLE biometrics(id INTEGER PRIMARY KEY, weekId INTEGER, cycleId INTEGER, currentWeight REAL, bodyFat REAL, dateTime TEXT, day INTEGER, estimated INTEGER)',
+    );
+    // PROGRESS PICS TABLE
+    db.execute(
+      'CREATE TABLE progressPictures(id INTEGER PRIMARY KEY, biometricId INTEGER, imagePath TEXT, dateTime TEXT)',
     );
   }
 
@@ -370,11 +375,49 @@ class AppDatabase {
           );
   }
 
+  // PROGRESS PICTURE FUNCTIONS
+  List<ProgressPicture> generateProgressPictureList(
+      List<Map<String, dynamic>> maps) {
+    return List.generate(maps.length, (i) {
+      return ProgressPicture(
+        id: maps[i]['id'],
+        biometricId: maps[i]['biometricId'],
+        imagePath: maps[i]['imagePath'],
+        dateTime: maps[i]['dateTime'],
+      );
+    });
+  }
+
+  Future<void> insertProgressPicture(ProgressPicture progressPicture) async {
+    final db = await database;
+
+    await db.insert(
+      'progressPictures',
+      progressPicture.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<ProgressPicture>> getProgressPictures() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query('progressPictures');
+
+    return generateProgressPictureList(maps);
+  }
+
+  Future<void> deleteProgressPictures() async {
+    final db = await database;
+
+    await db.delete('progressPictures');
+  }
+
   Future<void> deleteAll() async {
     final db = await database;
 
     await db.delete('biometrics');
     await db.delete('weeks');
     await db.delete('cycles');
+    await db.delete('progressPictures');
   }
 }

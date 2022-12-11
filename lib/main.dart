@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
+import 'package:project_cut/controller/progress_pics_controller.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/theme.dart';
@@ -109,7 +110,11 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const ProgressPictures(),
+                builder: (context) =>
+                    ChangeNotifierProvider<ProgressPicsController>(
+                  create: (context) => ProgressPicsController(),
+                  child: const ProgressPictures(),
+                ),
               ),
             );
           },
@@ -250,15 +255,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                     MaterialButton(
                                       child: const Text('data'),
                                       onPressed: () async {
-                                        var bio = await AppDatabase.db
-                                            .getBiometricsForWeek(1);
+                                        // var bio = await AppDatabase.db
+                                        //     .getBiometricsForWeek(1);
                                         // var bio = await AppDatabase.db.getWeekById(2);
                                         // var bio =
                                         //     await AppDatabase.db.getCurrentCycle();
-                                        // var bio =
-                                        //     await AppDatabase.db.getWeeks();
-                                        // SharedPreferences sharedPreferences =
-                                        //     await SharedPreferences.getInstance();
+                                        var bio = await AppDatabase.db
+                                            .getProgressPictures();
 
                                         print(bio);
                                       },
@@ -266,8 +269,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                     MaterialButton(
                                         child: const Text('delete'),
                                         onPressed: () {
-                                          AppDatabase.db.deleteBiometrics(7);
-                                          AppDatabase.db.deleteBiometrics(8);
+                                          AppDatabase.db
+                                              .deleteProgressPictures();
                                         }
                                         // onPressed: () async {
                                         //   final prefs = await SharedPreferences

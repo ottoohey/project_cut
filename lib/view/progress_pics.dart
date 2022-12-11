@@ -2,47 +2,90 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:project_cut/controller/progress_pics_controller.dart';
+import 'package:project_cut/model/progress_pic.dart';
+import 'package:provider/provider.dart';
 
-class ProgressPictures extends StatelessWidget {
+class ProgressPictures extends StatefulWidget {
   const ProgressPictures({Key? key}) : super(key: key);
 
   @override
+  State<ProgressPictures> createState() => _ProgressPicturesState();
+}
+
+class _ProgressPicturesState extends State<ProgressPictures> {
+  late Future _progressPicsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _progressPicsFuture = _loadProgressPics();
+  }
+
+  Future _loadProgressPics() async {
+    await Provider.of<ProgressPicsController>(context, listen: false)
+        .setProgressPictures();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Progress Pics",
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        shadowColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        backgroundColor: Theme.of(context).colorScheme.onPrimary,
-      ),
-      body: ListView.builder(
-        itemCount: 3,
-        itemBuilder: (context, index) {
-          return Card(
-            child: Text('Image Stuff'),
+    return FutureBuilder(
+      future: _progressPicsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return Consumer<ProgressPicsController>(
+            builder: (context, picProvider, child) {
+              List<ProgressPicture> progressPictures =
+                  picProvider.progressPictures;
+              print(progressPictures);
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text(
+                    "Progress Pics",
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                  shadowColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                ),
+                body: ListView.builder(
+                  itemCount: progressPictures.length,
+                  itemBuilder: (context, index) {
+                    ProgressPicture progressPicture = progressPictures[index];
+                    return Card(
+                      child: Image.file(
+                        File(progressPicture.imagePath),
+                      ),
+                    );
+                  },
+                ),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => TakeProgressPic(
+                          picProvider: picProvider,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.add_a_photo_rounded),
+                ),
+              );
+            },
           );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              settings: const RouteSettings(name: '/progress_pics'),
-              builder: (context) => const TakeProgressPic(),
-            ),
-          );
-        },
-        child: const Icon(Icons.add_a_photo_rounded),
-      ),
+        } else {
+          return CircularProgressIndicator();
+        }
+      },
     );
   }
 }
 
 class TakeProgressPic extends StatefulWidget {
-  const TakeProgressPic({super.key});
+  const TakeProgressPic({super.key, required this.picProvider});
+
+  final ProgressPicsController picProvider;
 
   @override
   State<TakeProgressPic> createState() => _TakeProgressPicState();
@@ -113,11 +156,11 @@ class _TakeProgressPicState extends State<TakeProgressPic> {
             // If the picture was taken, display it on a new screen.
             await Navigator.of(context).push(
               MaterialPageRoute(
-                settings: const RouteSettings(name: '/take_picture'),
                 builder: (context) => DisplayPictureScreen(
                   // Pass the automatically generated path to
                   // the DisplayPictureScreen widget.
                   imagePath: image.path,
+                  picProvider: widget.picProvider,
                 ),
               ),
             );
@@ -135,8 +178,10 @@ class _TakeProgressPicState extends State<TakeProgressPic> {
 // A widget that displays the picture taken by the user.
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
+  final ProgressPicsController picProvider;
 
-  const DisplayPictureScreen({super.key, required this.imagePath});
+  const DisplayPictureScreen(
+      {super.key, required this.imagePath, required this.picProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +203,8 @@ class DisplayPictureScreen extends StatelessWidget {
           Row(
             children: [
               MaterialButton(
-                onPressed: () {
+                onPressed: () async {
+                  await picProvider.addImagePathToDb(imagePath);
                   int count = 0;
                   Navigator.of(context).popUntil((route) => count++ == 2);
                 },
