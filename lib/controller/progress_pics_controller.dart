@@ -48,7 +48,10 @@ class ProgressPicsController with ChangeNotifier {
     await AppDatabase.db.insertProgressPicture(progressPicture);
 
     _progressPictures.add(progressPicture);
-    _biometrics = await AppDatabase.db.progressPictureBiometrics;
+
+    if (!_biometrics.contains(biometric)) {
+      _biometrics.add(biometric);
+    }
 
     notifyListeners();
   }

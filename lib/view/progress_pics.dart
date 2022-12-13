@@ -60,21 +60,32 @@ class _ProgressPicturesState extends State<ProgressPictures> {
                               element.id == progressPicture.biometricId,
                         )
                         .first;
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Column(
-                        children: [
-                          Text(biometric.currentWeight.toString()),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(32, 8, 32, 8),
-                            child: Image.file(
-                              File(
-                                  '${directory.path}/${progressPicture.imagePath}'),
-                            ),
+
+                    return Column(
+                      children: [
+                        index == 0 ||
+                                progressPicture.biometricId !=
+                                    progressPictures[index - 1].biometricId
+                            ? Text(biometric.dateTime)
+                            : const SizedBox(),
+                        Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15)),
+                          child: Column(
+                            children: [
+                              Text(biometric.id.toString()),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(32, 8, 32, 8),
+                                child: Image.file(
+                                  File(
+                                      '${directory.path}/${progressPicture.imagePath}'),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     );
                   },
                 ),
