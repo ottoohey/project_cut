@@ -1,7 +1,9 @@
 import 'dart:io';
 
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:project_cut/controller/progress_pics_controller.dart';
 import 'package:project_cut/model/progress_pic.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +39,7 @@ class _ProgressPicturesState extends State<ProgressPictures> {
             builder: (context, picProvider, child) {
               List<ProgressPicture> progressPictures =
                   picProvider.progressPictures;
-              print(progressPictures);
+              Directory directory = picProvider.directory;
               return Scaffold(
                 appBar: AppBar(
                   title: const Text(
@@ -54,20 +56,36 @@ class _ProgressPicturesState extends State<ProgressPictures> {
                     ProgressPicture progressPicture = progressPictures[index];
                     return Card(
                       child: Image.file(
-                        File(progressPicture.imagePath),
+                        File('${directory.path}/${progressPicture.imagePath}'),
                       ),
                     );
                   },
                 ),
                 floatingActionButton: FloatingActionButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => TakeProgressPic(
-                          picProvider: picProvider,
-                        ),
-                      ),
-                    );
+                  onPressed: () async {
+                    // Navigator.of(context).push(
+                    //   MaterialPageRoute(
+                    //     builder: (context) => TakeProgressPic(
+                    //       picProvider: picProvider,
+                    //     ),
+                    //   ),
+                    // );
+                    XFile? takenImage = await ImagePicker()
+                        .pickImage(source: ImageSource.gallery);
+
+                    if (takenImage != null) {
+                      Directory directory =
+                          await getApplicationDocumentsDirectory();
+
+                      File image = File(takenImage.path);
+
+                      String imageName = path.basename(takenImage.path);
+
+                      File savedImage =
+                          await image.copy('${directory.path}/$imageName');
+
+                      picProvider.addImagePathToDb(imageName);
+                    }
                   },
                   child: const Icon(Icons.add_a_photo_rounded),
                 ),
@@ -78,146 +96,6 @@ class _ProgressPicturesState extends State<ProgressPictures> {
           return CircularProgressIndicator();
         }
       },
-    );
-  }
-}
-
-class TakeProgressPic extends StatefulWidget {
-  const TakeProgressPic({super.key, required this.picProvider});
-
-  final ProgressPicsController picProvider;
-
-  @override
-  State<TakeProgressPic> createState() => _TakeProgressPicState();
-}
-
-class _TakeProgressPicState extends State<TakeProgressPic> {
-  late CameraDescription _camera;
-  late CameraController _cameraController;
-  late Future _cameraFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _cameraFuture = _getCameras();
-  }
-
-  @override
-  void dispose() {
-    // TODO: Dispose of controllers
-    _cameraController.dispose();
-    super.dispose();
-  }
-
-  Future _getCameras() async {
-    List<CameraDescription> cameras = await availableCameras();
-    _camera = cameras.first;
-    _cameraController = CameraController(_camera, ResolutionPreset.medium);
-    await _cameraController.initialize();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Take a Progress Pic",
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        shadowColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        backgroundColor: Theme.of(context).colorScheme.onPrimary,
-      ),
-      body: FutureBuilder(
-        future: _cameraFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return CameraPreview(_cameraController);
-          } else {
-            return CircularProgressIndicator();
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        // Provide an onPressed callback.
-        onPressed: () async {
-          // Take the Picture in a try / catch block. If anything goes wrong,
-          // catch the error.
-          try {
-            // Ensure that the camera is initialized.
-            await _cameraFuture;
-
-            // Attempt to take a picture and get the file `image`
-            // where it was saved.
-            final image = await _cameraController.takePicture();
-
-            if (!mounted) return;
-
-            // If the picture was taken, display it on a new screen.
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(
-                  // Pass the automatically generated path to
-                  // the DisplayPictureScreen widget.
-                  imagePath: image.path,
-                  picProvider: widget.picProvider,
-                ),
-              ),
-            );
-          } catch (e) {
-            // If an error occurs, log the error to the console.
-            print(e);
-          }
-        },
-        child: const Icon(Icons.camera_alt),
-      ),
-    );
-  }
-}
-
-// A widget that displays the picture taken by the user.
-class DisplayPictureScreen extends StatelessWidget {
-  final String imagePath;
-  final ProgressPicsController picProvider;
-
-  const DisplayPictureScreen(
-      {super.key, required this.imagePath, required this.picProvider});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Happy with this angle?",
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        shadowColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        backgroundColor: Theme.of(context).colorScheme.onPrimary,
-      ),
-      // The image is stored as a file on the device. Use the `Image.file`
-      // constructor with the given path to display the image.
-      body: Column(
-        children: [
-          Image.file(File(imagePath)),
-          Row(
-            children: [
-              MaterialButton(
-                onPressed: () async {
-                  await picProvider.addImagePathToDb(imagePath);
-                  int count = 0;
-                  Navigator.of(context).popUntil((route) => count++ == 2);
-                },
-                child: const Text('Save'),
-              ),
-              MaterialButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Take Again'),
-              )
-            ],
-          )
-        ],
-      ),
     );
   }
 }

@@ -9,9 +9,11 @@ import 'package:project_cut/model/progress_pic.dart';
 class ProgressPicsController with ChangeNotifier {
   String _imagePath = '';
   List<ProgressPicture> _progressPictures = [];
+  Directory? _directory;
 
   String get imagePath => _imagePath;
   List<ProgressPicture> get progressPictures => _progressPictures;
+  Directory get directory => _directory!;
 
   void setImagePath(String imagePath) {
     _imagePath = imagePath;
@@ -20,21 +22,17 @@ class ProgressPicsController with ChangeNotifier {
 
   Future<void> setProgressPictures() async {
     _progressPictures = await AppDatabase.db.getProgressPictures();
+    _directory = await getApplicationDocumentsDirectory();
     notifyListeners();
   }
 
   Future<void> addImagePathToDb(String imagePath) async {
     Biometric biometric = await AppDatabase.db.getLatestBiometric();
     int biometricId = biometric.id!;
-    File image = File(imagePath);
-    Directory directory = await getApplicationDocumentsDirectory();
-    String directoryPath = directory.path;
-    File directoryImage =
-        await image.copy('$directoryPath/${imagePath.hashCode}');
 
     ProgressPicture progressPicture = ProgressPicture(
         biometricId: biometricId,
-        imagePath: directoryImage.path,
+        imagePath: imagePath,
         dateTime: DateTime.now().toLocal().toString());
 
     await AppDatabase.db.insertProgressPicture(progressPicture);

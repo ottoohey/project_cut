@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Needed to save images to your camera roll</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -50,6 +52,6 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access needed to take progress pics</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Won't actually use the microphone, just gets requested with camera.</string>
+	<string>Won&apos;t actually use the microphone, just gets requested with camera.</string>
 </dict>
 </plist>
