@@ -2,9 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 import 'package:project_cut/controller/progress_pics_controller.dart';
+import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/progress_pic.dart';
 import 'package:provider/provider.dart';
 
@@ -40,6 +39,7 @@ class _ProgressPicturesState extends State<ProgressPictures> {
               List<ProgressPicture> progressPictures =
                   picProvider.progressPictures;
               Directory directory = picProvider.directory;
+              List<Biometric> biometrics = picProvider.biometrics;
               return Scaffold(
                 appBar: AppBar(
                   title: const Text(
@@ -54,37 +54,37 @@ class _ProgressPicturesState extends State<ProgressPictures> {
                   itemCount: progressPictures.length,
                   itemBuilder: (context, index) {
                     ProgressPicture progressPicture = progressPictures[index];
+                    Biometric biometric = biometrics
+                        .where(
+                          (element) =>
+                              element.id == progressPicture.biometricId,
+                        )
+                        .first;
                     return Card(
-                      child: Image.file(
-                        File('${directory.path}/${progressPicture.imagePath}'),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      child: Column(
+                        children: [
+                          Text(biometric.currentWeight.toString()),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(32, 8, 32, 8),
+                            child: Image.file(
+                              File(
+                                  '${directory.path}/${progressPicture.imagePath}'),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
                 ),
                 floatingActionButton: FloatingActionButton(
                   onPressed: () async {
-                    // Navigator.of(context).push(
-                    //   MaterialPageRoute(
-                    //     builder: (context) => TakeProgressPic(
-                    //       picProvider: picProvider,
-                    //     ),
-                    //   ),
-                    // );
                     XFile? takenImage = await ImagePicker()
                         .pickImage(source: ImageSource.gallery);
 
                     if (takenImage != null) {
-                      Directory directory =
-                          await getApplicationDocumentsDirectory();
-
-                      File image = File(takenImage.path);
-
-                      String imageName = path.basename(takenImage.path);
-
-                      File savedImage =
-                          await image.copy('${directory.path}/$imageName');
-
-                      picProvider.addImagePathToDb(imageName);
+                      picProvider.addImagePathToDb(takenImage.path);
                     }
                   },
                   child: const Icon(Icons.add_a_photo_rounded),

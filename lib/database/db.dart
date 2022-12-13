@@ -206,6 +206,17 @@ class AppDatabase {
     return latestBiometric;
   }
 
+  Future<List<Biometric>> get progressPictureBiometrics async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT bio.* FROM biometrics bio INNER JOIN progressPictures pics ON bio.id = pics.biometricId');
+
+    List<Biometric> biometrics = generateBiometricList(maps);
+
+    return biometrics;
+  }
+
   // WEEK FUNCTIONS
   List<Week> generateWeekList(List<Map<String, dynamic>> maps) {
     return List.generate(maps.length, (i) {

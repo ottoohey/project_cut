@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
@@ -10,10 +11,12 @@ class ProgressPicsController with ChangeNotifier {
   String _imagePath = '';
   List<ProgressPicture> _progressPictures = [];
   Directory? _directory;
+  List<Biometric> _biometrics = [];
 
   String get imagePath => _imagePath;
   List<ProgressPicture> get progressPictures => _progressPictures;
   Directory get directory => _directory!;
+  List<Biometric> get biometrics => _biometrics;
 
   void setImagePath(String imagePath) {
     _imagePath = imagePath;
@@ -22,13 +25,20 @@ class ProgressPicsController with ChangeNotifier {
 
   Future<void> setProgressPictures() async {
     _progressPictures = await AppDatabase.db.getProgressPictures();
+    _biometrics = await AppDatabase.db.progressPictureBiometrics;
     _directory = await getApplicationDocumentsDirectory();
     notifyListeners();
   }
 
-  Future<void> addImagePathToDb(String imagePath) async {
+  Future<void> addImagePathToDb(String tempImagePath) async {
     Biometric biometric = await AppDatabase.db.getLatestBiometric();
     int biometricId = biometric.id!;
+
+    File image = File(tempImagePath);
+
+    String imagePath = basename(tempImagePath);
+
+    await image.copy('${directory.path}/$imagePath');
 
     ProgressPicture progressPicture = ProgressPicture(
         biometricId: biometricId,
@@ -38,6 +48,7 @@ class ProgressPicsController with ChangeNotifier {
     await AppDatabase.db.insertProgressPicture(progressPicture);
 
     _progressPictures.add(progressPicture);
+    _biometrics = await AppDatabase.db.progressPictureBiometrics;
 
     notifyListeners();
   }
