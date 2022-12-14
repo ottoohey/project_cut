@@ -417,6 +417,16 @@ class AppDatabase {
     return generateProgressPictureList(maps);
   }
 
+  Future<void> deleteProgressPictureById(int id) async {
+    final db = await database;
+
+    await db.delete(
+      'progressPictures',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> deleteProgressPictures() async {
     final db = await database;
 

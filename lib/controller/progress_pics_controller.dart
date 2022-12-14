@@ -55,4 +55,12 @@ class ProgressPicsController with ChangeNotifier {
 
     notifyListeners();
   }
+
+  Future<void> deleteProgressPicture(int id) async {
+    await AppDatabase.db.deleteProgressPictureById(id);
+    _progressPictures.removeWhere((element) => element.id == id);
+    _biometrics = await AppDatabase.db.progressPictureBiometrics;
+
+    notifyListeners();
+  }
 }
