@@ -144,6 +144,13 @@ class _MyHomePageState extends State<MyHomePage> {
         if (snapshot.connectionState == ConnectionState.done) {
           double currentWeight =
               Provider.of<BiometricsDataController>(context).currentWeight;
+          DateTime currentDateTime = DateTime.parse(
+              Provider.of<BiometricsDataController>(context).currentDateTime);
+          bool addButtonVisible = true;
+          if (currentDateTime.difference(DateTime.now()).inDays < 1) {
+            addButtonVisible = false;
+          }
+
           if (currentWeight == 0) {
             return Container(
               width: MediaQuery.of(context).size.width,
@@ -255,13 +262,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                     MaterialButton(
                                       child: const Text('data'),
                                       onPressed: () async {
-                                        // var bio = await AppDatabase.db
-                                        //     .getBiometricsForWeek(1);
+                                        var bio = await AppDatabase.db
+                                            .getBiometricsForWeek(1);
                                         // var bio = await AppDatabase.db.getWeekById(2);
                                         // var bio =
                                         //     await AppDatabase.db.getCurrentCycle();
-                                        var bio = await AppDatabase.db
-                                            .getProgressPictures();
+                                        // var bio = await AppDatabase.db
+                                        //     .getProgressPictures();
 
                                         print(bio);
                                       },
@@ -269,8 +276,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                     MaterialButton(
                                         child: const Text('delete'),
                                         onPressed: () {
-                                          AppDatabase.db
-                                              .deleteProgressPictures();
+                                          // AppDatabase.db
+                                          //     .deleteProgressPictures();
+                                          AppDatabase.db.deleteBiometrics(4);
                                         }
                                         // onPressed: () async {
                                         //   final prefs = await SharedPreferences
@@ -307,24 +315,20 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                   ),
-                  floatingActionButton: FloatingActionButton(
-                    // onPressed: () => Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => const InsertWeightScreen(),
-                    //   ),
-                    // ),
-                    onPressed: () {
-                      if (expanded) {
-                        expanded = false;
-                      } else {
-                        expanded = true;
-                      }
+                  floatingActionButton: addButtonVisible
+                      ? FloatingActionButton(
+                          onPressed: () {
+                            if (expanded) {
+                              expanded = false;
+                            } else {
+                              expanded = true;
+                            }
 
-                      setState(() {});
-                    },
-                    child: const Icon(Icons.add),
-                  ),
+                            setState(() {});
+                          },
+                          child: const Icon(Icons.add),
+                        )
+                      : const SizedBox(),
                 ),
                 GestureDetector(
                   onTap: () {

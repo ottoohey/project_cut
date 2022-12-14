@@ -19,6 +19,7 @@ class BiometricsDataController with ChangeNotifier {
   double _currentWeightLoss = 0;
   double _currentBodyFatGoal = 0;
   double _currentWeightGoal = 0;
+  String _currentDateTime = DateTime.now().toString();
   double _sliderValue = -1;
 
   List<Biometric> get biometrics => _biometrics;
@@ -30,6 +31,7 @@ class BiometricsDataController with ChangeNotifier {
   double get currentWeightLoss => _currentWeightLoss;
   double get currentBodyFatGoal => _currentBodyFatGoal;
   double get currentWeightGoal => _currentWeightGoal;
+  String get currentDateTime => _currentDateTime;
   double get sliderValue => _sliderValue;
 
   Future<void> setHomePageData() async {
@@ -45,6 +47,8 @@ class BiometricsDataController with ChangeNotifier {
     _currentWeightLoss = latestWeek.weightLoss;
     _currentBodyFatGoal = latestWeek.bodyFatGoal;
     _currentWeightGoal = latestWeek.weightGoal;
+    _currentDateTime = latestBiometric.dateTime;
+
     notifyListeners();
   }
 
