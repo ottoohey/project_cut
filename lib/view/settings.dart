@@ -43,7 +43,10 @@ class Settings extends StatelessWidget {
                   MaterialButton(
                     onPressed: () {
                       if (index == 0) {
-                        print('start new cut');
+                        Provider.of<BiometricsDataController>(context,
+                                listen: false)
+                            .startNewCut()
+                            .then((value) => Navigator.pop(context));
                       } else if (index == 1) {
                         print('View previous cut');
                       } else if (index == 2) {

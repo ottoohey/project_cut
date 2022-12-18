@@ -6,6 +6,7 @@ import 'package:project_cut/extensions/double.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CycleConfigurationController with ChangeNotifier {
   String _sex = 'MALE';
@@ -128,12 +129,31 @@ class CycleConfigurationController with ChangeNotifier {
   }
 
   Future<void> startCut(Cycle cycle) async {
-    // insert cycle
-    await AppDatabase.db.insertCycle(cycle);
-
     // get newly inserted cycle to retrieve ID
     List<Cycle> newCycle = await AppDatabase.db.getCycles();
-    int cycleId = newCycle[0].id!;
+    int cycleId = 1;
+
+    if (newCycle.isNotEmpty) {
+      cycleId = newCycle.last.id!;
+
+      Cycle updateCycle = Cycle(
+        id: cycleId,
+        startWeight: cycle.startWeight,
+        goalWeight: cycle.goalWeight,
+        startBodyFat: cycle.startBodyFat,
+        goalBodyFat: cycle.goalBodyFat,
+        startDateTime: cycle.startDateTime,
+        endDateTime: cycle.endDateTime,
+      );
+      // insert cycle
+      await AppDatabase.db.updateCycle(updateCycle);
+    } else {
+      await AppDatabase.db.insertCycle(cycle);
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('currentCycleId', cycleId);
+
     double currentBF = cycle.startBodyFat;
     double currentWeight = cycle.startWeight;
 

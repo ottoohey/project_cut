@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/progress_pic.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProgressPicsController with ChangeNotifier {
   String _imagePath = '';
@@ -32,6 +33,9 @@ class ProgressPicsController with ChangeNotifier {
 
   Future<void> addImagePathToDb(String tempImagePath) async {
     Biometric biometric = await AppDatabase.db.getLatestBiometric();
+    final prefs = await SharedPreferences.getInstance();
+    int cycleId = prefs.getInt('currentCycleId') ?? 1;
+
     int biometricId = biometric.id!;
 
     File image = File(tempImagePath);
@@ -42,6 +46,7 @@ class ProgressPicsController with ChangeNotifier {
 
     ProgressPicture progressPicture = ProgressPicture(
         biometricId: biometricId,
+        cycleId: cycleId,
         imagePath: imagePath,
         dateTime: DateTime.now().toLocal().toString());
 

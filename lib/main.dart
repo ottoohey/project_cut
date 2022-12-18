@@ -79,7 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
             await Navigator.of(context)
                 .push(
                   MaterialPageRoute(
-                    builder: (context) => const Settings(),
+                    builder: (context) =>
+                        ChangeNotifierProvider<BiometricsDataController>(
+                      create: (context) => BiometricsDataController(),
+                      child: const Settings(),
+                    ),
                   ),
                 )
                 .whenComplete(_cycleConfigurationRequired);
@@ -144,14 +148,16 @@ class _MyHomePageState extends State<MyHomePage> {
         if (snapshot.connectionState == ConnectionState.done) {
           double currentWeight =
               Provider.of<BiometricsDataController>(context).currentWeight;
-          DateTime currentDateTime = DateTime.parse(
-              Provider.of<BiometricsDataController>(context).currentDateTime);
-          bool addButtonVisible = true;
-          if (currentDateTime.difference(DateTime.now()).inDays < 1) {
-            addButtonVisible = false;
-          }
 
-          if (currentWeight == 0) {
+          bool newCut = Provider.of<BiometricsDataController>(context).newCut;
+          // DateTime currentDateTime = DateTime.parse(
+          //     Provider.of<BiometricsDataController>(context).currentDateTime);
+          bool addButtonVisible = true;
+          // if (currentDateTime.difference(DateTime.now()).inDays < 1) {
+          //   addButtonVisible = false;
+          // }
+
+          if (newCut) {
             return Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
@@ -262,11 +268,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                     MaterialButton(
                                       child: const Text('data'),
                                       onPressed: () async {
-                                        var bio = await AppDatabase.db
-                                            .getBiometricsForWeek(1);
+                                        var bio =
+                                            await AppDatabase.db.getCycles();
                                         // var bio = await AppDatabase.db.getWeekById(2);
                                         // var bio =
-                                        //     await AppDatabase.db.getCurrentCycle();
+                                        // await AppDatabase.db.getCycles();
                                         // var bio = await AppDatabase.db
                                         //     .getProgressPictures();
 
@@ -276,15 +282,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                     MaterialButton(
                                         child: const Text('delete'),
                                         onPressed: () {
+                                          AppDatabase.db.deleteAll();
                                           // AppDatabase.db
                                           //     .deleteProgressPictures();
-                                          AppDatabase.db.deleteBiometrics(4);
+                                          // AppDatabase.db.deleteCycle(4);
                                         }
                                         // onPressed: () async {
                                         //   final prefs = await SharedPreferences
                                         //       .getInstance();
                                         //   prefs.clear();
-                                        //   AppDatabase.db.deleteAll();
+                                        // AppDatabase.db.deleteAll();
                                         // },
                                         ),
                                     MaterialButton(

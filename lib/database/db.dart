@@ -46,7 +46,7 @@ class AppDatabase {
     );
     // PROGRESS PICS TABLE
     db.execute(
-      'CREATE TABLE progressPictures(id INTEGER PRIMARY KEY, biometricId INTEGER, imagePath TEXT, dateTime TEXT)',
+      'CREATE TABLE progressPictures(id INTEGER PRIMARY KEY, biometricId INTEGER, cycleId INTEGER, imagePath TEXT, dateTime TEXT)',
     );
   }
 
@@ -68,6 +68,8 @@ class AppDatabase {
 
   Future<void> addWeight(double enteredWeight) async {
     Biometric latestBiometricEntry = await getLatestBiometric();
+    final prefs = await SharedPreferences.getInstance();
+    int cycleId = prefs.getInt('currentCycleId')!;
 
     DateTime currentDateTime =
         DateTime.parse(DateFormat("yyyy-MM-dd").format(DateTime.now()));
@@ -92,7 +94,7 @@ class AppDatabase {
 
         Biometric estimatedBiometric = Biometric(
           weekId: weekId,
-          cycleId: latestBiometricEntry.cycleId,
+          cycleId: cycleId,
           currentWeight: estimatedWeight.toTwoDecimalPlaces(),
           // add latest body measurements to shared preferences
           // calculate based on that
@@ -111,17 +113,13 @@ class AppDatabase {
       weekId: latestBiometricEntry.day == 7
           ? weekId + 1
           : latestBiometricEntry.weekId,
-      cycleId: latestBiometricEntry.cycleId,
+      cycleId: cycleId,
       currentWeight: enteredWeight,
       bodyFat: latestBiometricEntry.bodyFat,
       dateTime: DateTime.now().toLocal().toString(),
       day: DateTime.now().weekday,
       estimated: 0,
     );
-
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
-    sharedPreferences.setDouble('currentWeight', enteredWeight);
 
     insertBiometric(enteredBiometric);
   }
@@ -164,20 +162,28 @@ class AppDatabase {
 
   Future<List<Biometric>> getBiometrics() async {
     final db = await database;
+    final prefs = await SharedPreferences.getInstance();
+    int cycleId = prefs.getInt('currentCycleId') ?? 1;
 
-    final List<Map<String, dynamic>> maps =
-        await db.query('biometrics', orderBy: 'dateTime');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'biometrics',
+      orderBy: 'dateTime',
+      where: 'cycleId = ?',
+      whereArgs: [cycleId],
+    );
 
     List<Biometric> biometrics = generateBiometricList(maps);
 
     return biometrics;
   }
 
-  Future<List<Biometric>> getBiometricsForWeek(int week) async {
+  Future<List<Biometric>> getBiometricsForWeek(int weekId) async {
     final db = await database;
+    final prefs = await SharedPreferences.getInstance();
+    int cycleId = prefs.getInt('currentCycleId') ?? 1;
 
-    final List<Map<String, dynamic>> maps =
-        await db.rawQuery('SELECT * FROM biometrics WHERE weekId = $week');
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM biometrics WHERE weekId = $weekId AND cycleId = $cycleId');
 
     List<Biometric> biometrics = generateBiometricList(maps);
 
@@ -186,12 +192,17 @@ class AppDatabase {
 
   Future<Biometric> getLatestBiometric() async {
     final db = await database;
+    final prefs = await SharedPreferences.getInstance();
+    int cycleId = prefs.getInt('currentCycleId') ?? 1;
 
-    final List<Map<String, dynamic>> maps =
-        await db.query('biometrics', limit: 1, orderBy: 'dateTime DESC');
+    final List<Map<String, dynamic>> maps = await db.query('biometrics',
+        limit: 1,
+        orderBy: 'dateTime DESC',
+        where: 'cycleId = ?',
+        whereArgs: [cycleId]);
 
     List<Biometric> biometrics = generateBiometricList(maps);
-    Biometric latestBiometric = Biometric(
+    Biometric latestBiometric = const Biometric(
         weekId: 0,
         cycleId: 0,
         currentWeight: 0,
@@ -208,9 +219,11 @@ class AppDatabase {
 
   Future<List<Biometric>> get progressPictureBiometrics async {
     final db = await database;
+    final prefs = await SharedPreferences.getInstance();
+    int cycleId = prefs.getInt('currentCycleId') ?? 1;
 
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-        'SELECT bio.* FROM biometrics bio INNER JOIN progressPictures pics ON bio.id = pics.biometricId');
+        'SELECT bio.* FROM biometrics bio INNER JOIN progressPictures pics ON bio.id = pics.biometricId WHERE bio.cycleId = $cycleId');
 
     List<Biometric> biometrics = generateBiometricList(maps);
 
@@ -273,8 +286,11 @@ class AppDatabase {
 
   Future<List<Week>> getWeeks() async {
     final db = await database;
+    final prefs = await SharedPreferences.getInstance();
+    int cycleId = prefs.getInt('currentCycleId') ?? 1;
 
-    final List<Map<String, dynamic>> maps = await db.query('weeks');
+    final List<Map<String, dynamic>> maps =
+        await db.query('weeks', where: 'cycleId = ?', whereArgs: [cycleId]);
 
     return generateWeekList(maps);
   }
@@ -393,6 +409,7 @@ class AppDatabase {
       return ProgressPicture(
         id: maps[i]['id'],
         biometricId: maps[i]['biometricId'],
+        cycleId: maps[i]['cycleId'],
         imagePath: maps[i]['imagePath'],
         dateTime: maps[i]['dateTime'],
       );
@@ -411,8 +428,11 @@ class AppDatabase {
 
   Future<List<ProgressPicture>> getProgressPictures() async {
     final db = await database;
+    final prefs = await SharedPreferences.getInstance();
+    int cycleId = prefs.getInt('currentCycleId') ?? 1;
 
-    final List<Map<String, dynamic>> maps = await db.query('progressPictures');
+    final List<Map<String, dynamic>> maps = await db
+        .query('progressPictures', where: 'cycleId = ?', whereArgs: [cycleId]);
 
     return generateProgressPictureList(maps);
   }
