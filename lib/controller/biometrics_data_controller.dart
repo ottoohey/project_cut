@@ -41,7 +41,7 @@ class BiometricsDataController with ChangeNotifier {
     Week latestWeek = await AppDatabase.db.getWeekById(latestBiometric.weekId);
     _biometrics =
         await AppDatabase.db.getBiometricsForWeek(latestBiometric.weekId);
-    _sliderValue = latestBiometric.weekId.toDouble();
+    _sliderValue = latestWeek.week.toDouble();
     _weeks = await AppDatabase.db.getWeeks();
     _cycle = await AppDatabase.db.getCurrentCycle();
     _currentWeight = latestBiometric.currentWeight;
@@ -87,10 +87,12 @@ class BiometricsDataController with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setSliderValue(double value) async {
-    _sliderValue = value;
-    _biometrics =
-        await AppDatabase.db.getBiometricsForWeek(_sliderValue.toInt());
+  Future<void> setSliderValue(double sliderValue) async {
+    _sliderValue = sliderValue;
+    Week week =
+        await AppDatabase.db.getWeekByWeekNumber(sliderValue.toInt() - 1);
+    int weekId = week.id!;
+    _biometrics = await AppDatabase.db.getBiometricsForWeek(weekId);
     notifyListeners();
   }
 

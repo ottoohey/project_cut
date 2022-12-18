@@ -327,6 +327,25 @@ class AppDatabase {
             bodyFatGoal: 0);
   }
 
+  Future<Week> getWeekByWeekNumber(int week) async {
+    final db = await database;
+    final prefs = await SharedPreferences.getInstance();
+    int cycleId = prefs.getInt('currentCycleId') ?? 1;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM weeks WHERE week = $week AND cycleId = $cycleId');
+
+    return maps.isNotEmpty
+        ? generateWeekList(maps).first
+        : const Week(
+            cycleId: 0,
+            week: 0,
+            calorieDeficit: 0,
+            weightLoss: 0,
+            weightGoal: 0,
+            bodyFatGoal: 0);
+  }
+
   // CYCLE FUNCTIONS
   List<Cycle> generateCycleList(List<Map<String, dynamic>> maps) {
     return List.generate(maps.length, (i) {

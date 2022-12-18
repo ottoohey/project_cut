@@ -378,7 +378,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
             Provider.of<BiometricsDataController>(context, listen: false)
                 .sliderValue
                 .toInt();
-        if (sliderValue < 0) {
+        if (sliderValue <= 0) {
           sliderValue = 1;
         }
         List<Biometric> biometrics = provider.biometrics;

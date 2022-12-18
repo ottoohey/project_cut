@@ -119,11 +119,11 @@ class CycleConfigurationController with ChangeNotifier {
       _timeFrame += 1;
     }
 
-    if (_timeFrame > 16) {
-      _timeFrame = 16;
-    } else if (_timeFrame < 8) {
-      _timeFrame = 8;
-    }
+    // if (_timeFrame > 16) {
+    //   _timeFrame = 16;
+    // } else if (_timeFrame < 8) {
+    //   _timeFrame = 8;
+    // }
 
     notifyListeners();
   }
