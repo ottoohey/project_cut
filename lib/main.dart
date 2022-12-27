@@ -221,7 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             const SizedBox(
-                              height: 75,
+                              height: 50,
                             ),
                             const CurrentWeightNeumorphicCard(),
                             const SizedBox(
@@ -269,7 +269,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       child: const Text('data'),
                                       onPressed: () async {
                                         var bio =
-                                            await AppDatabase.db.getCycles();
+                                            await AppDatabase.db.getWeeks();
                                         // var bio = await AppDatabase.db.getWeekById(2);
                                         // var bio =
                                         // await AppDatabase.db.getCycles();

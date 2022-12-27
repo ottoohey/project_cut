@@ -66,26 +66,44 @@ class _EditWeightsState extends State<EditWeights> {
                               children: [
                                 Text(
                                   biometric.currentWeight.toString(),
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                  ),
                                 ),
                                 const SizedBox(
                                   width: 8,
                                 ),
                                 Text(
                                   biometric.estimated == 1 ? '(estimated)' : '',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                  ),
                                 ),
                                 const SizedBox(
                                   width: 8,
                                 ),
                                 Text(
                                   biometric.weekId.toString(),
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                  ),
                                 ),
                               ],
                             ),
                             subtitle: Text(
                               dateFormat
                                   .format(DateTime.parse(biometric.dateTime)),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
                             ),
-                            trailing: const Icon(Icons.edit),
+                            trailing: Icon(
+                              Icons.edit,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
                             onTap: () {
                               editBiometricsProvider.setExpanded();
                               editBiometricsProvider

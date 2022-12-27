@@ -435,14 +435,16 @@ class AppDatabase {
     });
   }
 
-  Future<void> insertProgressPicture(ProgressPicture progressPicture) async {
+  Future<int> insertProgressPicture(ProgressPicture progressPicture) async {
     final db = await database;
 
-    await db.insert(
+    int id = await db.insert(
       'progressPictures',
       progressPicture.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
+    return id;
   }
 
   Future<List<ProgressPicture>> getProgressPictures() async {

@@ -44,13 +44,20 @@ class ProgressPicsController with ChangeNotifier {
 
     await image.copy('${directory.path}/$imagePath');
 
-    ProgressPicture progressPicture = ProgressPicture(
+    ProgressPicture dbProgressPicture = ProgressPicture(
         biometricId: biometricId,
         cycleId: cycleId,
         imagePath: imagePath,
         dateTime: DateTime.now().toLocal().toString());
 
-    await AppDatabase.db.insertProgressPicture(progressPicture);
+    int id = await AppDatabase.db.insertProgressPicture(dbProgressPicture);
+
+    ProgressPicture progressPicture = ProgressPicture(
+        id: id,
+        biometricId: dbProgressPicture.biometricId,
+        cycleId: dbProgressPicture.cycleId,
+        imagePath: dbProgressPicture.imagePath,
+        dateTime: dbProgressPicture.dateTime);
 
     _progressPictures.add(progressPicture);
 

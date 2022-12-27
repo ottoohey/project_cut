@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_data_controller.dart';
+import 'package:project_cut/controller/cycle_history_controller.dart';
 import 'package:project_cut/controller/edit_biometrics_history_controller.dart';
+import 'package:project_cut/view/cycle_history.dart';
 import 'package:project_cut/view/edit_weights.dart';
 import 'package:provider/provider.dart';
 
@@ -8,9 +10,9 @@ class Settings extends StatelessWidget {
   const Settings({super.key});
 
   static final List<String> _settings = [
-    'Start new cut',
+    'Edit weights',
     'View previous cut',
-    'Edit weights'
+    'Start new cut',
   ];
 
   @override
@@ -29,7 +31,7 @@ class Settings extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Container(
           padding: const EdgeInsets.all(16),
-          // height: 200,
+          height: 220,
           decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.secondary,
               borderRadius: BorderRadius.circular(25)),
@@ -43,13 +45,6 @@ class Settings extends StatelessWidget {
                   MaterialButton(
                     onPressed: () {
                       if (index == 0) {
-                        Provider.of<BiometricsDataController>(context,
-                                listen: false)
-                            .startNewCut()
-                            .then((value) => Navigator.pop(context));
-                      } else if (index == 1) {
-                        print('View previous cut');
-                      } else if (index == 2) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => MultiProvider(
@@ -63,10 +58,32 @@ class Settings extends StatelessWidget {
                                       BiometricsDataController(),
                                 )
                               ],
-                              child: EditWeights(),
+                              child: const EditWeights(),
                             ),
                           ),
                         );
+                      } else if (index == 1) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MultiProvider(
+                              providers: [
+                                ChangeNotifierProvider(
+                                  create: (context) => CycleHistoryController(),
+                                ),
+                                ChangeNotifierProvider(
+                                  create: (context) =>
+                                      BiometricsDataController(),
+                                )
+                              ],
+                              child: const CycleHistory(),
+                            ),
+                          ),
+                        );
+                      } else if (index == 2) {
+                        Provider.of<BiometricsDataController>(context,
+                                listen: false)
+                            .startNewCut()
+                            .then((value) => Navigator.pop(context));
                       }
                     },
                     child: Row(
