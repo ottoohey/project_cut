@@ -17,4 +17,20 @@ class CycleHistoryController with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('currentCycleId', cycleId);
   }
+
+  Future<void> deleteCut(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    int currentCycleId = prefs.getInt('currentCycleId')!;
+
+    cycleHistory.removeWhere((element) => element.id == id);
+    await AppDatabase.db.deleteCycleData(id);
+
+    if (currentCycleId == id) {
+      List<Cycle> cycles = await AppDatabase.db.getCycles();
+      cycles.isNotEmpty ? currentCycleId = cycles.last.id! : currentCycleId = 0;
+      await prefs.setInt('currentCycleId', currentCycleId);
+    }
+
+    notifyListeners();
+  }
 }

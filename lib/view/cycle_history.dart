@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project_cut/controller/cycle_history_controller.dart';
@@ -24,6 +25,40 @@ class _CycleHistoryState extends State<CycleHistory> {
   void initState() {
     super.initState();
     _biometricHistoryFuture = _getBiometricHistory();
+  }
+
+  void _showAlertDialog(
+      BuildContext context, CycleHistoryController cycleProvider, int id) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Delete Cut Cycle?'),
+        content:
+            const Text('This will delete all data associated with this cycle.'),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            /// This parameter indicates this action is the default,
+            /// and turns the action's text to bold text.
+            isDefaultAction: true,
+            isDestructiveAction: true,
+            onPressed: () async {
+              await cycleProvider.deleteCut(id).then((value) =>
+                  Navigator.popUntil(context, (route) => route.isFirst));
+            },
+            child: const Text('Delete'),
+          ),
+          CupertinoDialogAction(
+            /// This parameter indicates the action would perform
+            /// a destructive action such as deletion, and turns
+            /// the action's text color to red.
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -62,6 +97,16 @@ class _CycleHistoryState extends State<CycleHistory> {
                               ),
                             ),
                           ],
+                        ),
+                        trailing: GestureDetector(
+                          onTap: () {
+                            _showAlertDialog(
+                                context, cycleHistoryProvider, cycle.id!);
+                          },
+                          child: const Icon(
+                            Icons.delete_forever,
+                            color: Colors.red,
+                          ),
                         ),
                         subtitle: Text(
                           '${dateFormat.format(DateTime.parse(cycle.startDateTime))} to ${dateFormat.format(DateTime.parse(cycle.endDateTime))}',

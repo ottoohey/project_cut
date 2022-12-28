@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
@@ -161,50 +162,82 @@ class _MyHomePageState extends State<MyHomePage> {
             return Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              color: Colors.white54,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                child: Center(
-                  child: Container(
-                    height: 300,
-                    width: MediaQuery.of(context).size.width - 32,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: Theme.of(context).colorScheme.onPrimary),
-                    child: Column(
+              color: Theme.of(context).colorScheme.primary,
+              child: Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  // color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
                       children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height / 4,
+                        ),
                         Text(
-                          'Welcome to Project Cut :)',
+                          'PROJECT CUT',
                           style: Theme.of(context).textTheme.headline4,
                           textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(
+                          height: 32,
                         ),
                         Text(
                           'We just need to get a few bits of information to set everything up. All data is stored on your phone, so only you have access to it!',
                           style: Theme.of(context).textTheme.subtitle1,
                           textAlign: TextAlign.center,
                         ),
-                        MaterialButton(
-                          child: const Text('Get Started'),
-                          onPressed: () async {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => MultiProvider(
-                                  providers: [
-                                    ChangeNotifierProvider(
-                                        create: (context) =>
-                                            CycleConfigurationController()),
-                                  ],
-                                  child: const CycleConfiguration(),
-                                ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height / 8,
+                        ),
+                        Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            SizedBox(
+                              height: 250,
+                              width: 250,
+                              child: Image(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                image:
+                                    const AssetImage('images/kettlebell_1.png'),
                               ),
-                            );
-                            await _cycleConfigurationRequired();
-                          },
+                            ),
+                            BlurryContainer(
+                              blur: 25,
+                              width: MediaQuery.of(context).size.width,
+                              height: 110,
+                              elevation: 0,
+                              color: Colors.transparent,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(20)),
+                              child: const SizedBox(),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ),
+                    MaterialButton(
+                      child: const Text('Get Started'),
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MultiProvider(
+                              providers: [
+                                ChangeNotifierProvider(
+                                    create: (context) =>
+                                        CycleConfigurationController()),
+                              ],
+                              child: const CycleConfiguration(),
+                            ),
+                          ),
+                        );
+                        await _cycleConfigurationRequired();
+                      },
+                    ),
+                  ],
                 ),
               ),
             );

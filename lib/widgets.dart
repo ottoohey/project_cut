@@ -424,6 +424,7 @@ class WeightLineGraphState extends State<WeightLineGraph> {
             ),
             Column(
               children: [
+                // TODO: Sometimes causes error when new cut created and navigating to screen
                 Slider(
                   value: sliderValue.toDouble(),
                   max: remaining.toDouble(),

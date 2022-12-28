@@ -474,6 +474,15 @@ class AppDatabase {
     await db.delete('progressPictures');
   }
 
+  Future<void> deleteCycleData(int id) async {
+    final db = await database;
+
+    await db.delete('cycles', where: 'id = ?', whereArgs: [id]);
+    await db.delete('weeks', where: 'cycleId = ?', whereArgs: [id]);
+    await db.delete('biometrics', where: 'cycleId = ?', whereArgs: [id]);
+    await db.delete('progressPictures', where: 'cycleId = ?', whereArgs: [id]);
+  }
+
   Future<void> deleteAll() async {
     final db = await database;
 
