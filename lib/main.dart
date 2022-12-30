@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/biometrics_data_controller.dart';
@@ -91,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
           },
           child: Column(
             children: [
-              Text('SETTINGS'),
+              const Text('SETTINGS'),
               Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Icon(
@@ -125,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
           },
           child: Column(
             children: [
-              Text('PROGRESS PIC'),
+              const Text('PROGRESS PIC'),
               Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Icon(
@@ -147,17 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
       future: _cycleConfigurationRequiredFuture,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          double currentWeight =
-              Provider.of<BiometricsDataController>(context).currentWeight;
-
           bool newCut = Provider.of<BiometricsDataController>(context).newCut;
-          // DateTime currentDateTime = DateTime.parse(
-          //     Provider.of<BiometricsDataController>(context).currentDateTime);
-          bool addButtonVisible = true;
-          // if (currentDateTime.difference(DateTime.now()).inDays < 1) {
-          //   addButtonVisible = false;
-          // }
-
           if (newCut) {
             return Container(
               width: MediaQuery.of(context).size.width,
@@ -245,131 +233,128 @@ class _MyHomePageState extends State<MyHomePage> {
             return Stack(
               children: [
                 Scaffold(
-                  resizeToAvoidBottomInset: false,
-                  body: SingleChildScrollView(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            const SizedBox(
-                              height: 50,
-                            ),
-                            const CurrentWeightNeumorphicCard(),
-                            const SizedBox(
-                              height: 16,
-                            ),
-                            const WeightLineGraph(),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            const WeeklyDataGrid(),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            _buttonRow(),
-                            Column(
-                              children: [
-                                const SizedBox(
-                                  height: 16,
-                                ),
-                                Column(
-                                  children: [
-                                    MaterialButton(
-                                      child: const Text('add'),
-                                      onPressed: () async {
-                                        // AppDatabase.db.addWeight(86.5);
-                                        //   SharedPreferences sharedPreferences =
-                                        //       await SharedPreferences.getInstance();
-                                        //   sharedPreferences.setDouble(
-                                        //       'currentWeight', 86.7);
-                                        Biometric bio = const Biometric(
-                                            id: 3,
-                                            weekId: 1,
-                                            cycleId: 1,
-                                            currentWeight: 0,
-                                            bodyFat: 20,
-                                            dateTime:
-                                                '2022-11-30 00:00:00.000000',
-                                            day: 3,
-                                            estimated: 0);
-                                        await AppDatabase.db
-                                            .updateBiometric(bio);
-                                      },
-                                    ),
-                                    MaterialButton(
-                                      child: const Text('data'),
-                                      onPressed: () async {
-                                        var bio =
-                                            await AppDatabase.db.getWeeks();
-                                        // var bio = await AppDatabase.db.getWeekById(2);
-                                        // var bio =
-                                        // await AppDatabase.db.getCycles();
-                                        // var bio = await AppDatabase.db
-                                        //     .getProgressPictures();
+                    resizeToAvoidBottomInset: false,
+                    body: SingleChildScrollView(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              const SizedBox(
+                                height: 50,
+                              ),
+                              const CurrentWeightNeumorphicCard(),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              const WeightLineGraph(),
+                              const SizedBox(
+                                height: 24,
+                              ),
+                              const WeeklyDataGrid(),
+                              const SizedBox(
+                                height: 24,
+                              ),
+                              _buttonRow(),
+                              Column(
+                                children: [
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  Column(
+                                    children: [
+                                      MaterialButton(
+                                        child: const Text('add'),
+                                        onPressed: () async {
+                                          // AppDatabase.db.addWeight(86.5);
+                                          //   SharedPreferences sharedPreferences =
+                                          //       await SharedPreferences.getInstance();
+                                          //   sharedPreferences.setDouble(
+                                          //       'currentWeight', 86.7);
+                                          Biometric bio = const Biometric(
+                                              id: 3,
+                                              weekId: 1,
+                                              cycleId: 1,
+                                              currentWeight: 0,
+                                              bodyFat: 20,
+                                              dateTime:
+                                                  '2022-11-30 00:00:00.000000',
+                                              day: 3,
+                                              estimated: 0);
+                                          await AppDatabase.db
+                                              .updateBiometric(bio);
+                                        },
+                                      ),
+                                      MaterialButton(
+                                        child: const Text('data'),
+                                        onPressed: () async {
+                                          var bio = await AppDatabase.db
+                                              .getBiometrics();
+                                          // var bio = await AppDatabase.db.getWeekById(2);
+                                          // var bio =
+                                          // await AppDatabase.db.getCycles();
+                                          // var bio = await AppDatabase.db
+                                          //     .getProgressPictures();
 
-                                        print(bio);
-                                      },
-                                    ),
-                                    MaterialButton(
-                                        child: const Text('delete'),
-                                        onPressed: () {
-                                          AppDatabase.db.deleteAll();
-                                          // AppDatabase.db
-                                          //     .deleteProgressPictures();
-                                          // AppDatabase.db.deleteCycle(4);
-                                        }
-                                        // onPressed: () async {
-                                        //   final prefs = await SharedPreferences
-                                        //       .getInstance();
-                                        //   prefs.clear();
-                                        // AppDatabase.db.deleteAll();
-                                        // },
-                                        ),
-                                    MaterialButton(
-                                      child: const Text('Cycle Config'),
-                                      onPressed: () =>
-                                          Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => MultiProvider(
-                                            providers: [
-                                              ChangeNotifierProvider(
-                                                  create: (context) =>
-                                                      CycleConfigurationController()),
-                                              ChangeNotifierProvider(
-                                                  create: (context) =>
-                                                      BiometricsDataController()),
-                                            ],
-                                            child: const CycleConfiguration(),
+                                          print(bio);
+                                        },
+                                      ),
+                                      MaterialButton(
+                                          child: const Text('delete'),
+                                          onPressed: () {
+                                            // AppDatabase.db.deleteAll();
+                                            // AppDatabase.db
+                                            //     .deleteProgressPictures();
+                                            AppDatabase.db.deleteBiometrics(2);
+                                          }
+                                          // onPressed: () async {
+                                          //   final prefs = await SharedPreferences
+                                          //       .getInstance();
+                                          //   prefs.clear();
+                                          // AppDatabase.db.deleteAll();
+                                          // },
+                                          ),
+                                      MaterialButton(
+                                        child: const Text('Cycle Config'),
+                                        onPressed: () =>
+                                            Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => MultiProvider(
+                                              providers: [
+                                                ChangeNotifierProvider(
+                                                    create: (context) =>
+                                                        CycleConfigurationController()),
+                                                ChangeNotifierProvider(
+                                                    create: (context) =>
+                                                        BiometricsDataController()),
+                                              ],
+                                              child: const CycleConfiguration(),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ],
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  floatingActionButton: addButtonVisible
-                      ? FloatingActionButton(
-                          onPressed: () {
-                            if (expanded) {
-                              expanded = false;
-                            } else {
-                              expanded = true;
-                            }
+                    floatingActionButton: FloatingActionButton(
+                      onPressed: () {
+                        if (expanded) {
+                          expanded = false;
+                        } else {
+                          expanded = true;
+                        }
 
-                            setState(() {});
-                          },
-                          child: const Icon(Icons.add),
-                        )
-                      : const SizedBox(),
-                ),
+                        setState(() {});
+                      },
+                      child: const Icon(Icons.add),
+                    )),
                 GestureDetector(
                   onTap: () {
                     expanded = false;

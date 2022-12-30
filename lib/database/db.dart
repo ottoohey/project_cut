@@ -66,7 +66,7 @@ class AppDatabase {
     });
   }
 
-  Future<void> addWeight(double enteredWeight) async {
+  Future<void> insertWeight(double enteredWeight) async {
     Biometric latestBiometricEntry = await getLatestBiometric();
     final prefs = await SharedPreferences.getInstance();
     int cycleId = prefs.getInt('currentCycleId')!;

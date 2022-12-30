@@ -154,7 +154,7 @@ class _ProgressPicturesState extends State<ProgressPictures> {
             },
           );
         } else {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
       },
     );

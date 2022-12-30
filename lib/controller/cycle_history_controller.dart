@@ -5,11 +5,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CycleHistoryController with ChangeNotifier {
   List<Cycle> _cycleHistory = [];
+  int _currentCycleId = 1;
 
   List<Cycle> get cycleHistory => _cycleHistory;
+  int get currentCycleId => _currentCycleId;
 
   Future<void> setCycleHistory() async {
     _cycleHistory = await AppDatabase.db.getCycles();
+    final prefs = await SharedPreferences.getInstance();
+    _currentCycleId = prefs.getInt('currentCycleId')!;
     notifyListeners();
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_cut/database/db.dart';
+import 'package:project_cut/extensions/date_time.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
@@ -97,13 +98,33 @@ class BiometricsDataController with ChangeNotifier {
   }
 
   Future<void> addWeight(double weight) async {
-    await AppDatabase.db.addWeight(weight);
+    if (_biometrics.isEmpty ||
+        DateTime.now()
+            .isNotSameDate(DateTime.parse(_biometrics.last.dateTime))) {
+      await AppDatabase.db.insertWeight(weight);
+    } else {
+      await _updateWeight(weight);
+    }
     Biometric latestBiometric = await AppDatabase.db.getLatestBiometric();
     _currentWeight = weight;
     _sliderValue = latestBiometric.weekId.toDouble();
     _biometrics =
         await AppDatabase.db.getBiometricsForWeek(latestBiometric.weekId);
     notifyListeners();
+  }
+
+  Future<void> _updateWeight(double weight) async {
+    Biometric outdatedBiometric = _biometrics.last;
+    Biometric newBiometric = Biometric(
+        id: outdatedBiometric.id,
+        weekId: outdatedBiometric.weekId,
+        cycleId: outdatedBiometric.cycleId,
+        currentWeight: weight,
+        bodyFat: outdatedBiometric.bodyFat,
+        dateTime: DateTime.now().toLocal().toString(),
+        day: outdatedBiometric.day,
+        estimated: 0);
+    await AppDatabase.db.updateBiometric(newBiometric);
   }
 
   Future<void> testChangeWeight() async {

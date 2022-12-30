@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
 import 'package:project_cut/model/cycle.dart';
@@ -12,29 +13,29 @@ class CycleConfiguration extends StatefulWidget {
 }
 
 class _CycleConfigurationState extends State<CycleConfiguration> {
-  PageController pageController = PageController(initialPage: 0);
-  List<bool> isSelected = [true, false];
-  List<String> sexes = ['MALE', 'FEMALE'];
+  final PageController _pageController = PageController(initialPage: 0);
+  List<bool> _isSelected = [true, false];
+  final List<String> _sexes = ['MALE', 'FEMALE'];
   String height = '';
   String age = '';
   String startingWeight = '';
   String startingBodyfat = '';
   String goalBodyfat = '';
 
-  static const String heightTitle = 'HEIGHT';
-  static const String ageTitle = 'AGE';
-  static const String startingWeightTitle = 'STARTING WEIGHT';
-  static const String startingBodyfatTitle = 'BODYFAT %';
-  static const String goalBodyfatTitle = 'GOAL BODYFAT %';
+  static const String _heightTitle = 'HEIGHT';
+  static const String _ageTitle = 'AGE';
+  static const String _startingWeightTitle = 'STARTING WEIGHT';
+  static const String _startingBodyFatTitle = 'BODYFAT %';
+  static const String _goalBodyFatTitle = 'GOAL BODYFAT %';
 
-  Widget toggleButtonWidget(String title) {
+  Widget _toggleButtonWidget(String title) {
     return SizedBox(
       width: (MediaQuery.of(context).size.width / 2) - 64,
       child: Center(child: Text(title)),
     );
   }
 
-  Widget textInputWidget(BuildContext context, String hint, String unit,
+  Widget _textInputWidget(BuildContext context, String hint, String unit,
       CycleConfigurationController cycleProvider) {
     Color onPrimary = Theme.of(context).colorScheme.onPrimary;
     String value = '';
@@ -44,18 +45,18 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     double width = MediaQuery.of(context).size.width - 128;
 
     switch (hint) {
-      case ageTitle:
+      case _ageTitle:
         value = cycleProvider.age.toString();
         break;
-      case startingWeightTitle:
+      case _startingWeightTitle:
         decimal = true;
         value = cycleProvider.startingWeight.toString();
         break;
-      case startingBodyfatTitle:
+      case _startingBodyFatTitle:
         width = MediaQuery.of(context).size.width / 2 - 64;
         value = cycleProvider.startingBodyFat.toString();
         break;
-      case goalBodyfatTitle:
+      case _goalBodyFatTitle:
         width = MediaQuery.of(context).size.width / 2 - 64;
         value = cycleProvider.goalBodyFat.toString();
         break;
@@ -98,16 +99,16 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
               value = enteredValue;
 
               switch (hint) {
-                case ageTitle:
+                case _ageTitle:
                   cycleProvider.setAge(enteredValue);
                   break;
-                case startingWeightTitle:
+                case _startingWeightTitle:
                   cycleProvider.setStartingWeight(enteredValue);
                   break;
-                case startingBodyfatTitle:
+                case _startingBodyFatTitle:
                   cycleProvider.setStartingBodyFat(enteredValue);
                   break;
-                case goalBodyfatTitle:
+                case _goalBodyFatTitle:
                   cycleProvider.setGoalBodyFat(enteredValue);
                   break;
                 default:
@@ -124,7 +125,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     );
   }
 
-  Widget gaugeWidget(CycleConfigurationController cycleProvider) {
+  Widget _gaugeWidget(CycleConfigurationController cycleProvider) {
     return Stack(
       children: [
         SizedBox(
@@ -204,43 +205,90 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     );
   }
 
-  Widget scrollToNextPageButton(int pageNumber) {
+  bool _checkFieldsCompleted(int timeFrame, double startWeight,
+      double startBodyFat, double goalBodyFat, double height) {
+    if (timeFrame == 0 ||
+        startWeight == 0 ||
+        startBodyFat == 0 ||
+        goalBodyFat == 0 ||
+        height == 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  void _showAlertDialog(BuildContext context) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Fields Missing'),
+        content: const Text('Please make sure you fill out all the fields!'),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            isDefaultAction: true,
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _scrollToNextPageButton(int pageNumber) {
+    int timeFrame =
+        Provider.of<CycleConfigurationController>(context, listen: false)
+            .timeFrame
+            .toInt();
+    double startWeight =
+        Provider.of<CycleConfigurationController>(context, listen: false)
+            .startingWeight;
+    double startBodyFat =
+        Provider.of<CycleConfigurationController>(context, listen: false)
+            .startingBodyFat;
+    double goalBodyFat =
+        Provider.of<CycleConfigurationController>(context, listen: false)
+            .goalBodyFat;
+    double height =
+        Provider.of<CycleConfigurationController>(context, listen: false)
+            .height;
+
     switch (pageNumber) {
       case 3:
         return MaterialButton(
           child: const Text('Start Cut'),
           onPressed: () {
-            int timeFrame = Provider.of<CycleConfigurationController>(context,
-                    listen: false)
-                .timeFrame
-                .toInt();
-            Cycle cycle = Cycle(
-              startWeight: Provider.of<CycleConfigurationController>(context,
-                      listen: false)
-                  .startingWeight,
-              goalWeight: 0,
-              startBodyFat: Provider.of<CycleConfigurationController>(context,
-                      listen: false)
-                  .startingBodyFat,
-              goalBodyFat: Provider.of<CycleConfigurationController>(context,
-                      listen: false)
-                  .goalBodyFat,
-              startDateTime: DateTime.now().toLocal().toString(),
-              endDateTime: DateTime.now()
-                  .add(Duration(days: timeFrame * 7))
-                  .toLocal()
-                  .toString(),
-            );
-            Provider.of<CycleConfigurationController>(context, listen: false)
-                .startCut(cycle)
-                .whenComplete(() => Navigator.of(context).pop());
+            bool fieldsCompleted = _checkFieldsCompleted(
+                timeFrame, startWeight, startBodyFat, goalBodyFat, height);
+
+            if (fieldsCompleted) {
+              Cycle cycle = Cycle(
+                startWeight: startWeight,
+                goalWeight: 0,
+                startBodyFat: startBodyFat,
+                goalBodyFat: goalBodyFat,
+                startDateTime: DateTime.now().toLocal().toString(),
+                endDateTime: DateTime.now()
+                    .add(Duration(days: timeFrame * 7))
+                    .toLocal()
+                    .toString(),
+              );
+              Provider.of<CycleConfigurationController>(context, listen: false)
+                  .startCut(cycle)
+                  .whenComplete(() => Navigator.of(context).pop());
+            } else {
+              // Alert
+              _showAlertDialog(context);
+            }
           },
         );
       default:
         return MaterialButton(
           child: const Text('Next'),
           onPressed: () {
-            pageController.animateToPage(pageNumber,
+            _pageController.animateToPage(pageNumber,
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeOutCubic);
           },
@@ -248,7 +296,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     }
   }
 
-  Widget scrollToPreviousPageButton(int pageNumber) {
+  Widget _scrollToPreviousPageButton(int pageNumber) {
     switch (pageNumber) {
       case 999:
         return MaterialButton(
@@ -260,14 +308,14 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
       default:
         return MaterialButton(
           child: const Text('Back'),
-          onPressed: () => pageController.animateToPage(pageNumber,
+          onPressed: () => _pageController.animateToPage(pageNumber,
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOutCubic),
         );
     }
   }
 
-  Widget bodyFatCalculationTextEntry(
+  Widget _bodyFatCalculationTextEntry(
       String hint, CycleConfigurationController cycleProvider) {
     String value = '';
     switch (hint) {
@@ -302,7 +350,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                     const TextInputType.numberWithOptions(decimal: true),
                 controller: TextEditingController(text: value),
                 enabled: true,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 32,
                 ),
@@ -345,7 +393,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     );
   }
 
-  Widget pageOne() {
+  Widget _pageOne() {
     return Consumer<CycleConfigurationController>(
       builder: (context, cycleProvider, child) {
         return Container(
@@ -361,7 +409,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                   ),
                   Center(
                     child: ToggleButtons(
-                      isSelected: isSelected,
+                      isSelected: _isSelected,
                       selectedColor: Theme.of(context).colorScheme.primary,
                       color: Theme.of(context).colorScheme.onPrimary,
                       fillColor: Theme.of(context).colorScheme.onPrimary,
@@ -371,24 +419,24 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                       borderWidth: 0.5,
                       borderRadius: BorderRadius.circular(10),
                       children: [
-                        toggleButtonWidget(sexes[0]),
-                        toggleButtonWidget(sexes[1]),
+                        _toggleButtonWidget(_sexes[0]),
+                        _toggleButtonWidget(_sexes[1]),
                       ],
                       onPressed: (int newIndex) async {
-                        isSelected = [false];
-                        isSelected.insert(newIndex, true);
-                        cycleProvider.setSex(sexes[newIndex]);
+                        _isSelected = [false];
+                        _isSelected.insert(newIndex, true);
+                        cycleProvider.setSex(_sexes[newIndex]);
                       },
                     ),
                   ),
                   const SizedBox(
                     height: 64,
                   ),
-                  textInputWidget(context, heightTitle, 'cm', cycleProvider),
+                  _textInputWidget(context, _heightTitle, 'cm', cycleProvider),
                   const SizedBox(
                     height: 32,
                   ),
-                  textInputWidget(context, ageTitle, 'yrs', cycleProvider),
+                  _textInputWidget(context, _ageTitle, 'yrs', cycleProvider),
                   const SizedBox(
                     height: 100,
                   ),
@@ -397,8 +445,8 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  scrollToPreviousPageButton(999),
-                  scrollToNextPageButton(1),
+                  _scrollToPreviousPageButton(999),
+                  _scrollToNextPageButton(1),
                 ],
               ),
             ],
@@ -408,7 +456,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     );
   }
 
-  Widget pageTwo() {
+  Widget _pageTwo() {
     return Consumer<CycleConfigurationController>(
       builder: (context, cycleProvider, child) {
         return Stack(
@@ -424,22 +472,22 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                       const SizedBox(
                         height: 100,
                       ),
-                      textInputWidget(
-                          context, startingWeightTitle, 'kg', cycleProvider),
+                      _textInputWidget(
+                          context, _startingWeightTitle, 'kg', cycleProvider),
                       const SizedBox(
                         height: 32,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          textInputWidget(context, startingBodyfatTitle, '%',
+                          _textInputWidget(context, _startingBodyFatTitle, '%',
                               cycleProvider),
                           const Icon(
                             Icons.arrow_forward,
                             size: 32,
                           ),
-                          textInputWidget(
-                              context, goalBodyfatTitle, '%', cycleProvider),
+                          _textInputWidget(
+                              context, _goalBodyFatTitle, '%', cycleProvider),
                         ],
                       ),
                       const SizedBox(
@@ -453,8 +501,8 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      scrollToPreviousPageButton(0),
-                      scrollToNextPageButton(2),
+                      _scrollToPreviousPageButton(0),
+                      _scrollToNextPageButton(2),
                     ],
                   ),
                 ],
@@ -510,12 +558,12 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                               ),
                               Column(
                                 children: [
-                                  bodyFatCalculationTextEntry(
+                                  _bodyFatCalculationTextEntry(
                                       'NECK', cycleProvider),
-                                  bodyFatCalculationTextEntry(
+                                  _bodyFatCalculationTextEntry(
                                       'WAIST', cycleProvider),
                                   cycleProvider.sex == 'FEMALE'
-                                      ? bodyFatCalculationTextEntry(
+                                      ? _bodyFatCalculationTextEntry(
                                           'HIPS', cycleProvider)
                                       : const SizedBox(),
                                 ],
@@ -551,7 +599,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     );
   }
 
-  Widget pageThree() {
+  Widget _pageThree() {
     return Consumer<CycleConfigurationController>(
       builder: (context, cycleProvider, child) {
         return Container(
@@ -566,7 +614,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                       const SizedBox(
                         height: 100,
                       ),
-                      gaugeWidget(cycleProvider),
+                      _gaugeWidget(cycleProvider),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -596,8 +644,8 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      scrollToPreviousPageButton(1),
-                      scrollToNextPageButton(3),
+                      _scrollToPreviousPageButton(1),
+                      _scrollToNextPageButton(3),
                     ],
                   )
                 ]));
@@ -612,23 +660,12 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
         return Scaffold(
           resizeToAvoidBottomInset: false,
           body: PageView(
-              controller: pageController,
+              controller: _pageController,
               scrollDirection: Axis.vertical,
               children: [
-                // Container(
-                //   color: Colors.amber,
-                //   child: Center(
-                //     child: MaterialButton(
-                //       child: Text('test'),
-                //       onPressed: () => biometricsProvider
-                //           .testChangeWeight()
-                //           .then((value) => Navigator.pop(context)),
-                //     ),
-                //   ),
-                // ),
-                pageOne(),
-                pageTwo(),
-                pageThree(),
+                _pageOne(),
+                _pageTwo(),
+                _pageThree(),
               ],
               onPageChanged: (value) {
                 value == 2 ? cycleProvider.estimateTimeFrame() : null;

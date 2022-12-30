@@ -80,11 +80,16 @@ class _CycleHistoryState extends State<CycleHistory> {
               return Consumer<CycleHistoryController>(
                 builder: (context, cycleHistoryProvider, child) {
                   List<Cycle> cycleHistory = cycleHistoryProvider.cycleHistory;
+                  int currentCycleId = cycleHistoryProvider.currentCycleId;
                   return ListView.builder(
                     padding: const EdgeInsets.all(8),
                     itemCount: cycleHistory.length,
                     itemBuilder: (context, index) {
                       Cycle cycle = cycleHistory[index];
+                      bool currentCycle = true;
+                      cycle.id == currentCycleId
+                          ? currentCycle = true
+                          : currentCycle = false;
                       return ListTile(
                         textColor: Colors.black,
                         tileColor: Theme.of(context).colorScheme.secondary,
@@ -98,15 +103,30 @@ class _CycleHistoryState extends State<CycleHistory> {
                             ),
                           ],
                         ),
-                        trailing: GestureDetector(
-                          onTap: () {
-                            _showAlertDialog(
-                                context, cycleHistoryProvider, cycle.id!);
-                          },
-                          child: const Icon(
-                            Icons.delete_forever,
-                            color: Colors.red,
-                          ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            currentCycle
+                                ? const Icon(
+                                    Icons.circle,
+                                    color: Colors.green,
+                                    size: 10,
+                                  )
+                                : const SizedBox(),
+                            const SizedBox(
+                              width: 16,
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                _showAlertDialog(
+                                    context, cycleHistoryProvider, cycle.id!);
+                              },
+                              child: const Icon(
+                                Icons.delete_forever,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
                         ),
                         subtitle: Text(
                           '${dateFormat.format(DateTime.parse(cycle.startDateTime))} to ${dateFormat.format(DateTime.parse(cycle.endDateTime))}',
@@ -127,7 +147,7 @@ class _CycleHistoryState extends State<CycleHistory> {
                 },
               );
             } else {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
             }
           }),
     );

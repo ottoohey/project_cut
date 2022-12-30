@@ -213,7 +213,7 @@ class _EditWeightsState extends State<EditWeights> {
                 },
               );
             } else {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
             }
           }),
     );
