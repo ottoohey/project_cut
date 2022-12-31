@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/extensions/date_time.dart';
+import 'package:project_cut/extensions/double.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
@@ -125,20 +127,5 @@ class BiometricsDataController with ChangeNotifier {
         day: outdatedBiometric.day,
         estimated: 0);
     await AppDatabase.db.updateBiometric(newBiometric);
-  }
-
-  Future<void> testChangeWeight() async {
-    Biometric bio = const Biometric(
-        id: 3,
-        weekId: 1,
-        cycleId: 1,
-        currentWeight: 85,
-        bodyFat: 20,
-        dateTime: '2022-11-30 00:00:00.000000',
-        day: 3,
-        estimated: 0);
-    await AppDatabase.db.updateBiometric(bio);
-    _currentWeight = 85;
-    notifyListeners();
   }
 }

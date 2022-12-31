@@ -73,6 +73,7 @@ class AppDatabase {
 
     DateTime currentDateTime =
         DateTime.parse(DateFormat("yyyy-MM-dd").format(DateTime.now()));
+
     DateTime lastEntryDateTime = DateTime.parse(DateFormat("yyyy-MM-dd")
         .format(DateTime.parse(latestBiometricEntry.dateTime)));
 
@@ -90,7 +91,7 @@ class AppDatabase {
       for (var i = 1; i < daysSinceLastEntry; i++) {
         DateTime estimatedDateTime = lastEntryDateTime.add(Duration(days: i));
         double estimatedWeight =
-            latestBiometricEntry.currentWeight + (dailyWeightDifference * i);
+            latestBiometricEntry.currentWeight + dailyWeightDifference;
 
         Biometric estimatedBiometric = Biometric(
           weekId: weekId,
@@ -106,6 +107,9 @@ class AppDatabase {
 
         insertBiometric(estimatedBiometric);
         // incremement week if previous estimated week added was day 7
+        if (estimatedBiometric.day == 7) {
+          weekId += 1;
+        }
         latestBiometricEntry = estimatedBiometric;
       }
     }
