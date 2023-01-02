@@ -89,12 +89,10 @@ class Settings extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Card(
-                          color: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          child: Text(
-                            _settings[index],
-                            style: const TextStyle(fontSize: 18),
+                        Text(
+                          _settings[index],
+                          style: const TextStyle(
+                            fontSize: 18,
                           ),
                         ),
                         const SizedBox(

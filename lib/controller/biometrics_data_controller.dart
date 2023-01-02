@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/extensions/date_time.dart';
-import 'package:project_cut/extensions/double.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';
@@ -92,8 +90,8 @@ class BiometricsDataController with ChangeNotifier {
 
   Future<void> setSliderValue(double sliderValue) async {
     _sliderValue = sliderValue;
-    Week week =
-        await AppDatabase.db.getWeekByWeekNumber(sliderValue.toInt() - 1);
+    int weekNumber = sliderValue.toInt() - 1;
+    Week week = await AppDatabase.db.getWeekByWeekNumber(weekNumber);
     int weekId = week.id!;
     _biometrics = await AppDatabase.db.getBiometricsForWeek(weekId);
     notifyListeners();

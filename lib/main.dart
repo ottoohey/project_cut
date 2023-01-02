@@ -1,10 +1,9 @@
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
 import 'package:project_cut/controller/progress_pics_controller.dart';
-import 'package:project_cut/database/db.dart';
-import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/theme.dart';
 import 'package:project_cut/view/cycle_configuration.dart';
 import 'package:project_cut/view/progress_pics.dart';
@@ -185,8 +184,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           alignment: Alignment.bottomCenter,
                           children: [
                             SizedBox(
-                              height: 250,
-                              width: 250,
+                              height: MediaQuery.of(context).size.height / 4,
+                              width: MediaQuery.of(context).size.height / 4,
                               child: Image(
                                 color: Theme.of(context).colorScheme.onPrimary,
                                 image:
@@ -196,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             BlurryContainer(
                               blur: 25,
                               width: MediaQuery.of(context).size.width,
-                              height: 110,
+                              height: MediaQuery.of(context).size.height / 9,
                               elevation: 0,
                               color: Colors.transparent,
                               borderRadius:
@@ -257,87 +256,90 @@ class _MyHomePageState extends State<MyHomePage> {
                                 height: 24,
                               ),
                               _buttonRow(),
-                              Column(
-                                children: [
-                                  const SizedBox(
-                                    height: 16,
-                                  ),
-                                  Column(
-                                    children: [
-                                      MaterialButton(
-                                        child: const Text('add'),
-                                        onPressed: () async {
-                                          // AppDatabase.db.addWeight(86.5);
-                                          //   SharedPreferences sharedPreferences =
-                                          //       await SharedPreferences.getInstance();
-                                          //   sharedPreferences.setDouble(
-                                          //       'currentWeight', 86.7);
-                                          Biometric bio = const Biometric(
-                                              id: 3,
-                                              weekId: 1,
-                                              cycleId: 1,
-                                              currentWeight: 0,
-                                              bodyFat: 20,
-                                              dateTime:
-                                                  '2022-11-30 00:00:00.000000',
-                                              day: 3,
-                                              estimated: 0);
-                                          await AppDatabase.db
-                                              .updateBiometric(bio);
-                                        },
-                                      ),
-                                      MaterialButton(
-                                        child: const Text('data'),
-                                        onPressed: () async {
-                                          var bio = await AppDatabase.db
-                                              .getBiometrics();
-                                          // var bio = await AppDatabase.db.getWeekById(2);
-                                          // var bio =
-                                          // await AppDatabase.db.getCycles();
-                                          // var bio = await AppDatabase.db
-                                          //     .getProgressPictures();
-
-                                          print(bio);
-                                        },
-                                      ),
-                                      MaterialButton(
-                                          child: const Text('delete'),
-                                          onPressed: () {
-                                            // AppDatabase.db.deleteAll();
-                                            // AppDatabase.db
-                                            //     .deleteProgressPictures();
-                                            AppDatabase.db.deleteBiometrics(2);
-                                          }
-                                          // onPressed: () async {
-                                          //   final prefs = await SharedPreferences
-                                          //       .getInstance();
-                                          //   prefs.clear();
-                                          // AppDatabase.db.deleteAll();
-                                          // },
-                                          ),
-                                      MaterialButton(
-                                        child: const Text('Cycle Config'),
-                                        onPressed: () =>
-                                            Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) => MultiProvider(
-                                              providers: [
-                                                ChangeNotifierProvider(
-                                                    create: (context) =>
-                                                        CycleConfigurationController()),
-                                                ChangeNotifierProvider(
-                                                    create: (context) =>
-                                                        BiometricsDataController()),
-                                              ],
-                                              child: const CycleConfiguration(),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                ],
+                              const SizedBox(
+                                height: 24,
                               ),
+                              // Column(
+                              //   children: [
+                              //     const SizedBox(
+                              //       height: 16,
+                              //     ),
+                              //     Column(
+                              //       children: [
+                              //         MaterialButton(
+                              //           child: const Text('add'),
+                              //           onPressed: () async {
+                              // AppDatabase.db.addWeight(86.5);
+                              //   SharedPreferences sharedPreferences =
+                              //       await SharedPreferences.getInstance();
+                              //   sharedPreferences.setDouble(
+                              //       'currentWeight', 86.7);
+                              //     Biometric bio = const Biometric(
+                              //         id: 3,
+                              //         weekId: 1,
+                              //         cycleId: 1,
+                              //         currentWeight: 0,
+                              //         bodyFat: 20,
+                              //         dateTime:
+                              //             '2022-11-30 00:00:00.000000',
+                              //         day: 3,
+                              //         estimated: 0);
+                              //     await AppDatabase.db
+                              //         .updateBiometric(bio);
+                              //   },
+                              // ),
+                              // MaterialButton(
+                              //   child: const Text('data'),
+                              //   onPressed: () async {
+                              //     var bio = await AppDatabase.db
+                              //         .getBiometrics();
+                              // var bio = await AppDatabase.db.getWeekById(2);
+                              // var bio =
+                              // await AppDatabase.db.getCycles();
+                              // var bio = await AppDatabase.db
+                              //     .getProgressPictures();
+
+                              //     print(bio);
+                              //   },
+                              // ),
+                              // MaterialButton(
+                              //     child: const Text('delete'),
+                              //     onPressed: () {
+                              // AppDatabase.db.deleteAll();
+                              // AppDatabase.db
+                              //     .deleteProgressPictures();
+                              //   AppDatabase.db.deleteBiometrics(2);
+                              // }
+                              // onPressed: () async {
+                              //   final prefs = await SharedPreferences
+                              //       .getInstance();
+                              //   prefs.clear();
+                              // AppDatabase.db.deleteAll();
+                              // },
+                              // ),
+                              // MaterialButton(
+                              //   child: const Text('Cycle Config'),
+                              //   onPressed: () =>
+                              //       Navigator.of(context).push(
+                              //     MaterialPageRoute(
+                              //       builder: (context) => MultiProvider(
+                              //         providers: [
+                              //           ChangeNotifierProvider(
+                              //               create: (context) =>
+                              //                   CycleConfigurationController()),
+                              //           ChangeNotifierProvider(
+                              //               create: (context) =>
+                              //                   BiometricsDataController()),
+                              //         ],
+                              //         child: const CycleConfiguration(),
+                              //       ),
+                              //     ),
+                              //   ),
+                              //     ),
+                              //   ],
+                              // )
+                              // ],
+                              // ),
                             ],
                           ),
                         ),
@@ -363,25 +365,37 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: AnimatedContainer(
+                      // curve: Curves.easeOutCirc,
+                      // duration: const Duration(milliseconds: 300),
+                      // height: expanded
+                      //     ? MediaQuery.of(context).size.height - 340 - 32
+                      //     : 0,
+                      // width: MediaQuery.of(context).size.width - 32,
+                      // decoration: BoxDecoration(
+                      //   color: Theme.of(context).colorScheme.onSecondary,
+                      //   borderRadius: BorderRadius.circular(20),
+                      // ),
                       curve: Curves.easeOutCirc,
-                      duration: const Duration(milliseconds: 300),
-                      height: expanded
-                          ? MediaQuery.of(context).size.height - 340 - 32
-                          : 0,
-                      width: MediaQuery.of(context).size.width - 32,
+                      // TODO: Text in dropdown container overflowing whilst container expanding
+                      duration: const Duration(milliseconds: 400),
+                      height: expanded ? MediaQuery.of(context).size.height : 0,
+                      width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onSecondary,
-                        borderRadius: BorderRadius.circular(20),
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                       child: expanded
                           ? Card(
-                              color: Colors.transparent,
-                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                              color: Colors.transparent.withOpacity(0),
+                              shadowColor: Colors.transparent.withOpacity(0),
                               child: Padding(
                                 padding: const EdgeInsets.all(32),
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
+                                    const SizedBox(
+                                      height: 64,
+                                    ),
                                     Text(
                                       'Todays Weight :)',
                                       style: TextStyle(
@@ -399,8 +413,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                       keyboardType:
                                           const TextInputType.numberWithOptions(
                                               decimal: true),
-                                      style: const TextStyle(fontSize: 36),
-                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                          fontSize: 36, color: Colors.white),
+                                      textAlign: TextAlign.end,
+                                      decoration: const InputDecoration(
+                                        suffix: Text(
+                                          'kg',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(
                                       height: 16,

@@ -59,56 +59,72 @@ class _EditWeightsState extends State<EditWeights> {
                         itemCount: allBiometrics.length,
                         itemBuilder: (context, index) {
                           Biometric biometric = allBiometrics[index];
-                          return ListTile(
-                            textColor: Colors.black,
-                            tileColor: Theme.of(context).colorScheme.secondary,
-                            title: Row(
-                              children: [
-                                Text(
-                                  biometric.currentWeight.toString(),
+                          return Column(
+                            children: [
+                              index == 0 ||
+                                      biometric.weekId !=
+                                          allBiometrics[index - 1].weekId
+                                  ? Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          8, 32, 32, 8),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          "Week ${biometric.weekId}",
+                                          style: const TextStyle(fontSize: 18),
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox(),
+                              ListTile(
+                                textColor: Colors.black,
+                                tileColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                title: Row(
+                                  children: [
+                                    Text(
+                                      '${biometric.currentWeight.toString()}kg',
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    Text(
+                                      biometric.estimated == 1
+                                          ? '(estimated)'
+                                          : '',
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                subtitle: Text(
+                                  dateFormat.format(
+                                      DateTime.parse(biometric.dateTime)),
                                   style: TextStyle(
                                     color:
                                         Theme.of(context).colorScheme.onPrimary,
                                   ),
                                 ),
-                                const SizedBox(
-                                  width: 8,
+                                trailing: Icon(
+                                  Icons.edit,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
                                 ),
-                                Text(
-                                  biometric.estimated == 1 ? '(estimated)' : '',
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 8,
-                                ),
-                                Text(
-                                  biometric.weekId.toString(),
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            subtitle: Text(
-                              dateFormat
-                                  .format(DateTime.parse(biometric.dateTime)),
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
+                                onTap: () {
+                                  editBiometricsProvider.setExpanded();
+                                  editBiometricsProvider
+                                      .setBiometricIdToEdit(biometric.id!);
+                                },
                               ),
-                            ),
-                            trailing: Icon(
-                              Icons.edit,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                            onTap: () {
-                              editBiometricsProvider.setExpanded();
-                              editBiometricsProvider
-                                  .setBiometricIdToEdit(biometric.id!);
-                            },
+                            ],
                           );
                         },
                       ),
@@ -127,6 +143,7 @@ class _EditWeightsState extends State<EditWeights> {
                           ),
                           child: editBiometricsProvider.expanded
                               ? Card(
+                                  elevation: 0,
                                   color: Colors.transparent,
                                   shadowColor: Colors.transparent,
                                   child: Padding(

@@ -427,9 +427,9 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                 // TODO: Sometimes causes error when new cut created and navigating to screen
                 Slider(
                   value: sliderValue.toDouble(),
-                  max: remaining.toDouble(),
+                  max: remaining.toDouble() - 1,
                   min: 1,
-                  divisions: remaining - 1,
+                  divisions: remaining - 2,
                   activeColor: Theme.of(context).colorScheme.onPrimary,
                   inactiveColor:
                       Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
