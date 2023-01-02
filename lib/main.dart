@@ -1,6 +1,4 @@
-import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
 import 'package:project_cut/controller/progress_pics_controller.dart';
@@ -177,30 +175,19 @@ class _MyHomePageState extends State<MyHomePage> {
                           style: Theme.of(context).textTheme.subtitle1,
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height / 8,
+                        const SizedBox(
+                          height: 24,
                         ),
                         Stack(
                           alignment: Alignment.bottomCenter,
                           children: [
                             SizedBox(
-                              height: MediaQuery.of(context).size.height / 4,
-                              width: MediaQuery.of(context).size.height / 4,
-                              child: Image(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                image:
-                                    const AssetImage('images/kettlebell_1.png'),
+                              height: MediaQuery.of(context).size.height / 3,
+                              width: MediaQuery.of(context).size.height / 3,
+                              child: const Image(
+                                image: AssetImage(
+                                    'assets/icons/Project-Cut-1024x1024.png'),
                               ),
-                            ),
-                            BlurryContainer(
-                              blur: 25,
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height / 9,
-                              elevation: 0,
-                              color: Colors.transparent,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(20)),
-                              child: const SizedBox(),
                             ),
                           ],
                         ),
