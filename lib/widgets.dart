@@ -59,7 +59,7 @@ class CurrentWeightNeumorphicCard extends StatelessWidget {
                         ),
                       ),
                       TextSpan(
-                        text: 'amount',
+                        text: 'kg',
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).primaryColor,

@@ -184,9 +184,12 @@ class _MyHomePageState extends State<MyHomePage> {
                             SizedBox(
                               height: MediaQuery.of(context).size.height / 3,
                               width: MediaQuery.of(context).size.height / 3,
-                              child: const Image(
-                                image: AssetImage(
-                                    'assets/icons/Project-Cut-1024x1024.png'),
+                              child: Image(
+                                image: AssetImage(MediaQuery.of(context)
+                                            .platformBrightness ==
+                                        Brightness.light
+                                    ? 'assets/icons/Project-Cut-1024x1024.png'
+                                    : 'assets/icons/Project-Cut-1024x1024-Dark.png'),
                               ),
                             ),
                           ],

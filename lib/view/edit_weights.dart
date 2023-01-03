@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:project_cut/controller/biometrics_data_controller.dart';
 import 'package:project_cut/controller/edit_biometrics_history_controller.dart';
 import 'package:project_cut/model/biometric.dart';
+import 'package:project_cut/model/week.dart';
 import 'package:provider/provider.dart';
 
 class EditWeights extends StatefulWidget {
@@ -59,6 +60,11 @@ class _EditWeightsState extends State<EditWeights> {
                         itemCount: allBiometrics.length,
                         itemBuilder: (context, index) {
                           Biometric biometric = allBiometrics[index];
+                          Week week = editBiometricsProvider.weeks
+                              .where(
+                                (element) => element.id == biometric.weekId,
+                              )
+                              .first;
                           return Column(
                             children: [
                               index == 0 ||
@@ -70,7 +76,7 @@ class _EditWeightsState extends State<EditWeights> {
                                       child: Align(
                                         alignment: Alignment.centerLeft,
                                         child: Text(
-                                          "Week ${biometric.weekId}",
+                                          "Week ${week.week}",
                                           style: const TextStyle(fontSize: 18),
                                         ),
                                       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_cut/database/db.dart';
 import 'package:project_cut/model/biometric.dart';
+import 'package:project_cut/model/week.dart';
 
 class EditBiometricsHistoryController with ChangeNotifier {
   List<Biometric> _allBiometrics = [];
@@ -8,14 +9,17 @@ class EditBiometricsHistoryController with ChangeNotifier {
   int _biometricIdToEdit = 0;
   double _weight = 0;
   Biometric? _biometric;
+  List<Week> _weeks = [];
 
   List<Biometric> get allBiometrics => _allBiometrics;
+  List<Week> get weeks => _weeks;
   bool get expanded => _expanded;
   int get biometricIdToEdit => _biometricIdToEdit;
   double get weight => _weight;
 
   Future<void> setAllBiometrics() async {
     _allBiometrics = await AppDatabase.db.getBiometrics();
+    _weeks = await AppDatabase.db.getWeeks();
     notifyListeners();
   }
 
