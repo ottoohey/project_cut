@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
+        debugShowCheckedModeBanner: false,
         home: ChangeNotifierProvider<BiometricsDataController>(
             create: (context) => BiometricsDataController(),
             child: const MyHomePage(title: 'Flutter Demo Home Page')),

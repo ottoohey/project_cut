@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -27,11 +29,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera access required to take progress pictures.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We have to request this for the camera, however we won't be recording anything.</string>
+	<string>This app uses the camera to take pictures of your progress during your cut to save within the app.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Needed to save images to your camera roll</string>
+	<string>This app accesses your photo library to save any progress pictures you want within the app.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
