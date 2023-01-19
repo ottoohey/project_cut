@@ -149,73 +149,74 @@ class _MyHomePageState extends State<MyHomePage> {
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               color: Theme.of(context).colorScheme.primary,
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  // color: Theme.of(context).colorScheme.onPrimary,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height / 4,
-                        ),
-                        Text(
-                          'PROJECT CUT',
-                          style: Theme.of(context).textTheme.headline4,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(
-                          height: 32,
-                        ),
-                        Text(
-                          'We just need to get a few bits of information to set everything up. All data is stored on your phone, so only you have access to it!',
-                          style: Theme.of(context).textTheme.subtitle1,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        Stack(
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height / 3,
-                              width: MediaQuery.of(context).size.height / 3,
-                              child: Image(
-                                image: AssetImage(MediaQuery.of(context)
-                                            .platformBrightness ==
-                                        Brightness.light
-                                    ? 'assets/icons/Project-Cut-1024x1024.png'
-                                    : 'assets/icons/Project-Cut-1024x1024-Dark.png'),
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        children: [
+                          const SizedBox(
+                            height: 64,
+                          ),
+                          Text(
+                            'PROJECT CUT',
+                            style: Theme.of(context).textTheme.headline4,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(
+                            height: 32,
+                          ),
+                          Text(
+                            'We just need to get a few bits of information to set everything up. All data is stored on your phone, so only you have access to it!',
+                            style: Theme.of(context).textTheme.subtitle1,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(
+                            height: 24,
+                          ),
+                          Stack(
+                            alignment: Alignment.bottomCenter,
+                            children: [
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height / 3,
+                                width: MediaQuery.of(context).size.height / 3,
+                                child: Image(
+                                  image: AssetImage(MediaQuery.of(context)
+                                              .platformBrightness ==
+                                          Brightness.light
+                                      ? 'assets/icons/Project-Cut-1024x1024.png'
+                                      : 'assets/icons/Project-Cut-1024x1024-Dark.png'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      MaterialButton(
+                        child: const Text('Get Started'),
+                        onPressed: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => MultiProvider(
+                                providers: [
+                                  ChangeNotifierProvider(
+                                      create: (context) =>
+                                          CycleConfigurationController()),
+                                ],
+                                child: const CycleConfiguration(),
                               ),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    MaterialButton(
-                      child: const Text('Get Started'),
-                      onPressed: () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => MultiProvider(
-                              providers: [
-                                ChangeNotifierProvider(
-                                    create: (context) =>
-                                        CycleConfigurationController()),
-                              ],
-                              child: const CycleConfiguration(),
-                            ),
-                          ),
-                        );
-                        await _cycleConfigurationRequired();
-                      },
-                    ),
-                  ],
+                          );
+                          await _cycleConfigurationRequired();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

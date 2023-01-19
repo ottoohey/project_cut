@@ -1,12 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Must reload app for changes to take effect
 
 class AppTheme {
-  //
   AppTheme._();
 
-  // static const String lightBg = '0xFFFBFAFB';
   static const Color lightBg = Color(0xFFEBEBEB);
   static const Color lightBgLight = Color(0xFFFBFAFB);
   static const Color primaryLight = Color(0xFF2372C2);
@@ -34,9 +33,12 @@ class AppTheme {
       onError: Colors.white,
       background: lightBg,
       onBackground: primaryLight,
-      surface: lightBgLight,
+      surface: CupertinoColors.systemGrey5,
       onSurface: secondaryLight,
+      outline: CupertinoColors.systemBlue,
+      errorContainer: CupertinoColors.systemRed,
     ),
+    indicatorColor: CupertinoColors.systemGreen,
     backgroundColor: lightBgLight,
     canvasColor: lightBg, // scaffold bg
     primaryColor: primaryLight,
@@ -57,7 +59,7 @@ class AppTheme {
       color: Colors.green, // app bar bg
       titleTextStyle: TextStyle(color: Colors.red),
     ),
-    colorScheme: const ColorScheme(
+    colorScheme: ColorScheme(
       brightness: Brightness.dark,
       primary: darkBg,
       onPrimary: primaryDark,
@@ -67,9 +69,12 @@ class AppTheme {
       onError: Colors.white,
       background: darkBg,
       onBackground: primaryDark,
-      surface: darkBgLight,
+      surface: CupertinoColors.systemGrey5.darkColor,
       onSurface: secondaryDark,
+      outline: CupertinoColors.systemBlue.darkColor,
+      errorContainer: CupertinoColors.systemRed.darkColor,
     ),
+    indicatorColor: CupertinoColors.systemGreen.darkColor,
     backgroundColor: darkBgLight,
     canvasColor: darkBg, // scaffold bg
     primaryColor: primaryDark,

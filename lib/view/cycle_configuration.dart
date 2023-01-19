@@ -2,8 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:project_cut/controller/cycle_configuration_controller.dart';
 import 'package:project_cut/model/cycle.dart';
+import 'package:project_cut/widgets/custom_ios_segemented_control.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+
+enum Sex { male, female }
 
 class CycleConfiguration extends StatefulWidget {
   const CycleConfiguration({Key? key}) : super(key: key);
@@ -14,8 +17,8 @@ class CycleConfiguration extends StatefulWidget {
 
 class _CycleConfigurationState extends State<CycleConfiguration> {
   final PageController _pageController = PageController(initialPage: 0);
-  List<bool> _isSelected = [true, false];
-  final List<String> _sexes = ['MALE', 'FEMALE'];
+  // List<bool> _isSelected = [true, false];
+  // final List<String> _sexes = ['MALE', 'FEMALE'];
   String height = '';
   String age = '';
   String startingWeight = '';
@@ -24,16 +27,19 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
 
   static const String _heightTitle = 'HEIGHT';
   static const String _ageTitle = 'AGE';
-  static const String _startingWeightTitle = 'STARTING WEIGHT';
+  static const String _weightTitle = 'WEIGHT';
   static const String _startingBodyFatTitle = 'BODYFAT %';
   static const String _goalBodyFatTitle = 'GOAL BODYFAT %';
+  static const String _neckTitle = 'NECK';
+  static const String _waistTitle = 'WAIST';
+  static const String _hipsTitle = 'HIPS';
 
-  Widget _toggleButtonWidget(String title) {
-    return SizedBox(
-      width: (MediaQuery.of(context).size.width / 2) - 64,
-      child: Center(child: Text(title)),
-    );
-  }
+  static const String _cmUnit = 'cm';
+  static const String _kgUnit = 'kg';
+  static const String _yearsUnit = 'yrs';
+  static const String _percentageUnit = '%';
+
+  Sex _selectedSegment = Sex.male;
 
   Widget _textInputWidget(BuildContext context, String hint, String unit,
       CycleConfigurationController cycleProvider) {
@@ -48,7 +54,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
       case _ageTitle:
         value = cycleProvider.age.toString();
         break;
-      case _startingWeightTitle:
+      case _weightTitle:
         decimal = true;
         value = cycleProvider.startingWeight.toString();
         break;
@@ -60,6 +66,15 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
         width = MediaQuery.of(context).size.width / 2 - 64;
         value = cycleProvider.goalBodyFat.toString();
         break;
+      case _neckTitle:
+        value = cycleProvider.neck.toString();
+        break;
+      case _waistTitle:
+        value = cycleProvider.waist.toString();
+        break;
+      case _hipsTitle:
+        value = cycleProvider.hips.toString();
+        break;
       default:
         value = cycleProvider.height.toString();
     }
@@ -69,57 +84,77 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     }
 
     return SizedBox(
-      width: width,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            showCursor: true,
-            cursorColor: Colors.blue,
-            maxLines: 1,
-            textAlign: TextAlign.end,
-            keyboardType: TextInputType.numberWithOptions(decimal: decimal),
-            controller: TextEditingController(text: value),
-            enabled: canEdit,
-            style: TextStyle(
-              color: onPrimary,
-              fontSize: 32,
-            ),
-            decoration: InputDecoration(
-              suffix: Text(
-                unit,
-                style: TextStyle(color: onPrimary),
-              ),
-            ),
-            onChanged: (enteredValue) {
-              if (enteredValue == '') {
-                enteredValue = '0';
-              }
-
-              value = enteredValue;
-
-              switch (hint) {
-                case _ageTitle:
-                  cycleProvider.setAge(enteredValue);
-                  break;
-                case _startingWeightTitle:
-                  cycleProvider.setStartingWeight(enteredValue);
-                  break;
-                case _startingBodyFatTitle:
-                  cycleProvider.setStartingBodyFat(enteredValue);
-                  break;
-                case _goalBodyFatTitle:
-                  cycleProvider.setGoalBodyFat(enteredValue);
-                  break;
-                default:
-                  cycleProvider.setHeight(enteredValue);
-              }
-            },
-          ),
+          Text(hint),
           const SizedBox(
             height: 8,
           ),
-          Text(hint),
+          Container(
+            height: 52,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Center(
+              child: TextField(
+                showCursor: true,
+                cursorColor: Theme.of(context).colorScheme.onPrimary,
+                maxLines: 1,
+                textAlign: TextAlign.end,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                controller: TextEditingController(text: value),
+                enabled: true,
+                decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide:
+                            const BorderSide(color: Colors.transparent)),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.onPrimary)),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    suffix: Text(unit)),
+                onChanged: (enteredValue) {
+                  if (enteredValue == '') {
+                    enteredValue = '0';
+                  }
+
+                  value = enteredValue;
+
+                  switch (hint) {
+                    case _ageTitle:
+                      cycleProvider.setAge(enteredValue);
+                      break;
+                    case _weightTitle:
+                      cycleProvider.setStartingWeight(enteredValue);
+                      break;
+                    case _startingBodyFatTitle:
+                      cycleProvider.setStartingBodyFat(enteredValue);
+                      break;
+                    case _goalBodyFatTitle:
+                      cycleProvider.setGoalBodyFat(enteredValue);
+                      break;
+                    case _neckTitle:
+                      cycleProvider.setNeck(value);
+                      break;
+                    case _waistTitle:
+                      cycleProvider.setWaist(value);
+                      break;
+                    case _hipsTitle:
+                      cycleProvider.setHips(value);
+                      break;
+                    default:
+                      cycleProvider.setHeight(enteredValue);
+                  }
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -166,21 +201,17 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                   GaugeRange(
                     startValue: 8,
                     endValue: 10,
-                    color:
-                        Theme.of(context).colorScheme.onPrimary.withBlue(125),
+                    color: Theme.of(context).colorScheme.errorContainer,
                   ),
                   GaugeRange(
                     startValue: 10,
                     endValue: 14,
-                    color: Theme.of(context).colorScheme.onPrimary,
+                    color: Theme.of(context).indicatorColor,
                   ),
                   GaugeRange(
                     startValue: 14,
                     endValue: 18,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimary
-                        .withOpacity(0.5),
+                    color: Theme.of(context).colorScheme.errorContainer,
                   ),
                 ],
                 pointers: <GaugePointer>[
@@ -258,7 +289,21 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     switch (pageNumber) {
       case 3:
         return MaterialButton(
-          child: const Text('Start Cut'),
+          minWidth: MediaQuery.of(context).size.width * 0.75 - 36,
+          height: 52,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(15),
+              bottomRight: Radius.circular(15),
+              topLeft: Radius.circular(5),
+              bottomLeft: Radius.circular(5),
+            ),
+          ),
+          color: Theme.of(context).colorScheme.outline,
+          child: const Text(
+            'Start Cut',
+            style: TextStyle(color: Colors.white),
+          ),
           onPressed: () {
             bool fieldsCompleted = _checkFieldsCompleted(
                 timeFrame, startWeight, startBodyFat, goalBodyFat, height);
@@ -286,12 +331,26 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
         );
       default:
         return MaterialButton(
-          child: const Text('Next'),
+          minWidth: MediaQuery.of(context).size.width * 0.75 - 36,
+          height: 52,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(15),
+              bottomRight: Radius.circular(15),
+              topLeft: Radius.circular(5),
+              bottomLeft: Radius.circular(5),
+            ),
+          ),
+          color: Theme.of(context).colorScheme.outline,
           onPressed: () {
             _pageController.animateToPage(pageNumber,
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeOutCubic);
           },
+          child: const Text(
+            'Next',
+            style: TextStyle(color: Colors.white),
+          ),
         );
     }
   }
@@ -300,302 +359,326 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     switch (pageNumber) {
       case 999:
         return MaterialButton(
-          child: const Text('Back'),
+          minWidth: MediaQuery.of(context).size.width * 0.25 - 32,
+          height: 52,
+          color: Theme.of(context).colorScheme.errorContainer,
+          elevation: 0,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              bottomLeft: Radius.circular(15),
+              topRight: Radius.circular(5),
+              bottomRight: Radius.circular(5),
+            ),
+          ),
           onPressed: () {
             Navigator.of(context).pop();
           },
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
         );
       default:
         return MaterialButton(
-          child: const Text('Back'),
+          minWidth: MediaQuery.of(context).size.width * 0.25 - 32,
+          height: 52,
+          color: Theme.of(context).colorScheme.errorContainer,
+          elevation: 0,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              bottomLeft: Radius.circular(15),
+              topRight: Radius.circular(5),
+              bottomRight: Radius.circular(5),
+            ),
+          ),
           onPressed: () => _pageController.animateToPage(pageNumber,
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOutCubic),
+          child: const Icon(
+            Icons.arrow_upward_rounded,
+            color: Colors.white,
+          ),
         );
     }
   }
 
-  Widget _bodyFatCalculationTextEntry(
-      String hint, CycleConfigurationController cycleProvider) {
-    String value = '';
-    switch (hint) {
-      case 'NECK':
-        value = cycleProvider.neck.toString();
-        break;
-      case 'WAIST':
-        value = cycleProvider.waist.toString();
-        break;
-      default:
-        value = cycleProvider.hips.toString();
-    }
-
-    if (value == '0' || value == '0.0') {
-      value = '';
-    }
-
-    return SizedBox(
-      width: MediaQuery.of(context).size.width / 2 - 32,
-      // height: 100,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Consumer<CycleConfigurationController>(
-            builder: (context, cycleProvider, child) {
-              return TextField(
-                showCursor: true,
-                cursorColor: Colors.white,
-                maxLines: 1,
-                textAlign: TextAlign.end,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                controller: TextEditingController(text: value),
-                enabled: true,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
+  Widget _pageOne() {
+    return SingleChildScrollView(
+      child: Consumer<CycleConfigurationController>(
+        builder: (context, cycleProvider, child) {
+          return Container(
+            padding: const EdgeInsets.all(32),
+            height: MediaQuery.of(context).size.height,
+            color: Theme.of(context).colorScheme.primary,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    const SizedBox(
+                      height: 64,
+                    ),
+                    Center(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: CustomCupertinoSlidingSegmentedControl(
+                          backgroundColor: CupertinoColors.systemGrey5,
+                          thumbColor: Theme.of(context).colorScheme.primary,
+                          groupValue: _selectedSegment,
+                          onValueChanged: (Sex? value) {
+                            if (value != null) {
+                              _selectedSegment = value;
+                              if (value == Sex.male) {
+                                cycleProvider.setSex(value.name);
+                              } else {
+                                cycleProvider.setSex(value.name);
+                              }
+                            }
+                          },
+                          children: const <Sex, Widget>{
+                            Sex.male: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 0),
+                              child: Text(
+                                'MALE',
+                              ),
+                            ),
+                            Sex.female: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 0),
+                              child: Text(
+                                'FEMALE',
+                              ),
+                            ),
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 32,
+                    ),
+                    _textInputWidget(
+                      context,
+                      _heightTitle,
+                      _cmUnit,
+                      cycleProvider,
+                    ),
+                    const SizedBox(
+                      height: 32,
+                    ),
+                    _textInputWidget(
+                      context,
+                      _weightTitle,
+                      _kgUnit,
+                      cycleProvider,
+                    ),
+                    const SizedBox(
+                      height: 32,
+                    ),
+                    _textInputWidget(
+                      context,
+                      _ageTitle,
+                      _yearsUnit,
+                      cycleProvider,
+                    ),
+                    const SizedBox(
+                      height: 32,
+                    ),
+                  ],
                 ),
-                decoration: const InputDecoration(
-                  suffix: Text(
-                    'cm',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _scrollToPreviousPageButton(999),
+                    const SizedBox(
+                      width: 4,
+                    ),
+                    _scrollToNextPageButton(1),
+                  ],
                 ),
-                onChanged: (enteredValue) {
-                  if (enteredValue == '') {
-                    enteredValue = '0';
-                  }
-                  value = enteredValue;
-
-                  switch (hint) {
-                    case 'NECK':
-                      cycleProvider.setNeck(value);
-                      break;
-                    case 'WAIST':
-                      cycleProvider.setWaist(value);
-                      break;
-                    default:
-                      cycleProvider.setHips(value);
-                      break;
-                  }
-                },
-              );
-            },
-          ),
-          const SizedBox(
-            height: 8,
-          ),
-          Text(
-            hint,
-            style: const TextStyle(color: Colors.white),
-          ),
-        ],
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _pageOne() {
-    return Consumer<CycleConfigurationController>(
-      builder: (context, cycleProvider, child) {
-        return Container(
-          padding: const EdgeInsets.all(32),
-          color: Theme.of(context).colorScheme.primary,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                children: [
-                  const SizedBox(
-                    height: 100,
-                  ),
-                  Center(
-                    child: ToggleButtons(
-                      isSelected: _isSelected,
-                      selectedColor: Theme.of(context).colorScheme.primary,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fillColor: Theme.of(context).colorScheme.onPrimary,
-                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                      renderBorder: true,
-                      borderColor: Theme.of(context).colorScheme.onPrimary,
-                      borderWidth: 0.5,
-                      borderRadius: BorderRadius.circular(10),
-                      children: [
-                        _toggleButtonWidget(_sexes[0]),
-                        _toggleButtonWidget(_sexes[1]),
-                      ],
-                      onPressed: (int newIndex) async {
-                        _isSelected = [false];
-                        _isSelected.insert(newIndex, true);
-                        cycleProvider.setSex(_sexes[newIndex]);
-                      },
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 64,
-                  ),
-                  _textInputWidget(context, _heightTitle, 'cm', cycleProvider),
-                  const SizedBox(
-                    height: 32,
-                  ),
-                  _textInputWidget(context, _ageTitle, 'yrs', cycleProvider),
-                  const SizedBox(
-                    height: 100,
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _scrollToPreviousPageButton(999),
-                  _scrollToNextPageButton(1),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _pageTwo() {
-    return Consumer<CycleConfigurationController>(
-      builder: (context, cycleProvider, child) {
-        return Stack(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(32),
-              color: Theme.of(context).colorScheme.primary,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    children: [
-                      const SizedBox(
-                        height: 100,
-                      ),
-                      _textInputWidget(
-                          context, _startingWeightTitle, 'kg', cycleProvider),
-                      const SizedBox(
-                        height: 32,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _textInputWidget(context, _startingBodyFatTitle, '%',
-                              cycleProvider),
-                          const Icon(
-                            Icons.arrow_forward,
-                            size: 32,
-                          ),
-                          _textInputWidget(
-                              context, _goalBodyFatTitle, '%', cycleProvider),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 64,
-                      ),
-                      MaterialButton(
-                          child: const Text('Calculate BF%'),
-                          onPressed: () => cycleProvider.setExpanded())
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _scrollToPreviousPageButton(0),
-                      _scrollToNextPageButton(2),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Align(
-              alignment: Alignment.topCenter,
-              child: AnimatedContainer(
-                curve: Curves.easeOutCirc,
-                // TODO: Text in dropdown container overflowing whilst container expanding
-                duration: const Duration(milliseconds: 400),
-                height: cycleProvider.expanded
-                    ? MediaQuery.of(context).size.height
-                    : 0,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: cycleProvider.expanded
-                    ? Card(
-                        color: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        child: Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                height: 50,
-                              ),
-                              Text(
-                                'US Navy Bodyfat % Calculator',
-                                style: TextStyle(
-                                    fontSize: 36,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondary),
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              Text(
-                                'This bodyfat calculator uses the US Navy method, which is fairly accurate with little equipment',
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondary),
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              Column(
-                                children: [
-                                  _bodyFatCalculationTextEntry(
-                                      'NECK', cycleProvider),
-                                  _bodyFatCalculationTextEntry(
-                                      'WAIST', cycleProvider),
-                                  cycleProvider.sex == 'FEMALE'
-                                      ? _bodyFatCalculationTextEntry(
-                                          'HIPS', cycleProvider)
-                                      : const SizedBox(),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              MaterialButton(
-                                child: Text(
-                                  'Save',
-                                  style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary),
-                                ),
-                                onPressed: () {
-                                  cycleProvider.calculateBodyFatPercentage();
-                                  cycleProvider.setExpanded();
-                                },
-                              ),
-                            ],
+    return SingleChildScrollView(
+      child: Consumer<CycleConfigurationController>(
+        builder: (context, cycleProvider, child) {
+          return Stack(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(32),
+                height: MediaQuery.of(context).size.height,
+                color: Theme.of(context).colorScheme.primary,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const SizedBox(
+                          height: 64,
+                        ),
+                        _textInputWidget(
+                          context,
+                          _startingBodyFatTitle,
+                          _percentageUnit,
+                          cycleProvider,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: () => cycleProvider.setExpanded(),
+                            child: Text(
+                              'Don\'t know your bodyfat percentage?',
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.outline),
+                            ),
                           ),
                         ),
-                      )
-                    : Container(),
+                        const SizedBox(
+                          height: 32,
+                        ),
+                        _textInputWidget(
+                          context,
+                          _goalBodyFatTitle,
+                          _percentageUnit,
+                          cycleProvider,
+                        ),
+                        const SizedBox(
+                          height: 64,
+                        ),
+                        MaterialButton(
+                            child: const Text('Calculate BF%'),
+                            onPressed: () => cycleProvider.setExpanded())
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _scrollToPreviousPageButton(0),
+                        const SizedBox(
+                          width: 4,
+                        ),
+                        _scrollToNextPageButton(2),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        );
-      },
+              Align(
+                alignment: Alignment.topCenter,
+                child: AnimatedContainer(
+                  curve: Curves.easeOutCirc,
+                  // TODO: Text in dropdown container overflowing whilst container expanding
+                  duration: const Duration(milliseconds: 400),
+                  height: cycleProvider.expanded
+                      ? MediaQuery.of(context).size.height
+                      : 0,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: cycleProvider.expanded
+                      ? Card(
+                          color: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  children: [
+                                    const SizedBox(
+                                      height: 50,
+                                    ),
+                                    const Text(
+                                      'US Navy Bodyfat % Calculator',
+                                      style: TextStyle(
+                                        fontSize: 36,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 16,
+                                    ),
+                                    const Text(
+                                      'This bodyfat calculator uses the US Navy method, which is fairly accurate with little equipment',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 16,
+                                    ),
+                                    Column(
+                                      children: [
+                                        _textInputWidget(
+                                          context,
+                                          _neckTitle,
+                                          _cmUnit,
+                                          cycleProvider,
+                                        ),
+                                        const SizedBox(
+                                          height: 32,
+                                        ),
+                                        _textInputWidget(
+                                          context,
+                                          _waistTitle,
+                                          _cmUnit,
+                                          cycleProvider,
+                                        ),
+                                        const SizedBox(
+                                          height: 32,
+                                        ),
+                                        cycleProvider.sex == Sex.female.name
+                                            ? _textInputWidget(
+                                                context,
+                                                _hipsTitle,
+                                                _cmUnit,
+                                                cycleProvider,
+                                              )
+                                            : const SizedBox(),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                MaterialButton(
+                                  minWidth: MediaQuery.of(context).size.width,
+                                  height: 52,
+                                  color: Theme.of(context).colorScheme.outline,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  onPressed: () {
+                                    cycleProvider.calculateBodyFatPercentage();
+                                    cycleProvider.setExpanded();
+                                  },
+                                  child: const Text(
+                                    'Save',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Container(),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -621,17 +704,30 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                           GestureDetector(
                             onTap: () =>
                                 cycleProvider.removeWeekFromTimeFrame(),
-                            child: const Card(
-                              child: Icon(
+                            child: Container(
+                              height: 52,
+                              width: 104,
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(15)),
+                              child: const Icon(
                                 Icons.remove,
                                 size: 40,
                               ),
                             ),
                           ),
+                          const SizedBox(
+                            width: 8,
+                          ),
                           GestureDetector(
                             onTap: () => cycleProvider.addWeekToTimeFrame(),
-                            child: const Card(
-                              child: Icon(
+                            child: Container(
+                              height: 52,
+                              width: 104,
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(15)),
+                              child: const Icon(
                                 Icons.add,
                                 size: 40,
                               ),
@@ -645,6 +741,9 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _scrollToPreviousPageButton(1),
+                      const SizedBox(
+                        width: 4,
+                      ),
                       _scrollToNextPageButton(3),
                     ],
                   )
@@ -658,10 +757,11 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
     return Consumer<CycleConfigurationController>(
       builder: (context, cycleProvider, child) {
         return Scaffold(
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,
           body: PageView(
               controller: _pageController,
               scrollDirection: Axis.vertical,
+              physics: NeverScrollableScrollPhysics(),
               children: [
                 _pageOne(),
                 _pageTwo(),
