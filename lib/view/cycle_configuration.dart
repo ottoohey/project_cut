@@ -574,8 +574,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                   ),
                   child: cycleProvider.expanded
                       ? Card(
-                          color: Colors.transparent,
-                          shadowColor: Colors.transparent,
+                          color: Theme.of(context).colorScheme.primary,
                           child: Padding(
                             padding: const EdgeInsets.all(32),
                             child: Column(
