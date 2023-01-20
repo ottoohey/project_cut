@@ -145,12 +145,15 @@ class _MyHomePageState extends State<MyHomePage> {
         if (snapshot.connectionState == ConnectionState.done) {
           bool newCut = Provider.of<BiometricsDataController>(context).newCut;
           if (newCut) {
+            bool firstCycle =
+                Provider.of<BiometricsDataController>(context).firstCycle;
             return Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               color: Theme.of(context).colorScheme.primary,
               child: SingleChildScrollView(
                 child: Container(
+                  height: MediaQuery.of(context).size.height,
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
@@ -176,45 +179,120 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: Theme.of(context).textTheme.subtitle1,
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(
-                            height: 24,
-                          ),
-                          Stack(
-                            alignment: Alignment.bottomCenter,
-                            children: [
-                              SizedBox(
-                                height: MediaQuery.of(context).size.height / 3,
-                                width: MediaQuery.of(context).size.height / 3,
-                                child: Image(
-                                  image: AssetImage(MediaQuery.of(context)
-                                              .platformBrightness ==
-                                          Brightness.light
-                                      ? 'assets/icons/Project-Cut-1024x1024.png'
-                                      : 'assets/icons/Project-Cut-1024x1024-Dark.png'),
-                                ),
-                              ),
-                            ],
-                          ),
                         ],
                       ),
-                      MaterialButton(
-                        child: const Text('Get Started'),
-                        onPressed: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => MultiProvider(
-                                providers: [
-                                  ChangeNotifierProvider(
-                                      create: (context) =>
-                                          CycleConfigurationController()),
-                                ],
-                                child: const CycleConfiguration(),
-                              ),
-                            ),
-                          );
-                          await _cycleConfigurationRequired();
-                        },
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height / 3,
+                        width: MediaQuery.of(context).size.height / 3,
+                        child: Image(
+                          image: AssetImage(MediaQuery.of(context)
+                                      .platformBrightness ==
+                                  Brightness.light
+                              ? 'assets/icons/Project-Cut-1024x1024.png'
+                              : 'assets/icons/Project-Cut-1024x1024-Dark.png'),
+                        ),
                       ),
+                      firstCycle
+                          ? MaterialButton(
+                              minWidth: MediaQuery.of(context).size.width,
+                              height: 52,
+                              color: Theme.of(context).colorScheme.outline,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              onPressed: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => MultiProvider(
+                                      providers: [
+                                        ChangeNotifierProvider(
+                                            create: (context) =>
+                                                CycleConfigurationController()),
+                                      ],
+                                      child: const CycleConfiguration(),
+                                    ),
+                                  ),
+                                );
+                                await _cycleConfigurationRequired();
+                              },
+                              child: const Text(
+                                'Get Started',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                MaterialButton(
+                                  minWidth:
+                                      MediaQuery.of(context).size.width * 0.25 -
+                                          32,
+                                  height: 52,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .errorContainer,
+                                  elevation: 0,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(15),
+                                      bottomLeft: Radius.circular(15),
+                                      topRight: Radius.circular(5),
+                                      bottomRight: Radius.circular(5),
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    await Provider.of<BiometricsDataController>(
+                                            context,
+                                            listen: false)
+                                        .cancelNewCut();
+                                    await _cycleConfigurationRequired();
+                                  },
+                                  child: const Icon(
+                                    Icons.arrow_back_ios_new_rounded,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 4,
+                                ),
+                                MaterialButton(
+                                  minWidth:
+                                      MediaQuery.of(context).size.width * 0.75 -
+                                          36,
+                                  height: 52,
+                                  color: Theme.of(context).colorScheme.outline,
+                                  elevation: 0,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(15),
+                                      bottomRight: Radius.circular(15),
+                                      topLeft: Radius.circular(5),
+                                      bottomLeft: Radius.circular(5),
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    await Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => MultiProvider(
+                                          providers: [
+                                            ChangeNotifierProvider(
+                                                create: (context) =>
+                                                    CycleConfigurationController()),
+                                          ],
+                                          child: const CycleConfiguration(),
+                                        ),
+                                      ),
+                                    );
+                                    await _cycleConfigurationRequired();
+                                  },
+                                  child: const Text(
+                                    'Get Started',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
                     ],
                   ),
                 ),
@@ -251,87 +329,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               const SizedBox(
                                 height: 24,
                               ),
-                              // Column(
-                              //   children: [
-                              //     const SizedBox(
-                              //       height: 16,
-                              //     ),
-                              //     Column(
-                              //       children: [
-                              //         MaterialButton(
-                              //           child: const Text('add'),
-                              //           onPressed: () async {
-                              // AppDatabase.db.addWeight(86.5);
-                              //   SharedPreferences sharedPreferences =
-                              //       await SharedPreferences.getInstance();
-                              //   sharedPreferences.setDouble(
-                              //       'currentWeight', 86.7);
-                              //     Biometric bio = const Biometric(
-                              //         id: 3,
-                              //         weekId: 1,
-                              //         cycleId: 1,
-                              //         currentWeight: 0,
-                              //         bodyFat: 20,
-                              //         dateTime:
-                              //             '2022-11-30 00:00:00.000000',
-                              //         day: 3,
-                              //         estimated: 0);
-                              //     await AppDatabase.db
-                              //         .updateBiometric(bio);
-                              //   },
-                              // ),
-                              // MaterialButton(
-                              //   child: const Text('data'),
-                              //   onPressed: () async {
-                              //     var bio = await AppDatabase.db
-                              //         .getBiometrics();
-                              // var bio = await AppDatabase.db.getWeekById(2);
-                              // var bio =
-                              // await AppDatabase.db.getCycles();
-                              // var bio = await AppDatabase.db
-                              //     .getProgressPictures();
-
-                              //     print(bio);
-                              //   },
-                              // ),
-                              // MaterialButton(
-                              //     child: const Text('delete'),
-                              //     onPressed: () {
-                              // AppDatabase.db.deleteAll();
-                              // AppDatabase.db
-                              //     .deleteProgressPictures();
-                              //   AppDatabase.db.deleteBiometrics(2);
-                              // }
-                              // onPressed: () async {
-                              //   final prefs = await SharedPreferences
-                              //       .getInstance();
-                              //   prefs.clear();
-                              // AppDatabase.db.deleteAll();
-                              // },
-                              // ),
-                              // MaterialButton(
-                              //   child: const Text('Cycle Config'),
-                              //   onPressed: () =>
-                              //       Navigator.of(context).push(
-                              //     MaterialPageRoute(
-                              //       builder: (context) => MultiProvider(
-                              //         providers: [
-                              //           ChangeNotifierProvider(
-                              //               create: (context) =>
-                              //                   CycleConfigurationController()),
-                              //           ChangeNotifierProvider(
-                              //               create: (context) =>
-                              //                   BiometricsDataController()),
-                              //         ],
-                              //         child: const CycleConfiguration(),
-                              //       ),
-                              //     ),
-                              //   ),
-                              //     ),
-                              //   ],
-                              // )
-                              // ],
-                              // ),
                             ],
                           ),
                         ),
@@ -357,16 +354,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: AnimatedContainer(
-                      // curve: Curves.easeOutCirc,
-                      // duration: const Duration(milliseconds: 300),
-                      // height: expanded
-                      //     ? MediaQuery.of(context).size.height - 340 - 32
-                      //     : 0,
-                      // width: MediaQuery.of(context).size.width - 32,
-                      // decoration: BoxDecoration(
-                      //   color: Theme.of(context).colorScheme.onSecondary,
-                      //   borderRadius: BorderRadius.circular(20),
-                      // ),
                       curve: Curves.easeOutCirc,
                       // TODO: Text in dropdown container overflowing whilst container expanding
                       duration: const Duration(milliseconds: 400),

@@ -23,6 +23,7 @@ class BiometricsDataController with ChangeNotifier {
   String _currentDateTime = DateTime.now().toString();
   double _sliderValue = -1;
   bool _newCut = true;
+  bool _firstCycle = true;
 
   List<Biometric> get biometrics => _biometrics;
   List<Week> get weeks => _weeks;
@@ -36,6 +37,7 @@ class BiometricsDataController with ChangeNotifier {
   String get currentDateTime => _currentDateTime;
   double get sliderValue => _sliderValue;
   bool get newCut => _newCut;
+  bool get firstCycle => _firstCycle;
 
   Future<void> setHomePageData() async {
     Biometric latestBiometric = await AppDatabase.db.getLatestBiometric();
@@ -51,6 +53,8 @@ class BiometricsDataController with ChangeNotifier {
     _currentBodyFatGoal = latestWeek.bodyFatGoal;
     _currentWeightGoal = latestWeek.weightGoal;
     _currentDateTime = latestBiometric.dateTime;
+
+    checkIfFirstCycle();
 
     checkIfNewCut();
 
@@ -69,6 +73,20 @@ class BiometricsDataController with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> checkIfFirstCycle() async {
+    List<Cycle> cycles = await AppDatabase.db.getCycles();
+
+    if (cycles.length <= 1) {
+      _firstCycle = true;
+    } else {
+      _firstCycle = false;
+    }
+
+    print(cycles);
+
+    notifyListeners();
+  }
+
   Future<void> startNewCut() async {
     Cycle cycle = const Cycle(
       startWeight: 0,
@@ -80,6 +98,16 @@ class BiometricsDataController with ChangeNotifier {
     );
     await AppDatabase.db.insertCycle(cycle);
     _newCut = true;
+    notifyListeners();
+  }
+
+  Future<void> cancelNewCut() async {
+    _newCut = false;
+
+    Cycle lastCycle = await AppDatabase.db.getCurrentCycle();
+
+    await AppDatabase.db.deleteCycle(lastCycle.id!);
+
     notifyListeners();
   }
 

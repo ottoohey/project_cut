@@ -549,12 +549,6 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                           _percentageUnit,
                           cycleProvider,
                         ),
-                        const SizedBox(
-                          height: 64,
-                        ),
-                        MaterialButton(
-                            child: const Text('Calculate BF%'),
-                            onPressed: () => cycleProvider.setExpanded())
                       ],
                     ),
                     Row(
@@ -624,6 +618,13 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                                           _cmUnit,
                                           cycleProvider,
                                         ),
+                                        const Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Text(
+                                            'Measure circumference just underneath Adam\'s apple',
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
                                         const SizedBox(
                                           height: 32,
                                         ),
@@ -633,15 +634,37 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                                           _cmUnit,
                                           cycleProvider,
                                         ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            cycleProvider.sex == Sex.female.name
+                                                ? 'Circumference of narrowest part of the abdomen'
+                                                : 'Circumference at the level of the navel',
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
                                         const SizedBox(
                                           height: 32,
                                         ),
                                         cycleProvider.sex == Sex.female.name
-                                            ? _textInputWidget(
-                                                context,
-                                                _hipsTitle,
-                                                _cmUnit,
-                                                cycleProvider,
+                                            ? Column(
+                                                children: [
+                                                  _textInputWidget(
+                                                    context,
+                                                    _hipsTitle,
+                                                    _cmUnit,
+                                                    cycleProvider,
+                                                  ),
+                                                  const Padding(
+                                                    padding:
+                                                        EdgeInsets.all(8.0),
+                                                    child: Text(
+                                                      'Measured at the widest part of the buttocks or hips',
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                    ),
+                                                  ),
+                                                ],
                                               )
                                             : const SizedBox(),
                                       ],
@@ -761,7 +784,7 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
           body: PageView(
               controller: _pageController,
               scrollDirection: Axis.vertical,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               children: [
                 _pageOne(),
                 _pageTwo(),

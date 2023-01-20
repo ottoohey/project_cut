@@ -390,6 +390,9 @@ class WeightLineGraphState extends State<WeightLineGraph> {
             (endDateTime.difference(currentDateTime).inDays / 7).ceil();
         int total = remaining - provider.sliderValue.toInt();
 
+        double max = remaining.toDouble() - 1;
+        int divisions = remaining - 2;
+
         return Column(
           children: [
             SizedBox(
@@ -427,9 +430,9 @@ class WeightLineGraphState extends State<WeightLineGraph> {
                 // TODO: Sometimes causes error when new cut created and navigating to screen
                 Slider(
                   value: sliderValue.toDouble(),
-                  max: remaining.toDouble() - 1,
+                  max: max <= 1 ? 2 : max,
                   min: 1,
-                  divisions: remaining - 2,
+                  divisions: divisions,
                   activeColor: Theme.of(context).colorScheme.onPrimary,
                   inactiveColor:
                       Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
