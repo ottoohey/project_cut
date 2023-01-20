@@ -82,8 +82,6 @@ class BiometricsDataController with ChangeNotifier {
       _firstCycle = false;
     }
 
-    print(cycles);
-
     notifyListeners();
   }
 

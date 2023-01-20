@@ -43,27 +43,22 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
 
   Widget _textInputWidget(BuildContext context, String hint, String unit,
       CycleConfigurationController cycleProvider) {
-    Color onPrimary = Theme.of(context).colorScheme.onPrimary;
     String value = '';
     bool canEdit = true;
-    bool decimal = false;
-
-    double width = MediaQuery.of(context).size.width - 128;
+    bool decimal = true;
 
     switch (hint) {
       case _ageTitle:
+        decimal = false;
         value = cycleProvider.age.toString();
         break;
       case _weightTitle:
-        decimal = true;
         value = cycleProvider.startingWeight.toString();
         break;
       case _startingBodyFatTitle:
-        width = MediaQuery.of(context).size.width / 2 - 64;
         value = cycleProvider.startingBodyFat.toString();
         break;
       case _goalBodyFatTitle:
-        width = MediaQuery.of(context).size.width / 2 - 64;
         value = cycleProvider.goalBodyFat.toString();
         break;
       case _neckTitle:
@@ -103,10 +98,9 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                 cursorColor: Theme.of(context).colorScheme.onPrimary,
                 maxLines: 1,
                 textAlign: TextAlign.end,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: TextInputType.numberWithOptions(decimal: decimal),
                 controller: TextEditingController(text: value),
-                enabled: true,
+                enabled: canEdit,
                 decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
