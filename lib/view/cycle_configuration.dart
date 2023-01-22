@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:project_cut/controller/cycle_configuration_controller.dart';
+import 'package:project_cut/providers/cycle_configuration_controller.dart';
 import 'package:project_cut/model/cycle.dart';
+import 'package:project_cut/providers/dropdown_controller.dart';
 import 'package:project_cut/widgets/custom_ios_segemented_control.dart';
+import 'package:project_cut/widgets/dropdown_data_entry.dart';
+import 'package:project_cut/widgets/standard_text_field.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
@@ -30,9 +33,6 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
   static const String _weightTitle = 'WEIGHT';
   static const String _startingBodyFatTitle = 'BODYFAT %';
   static const String _goalBodyFatTitle = 'GOAL BODYFAT %';
-  static const String _neckTitle = 'NECK';
-  static const String _waistTitle = 'WAIST';
-  static const String _hipsTitle = 'HIPS';
 
   static const String _cmUnit = 'cm';
   static const String _kgUnit = 'kg';
@@ -40,119 +40,6 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
   static const String _percentageUnit = '%';
 
   Sex _selectedSegment = Sex.male;
-
-  Widget _textInputWidget(BuildContext context, String hint, String unit,
-      CycleConfigurationController cycleProvider) {
-    String value = '';
-    bool canEdit = true;
-    bool decimal = true;
-
-    switch (hint) {
-      case _ageTitle:
-        decimal = false;
-        value = cycleProvider.age.toString();
-        break;
-      case _weightTitle:
-        value = cycleProvider.startingWeight.toString();
-        break;
-      case _startingBodyFatTitle:
-        value = cycleProvider.startingBodyFat.toString();
-        break;
-      case _goalBodyFatTitle:
-        value = cycleProvider.goalBodyFat.toString();
-        break;
-      case _neckTitle:
-        value = cycleProvider.neck.toString();
-        break;
-      case _waistTitle:
-        value = cycleProvider.waist.toString();
-        break;
-      case _hipsTitle:
-        value = cycleProvider.hips.toString();
-        break;
-      default:
-        value = cycleProvider.height.toString();
-    }
-
-    if (value == '0' || value == '0.0') {
-      value = '';
-    }
-
-    return SizedBox(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(hint),
-          const SizedBox(
-            height: 8,
-          ),
-          Container(
-            height: 52,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Center(
-              child: TextField(
-                showCursor: true,
-                cursorColor: Theme.of(context).colorScheme.onPrimary,
-                maxLines: 1,
-                textAlign: TextAlign.end,
-                keyboardType: TextInputType.numberWithOptions(decimal: decimal),
-                controller: TextEditingController(text: value),
-                enabled: canEdit,
-                decoration: InputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide:
-                            const BorderSide(color: Colors.transparent)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.onPrimary)),
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surface,
-                    suffix: Text(unit)),
-                onChanged: (enteredValue) {
-                  if (enteredValue == '') {
-                    enteredValue = '0';
-                  }
-
-                  value = enteredValue;
-
-                  switch (hint) {
-                    case _ageTitle:
-                      cycleProvider.setAge(enteredValue);
-                      break;
-                    case _weightTitle:
-                      cycleProvider.setStartingWeight(enteredValue);
-                      break;
-                    case _startingBodyFatTitle:
-                      cycleProvider.setStartingBodyFat(enteredValue);
-                      break;
-                    case _goalBodyFatTitle:
-                      cycleProvider.setGoalBodyFat(enteredValue);
-                      break;
-                    case _neckTitle:
-                      cycleProvider.setNeck(value);
-                      break;
-                    case _waistTitle:
-                      cycleProvider.setWaist(value);
-                      break;
-                    case _hipsTitle:
-                      cycleProvider.setHips(value);
-                      break;
-                    default:
-                      cycleProvider.setHeight(enteredValue);
-                  }
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _gaugeWidget(CycleConfigurationController cycleProvider) {
     return Stack(
@@ -451,30 +338,27 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                     const SizedBox(
                       height: 32,
                     ),
-                    _textInputWidget(
-                      context,
-                      _heightTitle,
-                      _cmUnit,
-                      cycleProvider,
-                    ),
+                    const StandardisedTextField(
+                        action: 'addHeight',
+                        hint: _heightTitle,
+                        unit: _cmUnit,
+                        decimal: true),
                     const SizedBox(
                       height: 32,
                     ),
-                    _textInputWidget(
-                      context,
-                      _weightTitle,
-                      _kgUnit,
-                      cycleProvider,
-                    ),
+                    const StandardisedTextField(
+                        action: 'addWeight',
+                        hint: _weightTitle,
+                        unit: _kgUnit,
+                        decimal: true),
                     const SizedBox(
                       height: 32,
                     ),
-                    _textInputWidget(
-                      context,
-                      _ageTitle,
-                      _yearsUnit,
-                      cycleProvider,
-                    ),
+                    const StandardisedTextField(
+                        action: 'addAge',
+                        hint: _ageTitle,
+                        unit: _yearsUnit,
+                        decimal: false),
                     const SizedBox(
                       height: 32,
                     ),
@@ -500,8 +384,8 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
 
   Widget _pageTwo() {
     return SingleChildScrollView(
-      child: Consumer<CycleConfigurationController>(
-        builder: (context, cycleProvider, child) {
+      child: Consumer2<CycleConfigurationController, DropdownController>(
+        builder: (context, cycleProvider, dropdownProvider, child) {
           return Stack(
             children: [
               Container(
@@ -517,16 +401,15 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                         const SizedBox(
                           height: 64,
                         ),
-                        _textInputWidget(
-                          context,
-                          _startingBodyFatTitle,
-                          _percentageUnit,
-                          cycleProvider,
-                        ),
+                        const StandardisedTextField(
+                            action: 'addStartingBodyfat',
+                            hint: _startingBodyFatTitle,
+                            unit: _percentageUnit,
+                            decimal: true),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: GestureDetector(
-                            onTap: () => cycleProvider.setExpanded(),
+                            onTap: () => dropdownProvider.setExpanded(),
                             child: Text(
                               'Don\'t know your bodyfat percentage?',
                               style: TextStyle(
@@ -537,12 +420,11 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                         const SizedBox(
                           height: 32,
                         ),
-                        _textInputWidget(
-                          context,
-                          _goalBodyFatTitle,
-                          _percentageUnit,
-                          cycleProvider,
-                        ),
+                        const StandardisedTextField(
+                            action: 'addGoalBodyfat',
+                            hint: _goalBodyFatTitle,
+                            unit: _percentageUnit,
+                            decimal: true),
                       ],
                     ),
                     Row(
@@ -558,138 +440,8 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
                   ],
                 ),
               ),
-              Align(
-                alignment: Alignment.topCenter,
-                child: AnimatedContainer(
-                  curve: Curves.easeOutCirc,
-                  // TODO: Text in dropdown container overflowing whilst container expanding
-                  duration: const Duration(milliseconds: 400),
-                  height: cycleProvider.expanded
-                      ? MediaQuery.of(context).size.height
-                      : 0,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: cycleProvider.expanded
-                      ? Card(
-                          color: Theme.of(context).colorScheme.primary,
-                          child: Padding(
-                            padding: const EdgeInsets.all(32),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  children: [
-                                    const SizedBox(
-                                      height: 50,
-                                    ),
-                                    const Text(
-                                      'US Navy Bodyfat % Calculator',
-                                      style: TextStyle(
-                                        fontSize: 36,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 16,
-                                    ),
-                                    const Text(
-                                      'This bodyfat calculator uses the US Navy method, which is fairly accurate with little equipment',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 16,
-                                    ),
-                                    Column(
-                                      children: [
-                                        _textInputWidget(
-                                          context,
-                                          _neckTitle,
-                                          _cmUnit,
-                                          cycleProvider,
-                                        ),
-                                        const Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Text(
-                                            'Measure circumference just underneath Adam\'s apple',
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          height: 32,
-                                        ),
-                                        _textInputWidget(
-                                          context,
-                                          _waistTitle,
-                                          _cmUnit,
-                                          cycleProvider,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                            cycleProvider.sex == Sex.female.name
-                                                ? 'Circumference of narrowest part of the abdomen'
-                                                : 'Circumference at the level of the navel',
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          height: 32,
-                                        ),
-                                        cycleProvider.sex == Sex.female.name
-                                            ? Column(
-                                                children: [
-                                                  _textInputWidget(
-                                                    context,
-                                                    _hipsTitle,
-                                                    _cmUnit,
-                                                    cycleProvider,
-                                                  ),
-                                                  const Padding(
-                                                    padding:
-                                                        EdgeInsets.all(8.0),
-                                                    child: Text(
-                                                      'Measured at the widest part of the buttocks or hips',
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    ),
-                                                  ),
-                                                ],
-                                              )
-                                            : const SizedBox(),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 16,
-                                ),
-                                MaterialButton(
-                                  minWidth: MediaQuery.of(context).size.width,
-                                  height: 52,
-                                  color: Theme.of(context).colorScheme.outline,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  onPressed: () {
-                                    cycleProvider.calculateBodyFatPercentage();
-                                    cycleProvider.setExpanded();
-                                  },
-                                  child: const Text(
-                                    'Save',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(),
-                ),
+              const DataEntryDropdown(
+                dropdownType: 'calculateBodyfat',
               ),
             ],
           );
@@ -770,24 +522,24 @@ class _CycleConfigurationState extends State<CycleConfiguration> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CycleConfigurationController>(
-      builder: (context, cycleProvider, child) {
-        return Scaffold(
-          resizeToAvoidBottomInset: true,
-          body: PageView(
-              controller: _pageController,
-              scrollDirection: Axis.vertical,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _pageOne(),
-                _pageTwo(),
-                _pageThree(),
-              ],
-              onPageChanged: (value) {
-                value == 2 ? cycleProvider.estimateTimeFrame() : null;
-              }),
-        );
-      },
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: PageView(
+          controller: _pageController,
+          scrollDirection: Axis.vertical,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            _pageOne(),
+            _pageTwo(),
+            _pageThree(),
+          ],
+          onPageChanged: (value) {
+            value == 2
+                ? Provider.of<CycleConfigurationController>(context,
+                        listen: false)
+                    .estimateTimeFrame()
+                : null;
+          }),
     );
   }
 }

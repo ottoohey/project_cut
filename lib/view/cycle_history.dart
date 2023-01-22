@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:project_cut/controller/cycle_history_controller.dart';
+import 'package:project_cut/providers/cycle_history_controller.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:provider/provider.dart';
 

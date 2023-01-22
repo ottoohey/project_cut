@@ -24,6 +24,7 @@ class BiometricsDataController with ChangeNotifier {
   double _sliderValue = -1;
   bool _newCut = true;
   bool _firstCycle = true;
+  double _tempWeight = 0;
 
   List<Biometric> get biometrics => _biometrics;
   List<Week> get weeks => _weeks;
@@ -109,11 +110,6 @@ class BiometricsDataController with ChangeNotifier {
     notifyListeners();
   }
 
-  void setWeight(double weight) {
-    _currentWeight = weight;
-    notifyListeners();
-  }
-
   Future<void> setSliderValue(double sliderValue) async {
     _sliderValue = sliderValue;
     int weekNumber = sliderValue.toInt() - 1;
@@ -123,16 +119,23 @@ class BiometricsDataController with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addWeight(double weight) async {
+  void setTempWeight(double weight) {
+    _tempWeight = weight;
+  }
+
+  Future<void> addWeight() async {
+    if (_tempWeight != 0) {
+      _currentWeight = _tempWeight;
+    }
+
     if (_biometrics.isEmpty ||
         DateTime.now()
             .isNotSameDate(DateTime.parse(_biometrics.last.dateTime))) {
-      await AppDatabase.db.insertWeight(weight);
+      await AppDatabase.db.insertWeight(_currentWeight);
     } else {
-      await _updateWeight(weight);
+      await _updateWeight(_currentWeight);
     }
     Biometric latestBiometric = await AppDatabase.db.getLatestBiometric();
-    _currentWeight = weight;
     _sliderValue = latestBiometric.weekId.toDouble();
     _biometrics =
         await AppDatabase.db.getBiometricsForWeek(latestBiometric.weekId);

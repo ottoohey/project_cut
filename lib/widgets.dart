@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_cut/controller/biometrics_data_controller.dart';
+import 'package:project_cut/providers/biometrics_data_controller.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/cycle.dart';
 import 'package:project_cut/model/week.dart';

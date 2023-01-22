@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:project_cut/controller/progress_pics_controller.dart';
+import 'package:project_cut/providers/progress_pics_controller.dart';
 import 'package:project_cut/model/biometric.dart';
 import 'package:project_cut/model/progress_pic.dart';
 import 'package:provider/provider.dart';

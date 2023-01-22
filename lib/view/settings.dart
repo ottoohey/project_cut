@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:project_cut/controller/biometrics_data_controller.dart';
-import 'package:project_cut/controller/cycle_history_controller.dart';
-import 'package:project_cut/controller/edit_biometrics_history_controller.dart';
+import 'package:project_cut/providers/biometrics_data_controller.dart';
+import 'package:project_cut/providers/cycle_history_controller.dart';
+import 'package:project_cut/providers/dropdown_controller.dart';
+import 'package:project_cut/providers/edit_biometrics_history_controller.dart';
 import 'package:project_cut/view/cycle_history.dart';
 import 'package:project_cut/view/edit_weights.dart';
 import 'package:provider/provider.dart';
@@ -56,6 +57,9 @@ class Settings extends StatelessWidget {
                                 ChangeNotifierProvider(
                                   create: (context) =>
                                       BiometricsDataController(),
+                                ),
+                                ChangeNotifierProvider(
+                                  create: (context) => DropdownController(),
                                 )
                               ],
                               child: const EditWeights(),

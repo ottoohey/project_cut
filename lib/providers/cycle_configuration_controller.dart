@@ -9,7 +9,7 @@ import 'package:project_cut/model/week.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CycleConfigurationController with ChangeNotifier {
-  String _sex = 'MALE';
+  String _sex = 'male';
   int _age = 0;
   double _timeFrame = 0.0;
   double _startingWeight = 0;
